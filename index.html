@@ -330,6 +330,58 @@
     letter-spacing: 4px;
     margin-top: 4px;
   }
+  .vs-powerup-panel {
+    background: rgba(13, 19, 34, 0.85);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 14px 0;
+    text-align: left;
+  }
+  .vs-powerup-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .vs-pu-btn {
+    background: #182238;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.12s;
+    touch-action: manipulation;
+  }
+  .vs-pu-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: #21304f;
+  }
+  .vs-pu-btn:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+  }
+  .vs-pu-btn.armed {
+    border-color: var(--green);
+    background: rgba(34, 197, 94, 0.22);
+    color: #bbf7d0;
+    opacity: 1;
+  }
+  .opp-pu-alert {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.22), rgba(249, 115, 22, 0.22));
+    border: 1px solid #f87171;
+    color: #fecaca;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-weight: 800;
+    font-size: 0.92rem;
+    text-align: left;
+    animation: fadeIn 0.2s ease;
+  }
 
   /* Arena UI */
   .matchup-banner {
@@ -644,9 +696,9 @@
           <h3>How Trivia Royale 20 Works</h3>
           <ul style="padding-left:20px; line-height:1.65; color:var(--muted); font-size:0.92rem;">
             <li><b>20-Player Lobby:</b> Every match has 20 total combatants. Every player/bot starts with <b>3 lives (❤️❤️❤️)</b>.</li>
-            <li><b>5-Second Matchup Preview:</b> Before every question, a 5-second VS screen reveals your opponent and both players' remaining lives.</li>
+            <li><b>6-Second Matchup &amp; Power-Up Preview:</b> Before every question, a 6-second VS screen reveals your opponent, both players' remaining lives, and lets you activate Power-Ups for the upcoming duel.</li>
             <li><b>1v1 Pairings:</b> Each round, surviving players face off with a <b>20-second timer</b>. (If an odd number remain, one player receives a Bye).</li>
-            <li><b>Winning a Duel:</b> Fastest <b>correct</b> answer wins. The loser loses 1 life.</li>
+            <li><b>Winning a Duel:</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives if <b>Double Jeopardy</b> is active).</li>
             <li><b>Ties &amp; Double Misses:</b> If both answer wrong (or time out), <b>both lose 1 life</b>. If both answer right in the exact same time, <b>neither loses a life</b>.</li>
             <li><b>Quick Match &amp; Private Rooms:</b> Click <b>Quick Match</b> to automatically join an open 60-second public lobby (or create one if none are open) to play with random players online, or use a 5-character Room Code for private matches. Bots never spawn as <i>Very Hard</i>, and if the host is eliminated early, the match keeps running so all remaining players can finish!</li>
           </ul>
@@ -719,7 +771,7 @@
       </div>
     </section>
 
-    <!-- 5-SECOND PRE-QUESTION VS SCREEN -->
+    <!-- 6-SECOND PRE-QUESTION VS SCREEN -->
     <section id="vsScreen" class="screen">
       <div class="vs-showcase">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
@@ -731,8 +783,10 @@
           <span>👁️ <b>SPECTATOR MODE</b> — You were eliminated (#<span id="vsSpecPlace">0</span>). Watching live duel while match finishes...</span>
         </div>
 
+        <div id="vsOpponentPowerupAlert" class="opp-pu-alert" style="display:none;"></div>
+
         <h2 id="vsHeaderTitle" style="margin-top:6px;">Next Duel Starting Soon!</h2>
-        <p class="sub" style="margin-bottom:8px;">Get ready to answer fast and accurately.</p>
+        <p class="sub" style="margin-bottom:8px;">Activate Power-Ups now before the question starts!</p>
 
         <div class="vs-cards-row">
           <div class="vs-fighter-card me-card">
@@ -754,10 +808,24 @@
           </div>
         </div>
 
+        <div id="vsPowerupSection" class="vs-powerup-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+            <span style="font-size:0.82rem; font-weight:800; color:var(--accent);">⚡ ARM POWER-UPS FOR NEXT QUESTION (VS SCREEN ONLY)</span>
+            <span id="vsActiveBuffSummary" style="font-size:0.8rem; font-weight:700; color:var(--green);">None armed</span>
+          </div>
+          <div id="vsPowerupButtons" class="vs-powerup-buttons">
+            <button id="vsPu5050Btn" class="vs-pu-btn" onclick="usePowerup('fiftyFifty')">✂️ 50/50 (<span id="vsInv5050">0</span>)</button>
+            <button id="vsPuFreezeBtn" class="vs-pu-btn" onclick="usePowerup('freeze')">❄️ Cryo +3s (<span id="vsInvFreeze">0</span>)</button>
+            <button id="vsPuShieldBtn" class="vs-pu-btn" onclick="usePowerup('shield')">🛡️ Shield (<span id="vsInvShield">0</span>)</button>
+            <button id="vsPuHeartBargainBtn" class="vs-pu-btn" onclick="usePowerup('heartBargain')">💝 Heart Bargain (<span id="vsInvHeartBargain">0</span>)</button>
+            <button id="vsPuDoubleJeopardyBtn" class="vs-pu-btn" onclick="usePowerup('doubleJeopardy')">⚡ Double Jeopardy (<span id="vsInvDoubleJeopardy">0</span>)</button>
+          </div>
+        </div>
+
         <div class="timer-bar-wrap" style="margin-bottom:8px;">
           <div id="vsTimerBar" class="timer-bar" style="background: linear-gradient(90deg, var(--accent), var(--accent-2));"></div>
         </div>
-        <div id="vsCountdownText" style="font-weight:800; color:var(--accent); font-size:1rem;">Question starts in 5.0s...</div>
+        <div id="vsCountdownText" style="font-weight:800; color:var(--accent); font-size:1rem;">Question starts in 6.0s...</div>
       </div>
     </section>
 
@@ -797,12 +865,14 @@
 
       <div id="optionsGrid" class="options-grid"></div>
 
-      <div id="powerupBar" class="powerup-bar">
-        <span style="font-size:0.82rem; font-weight:700; color:var(--muted);">POWER-UPS:</span>
-        <button id="pu5050Btn" class="btn secondary small" onclick="usePowerup('fiftyFifty')">✂️ 50/50 (<span id="inv5050">0</span>)</button>
-        <button id="puFreezeBtn" class="btn secondary small" onclick="usePowerup('freeze')">❄️ Freeze +3s (<span id="invFreeze">0</span>)</button>
-        <button id="puShieldBtn" class="btn secondary small" onclick="usePowerup('shield')">🛡️ Shield (<span id="invShield">0</span>)</button>
-        <span id="activeBuffNotice" style="font-size:0.82rem; color:var(--accent); font-weight:700; margin-left:auto;"></span>
+      <div id="powerupBar" class="powerup-bar" style="justify-content:space-between;">
+        <div style="font-size:0.82rem; font-weight:700; color:var(--muted);">
+          YOUR BUFFS: <span id="arenaMyBuffsList" style="color:var(--green);">None</span>
+        </div>
+        <div style="font-size:0.82rem; font-weight:700; color:var(--muted);">
+          OPPONENT BUFFS: <span id="arenaOppBuffsList" style="color:var(--orange);">None</span>
+        </div>
+        <span id="activeBuffNotice" style="font-size:0.82rem; color:var(--accent); font-weight:700;"></span>
       </div>
     </section>
 
@@ -1251,10 +1321,12 @@ const BOT_NAMES = [
 
 // ==================== SHOP CATALOG & PERSISTENT SAVE ====================
 const POWERUP_ITEMS = [
-  { id: "revive", name: "💖 Extra Life Revive", cost: 1000, desc: "Use upon elimination to restore 1 ❤️ and stay in the match." },
-  { id: "fiftyFifty", name: "✂️ 50/50 Sabotage", cost: 1200, desc: "Eliminates 2 wrong answers immediately during a question." },
-  { id: "freeze", name: "❄️ Cryo Delay (+3s)", cost: 1500, desc: "Adds +3.0 seconds to your opponent's answer time this round." },
-  { id: "shield", name: "🛡️ Aegis Life Shield", cost: 2000, desc: "Blocks you from losing a life if you lose the current duel." }
+  { id: "revive", name: "💖 Extra Life Revive", cost: 1500, desc: "Use upon elimination to restore 1 ❤️ and stay in the match." },
+  { id: "fiftyFifty", name: "✂️ 50/50 Sabotage", cost: 800, desc: "Activate on the VS screen to eliminate 2 wrong answers on the next question." },
+  { id: "freeze", name: "❄️ Cryo Delay (+3s)", cost: 1800, desc: "Activate on the VS screen to add +3.0 seconds to your opponent's answer time." },
+  { id: "shield", name: "🛡️ Aegis Life Shield", cost: 2000, desc: "Activate on the VS screen to block losing a life if you lose the next duel." },
+  { id: "heartBargain", name: "💝 Heart Bargain", cost: 1000, desc: "Activate on the VS screen: answer the next question right and before your opponent to gain back 1 ❤️." },
+  { id: "doubleJeopardy", name: "⚡ Double Jeopardy", cost: 750, desc: "Activate on the VS screen: raises stakes so whoever loses (or both if both miss) loses 2 ❤️ instead of 1!" }
 ];
 
 const SKIN_THEMES = [
@@ -1347,7 +1419,7 @@ let selectedSkinThemeFilter = "ALL";
 let profile = {
   name: "Player",
   coins: 250,
-  inventory: { revive: 0, fiftyFifty: 0, freeze: 0, shield: 0 },
+  inventory: { revive: 0, fiftyFifty: 0, freeze: 0, shield: 0, heartBargain: 0, doubleJeopardy: 0 },
   unlockedSkins: ["default"],
   equippedSkin: "default"
 };
@@ -1544,8 +1616,10 @@ let gameState = {
   timerInterval: null,
   vsInterval: null,
   sbInterval: null,
+  botPuTimeout: null,
   myAnswer: null,
-  roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false },
+  roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false },
+  preRoundBuffs: {},
   roundSubmissions: {},
   myPlacement: null,
   coinsAwarded: false
@@ -1555,6 +1629,7 @@ function clearAllTimers() {
   clearInterval(gameState.timerInterval);
   clearInterval(gameState.vsInterval);
   clearInterval(gameState.sbInterval);
+  clearTimeout(gameState.botPuTimeout);
 }
 
 function generateBots(count, modeType) {
@@ -1611,7 +1686,9 @@ function startSinglePlayer(isSuperHard) {
     vsInterval: null,
     sbInterval: null,
     myAnswer: null,
-    roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false },
+    botPuTimeout: null,
+    roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false },
+    preRoundBuffs: {},
     roundSubmissions: {},
     myPlacement: null,
     coinsAwarded: false
@@ -1644,7 +1721,7 @@ function buildPairings(alivePlayers) {
   return pairs;
 }
 
-// ==================== STEP 1 OF ROUND: 5-SECOND VS MATCHUP SCREEN ====================
+// ==================== STEP 1 OF ROUND: 6-SECOND VS MATCHUP SCREEN ====================
 function startNextRound() {
   clearAllTimers();
   const alive = gameState.players.filter(p => p.lives > 0);
@@ -1655,12 +1732,13 @@ function startNextRound() {
 
   gameState.round += 1;
   gameState.myAnswer = null;
-  gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false };
+  gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false };
+  gameState.preRoundBuffs = {};
   gameState.roundSubmissions = {};
   gameState.currentQuestion = pickRandomQuestion();
   gameState.currentPairings = buildPairings(alive);
 
-  // Broadcast 5-second VS matchup screen first (without leaking question yet)
+  // Broadcast 6-second VS matchup screen first (without leaking question yet)
   if (gameState.mode === "online_host") {
     broadcastOnline({
       type: "PRE_ROUND_VS",
@@ -1671,6 +1749,35 @@ function startNextRound() {
   }
 
   showPreRoundVSScreen();
+}
+
+function formatBuffLabels(buffObj) {
+  if (!buffObj) return [];
+  const tags = [];
+  if (buffObj.fiftyFiftyUsed) tags.push("✂️ 50/50");
+  if (buffObj.freeze) tags.push("❄️ Cryo +3s");
+  if (buffObj.shield) tags.push("🛡️ Life Shield");
+  if (buffObj.heartBargain) tags.push("💝 Heart Bargain");
+  if (buffObj.doubleJeopardy) tags.push("⚡ Double Jeopardy");
+  return tags;
+}
+
+function triggerOpponentPowerupNotification(oppName, powerupType) {
+  const alertBox = document.getElementById("vsOpponentPowerupAlert");
+  const descMap = {
+    doubleJeopardy: "⚡ Double Jeopardy (Loser loses 2 ❤️ instead of 1!)",
+    heartBargain: "💝 Heart Bargain (Gains +1 ❤️ if they beat you!)",
+    freeze: "❄️ Cryo Delay (+3.0s added to your answer time!)",
+    shield: "🛡️ Aegis Life Shield (Protected from losing a heart!)",
+    fiftyFifty: "✂️ 50/50 Sabotage (Eliminated 2 wrong choices for themselves!)"
+  };
+  const label = descMap[powerupType] || powerupType;
+  const msg = `⚠️ OPPONENT POWER-UP: ${oppName} activated ${label}`;
+  if (alertBox) {
+    alertBox.textContent = msg;
+    alertBox.style.display = "block";
+  }
+  showToast(msg);
 }
 
 function showPreRoundVSScreen() {
@@ -1684,6 +1791,10 @@ function showPreRoundVSScreen() {
 
   document.getElementById("vsRoundBadge").textContent = `ROUND ${gameState.round} MATCHUP`;
   document.getElementById("vsAliveBadge").textContent = `${alive.length} / 20 Remaining`;
+
+  const oppAlertEl = document.getElementById("vsOpponentPowerupAlert");
+  oppAlertEl.style.display = "none";
+  oppAlertEl.textContent = "";
 
   let leftPlayer = me;
   let rightPlayer = null;
@@ -1701,7 +1812,6 @@ function showPreRoundVSScreen() {
     gameState.myOpponentId = oppId;
     rightPlayer = gameState.players.find(p => p.id === oppId) || null;
   } else {
-    // Eliminated player (e.g. eliminated host or spectating client): show featured live pairing
     document.getElementById("vsSpectatorNotice").style.display = "flex";
     document.getElementById("vsSpecPlace").textContent = gameState.myPlacement || (alive.length + 1);
     document.getElementById("vsHeaderTitle").textContent = "Featured Live Duel";
@@ -1738,11 +1848,32 @@ function showPreRoundVSScreen() {
     document.getElementById("vsRightLivesText").textContent = "Automatic Pass";
   }
 
-  // 5.0-second countdown before question starts
-  const vsDuration = 5.0;
+  // Configure Pre-Question Power-Up Selection Panel
+  const vsPuPanel = document.getElementById("vsPowerupSection");
+  if (isSpectating) {
+    vsPuPanel.style.display = "none";
+  } else {
+    vsPuPanel.style.display = "block";
+    updateVSPowerupButtonsUI(me, rightPlayer);
+  }
+
+  // 3% chance for bot opponent to use Double Jeopardy or Heart Bargain against you
+  if (!isSpectating && rightPlayer && rightPlayer.isBot) {
+    if (Math.random() < 0.03) {
+      const botPu = (rightPlayer.lives < 3 && Math.random() < 0.5) ? "heartBargain" : "doubleJeopardy";
+      if (!gameState.preRoundBuffs[rightPlayer.id]) gameState.preRoundBuffs[rightPlayer.id] = {};
+      gameState.preRoundBuffs[rightPlayer.id][botPu] = true;
+      gameState.botPuTimeout = setTimeout(() => {
+        triggerOpponentPowerupNotification(rightPlayer.name, botPu);
+      }, 1100);
+    }
+  }
+
+  // 6.0-second countdown before question starts
+  const vsDuration = 6.0;
   const vsStart = performance.now();
   document.getElementById("vsTimerBar").style.width = "100%";
-  document.getElementById("vsCountdownText").textContent = "Question starts in 5.0s...";
+  document.getElementById("vsCountdownText").textContent = "Question starts in 6.0s...";
 
   gameState.vsInterval = setInterval(() => {
     const elapsed = (performance.now() - vsStart) / 1000;
@@ -1758,15 +1889,130 @@ function showPreRoundVSScreen() {
           round: gameState.round,
           players: gameState.players,
           question: gameState.currentQuestion,
-          pairings: gameState.currentPairings
+          pairings: gameState.currentPairings,
+          preRoundBuffs: gameState.preRoundBuffs
         });
         setupRoundUI();
       } else if (gameState.mode !== "online_client") {
         setupRoundUI();
       }
-      // If online_client, waits for host's ROUND_START message (arrives immediately at 5.0s)
     }
   }, 50);
+}
+
+function updateVSPowerupButtonsUI(me, rightPlayer) {
+  const hasOpp = !!rightPlayer;
+  const isFullLives = me && me.lives >= 3;
+
+  document.getElementById("vsInv5050").textContent = profile.inventory.fiftyFifty || 0;
+  document.getElementById("vsInvFreeze").textContent = profile.inventory.freeze || 0;
+  document.getElementById("vsInvShield").textContent = profile.inventory.shield || 0;
+  document.getElementById("vsInvHeartBargain").textContent = profile.inventory.heartBargain || 0;
+  document.getElementById("vsInvDoubleJeopardy").textContent = profile.inventory.doubleJeopardy || 0;
+
+  const btn5050 = document.getElementById("vsPu5050Btn");
+  const btnFreeze = document.getElementById("vsPuFreezeBtn");
+  const btnShield = document.getElementById("vsPuShieldBtn");
+  const btnHB = document.getElementById("vsPuHeartBargainBtn");
+  const btnDJ = document.getElementById("vsPuDoubleJeopardyBtn");
+
+  btn5050.classList.toggle("armed", !!gameState.roundBuffs.fiftyFiftyUsed);
+  btnFreeze.classList.toggle("armed", !!gameState.roundBuffs.freeze);
+  btnShield.classList.toggle("armed", !!gameState.roundBuffs.shield);
+  btnHB.classList.toggle("armed", !!gameState.roundBuffs.heartBargain);
+  btnDJ.classList.toggle("armed", !!gameState.roundBuffs.doubleJeopardy);
+
+  btn5050.disabled = !hasOpp || gameState.roundBuffs.fiftyFiftyUsed || (profile.inventory.fiftyFifty || 0) <= 0;
+  btnFreeze.disabled = !hasOpp || gameState.roundBuffs.freeze || (profile.inventory.freeze || 0) <= 0;
+  btnShield.disabled = !hasOpp || gameState.roundBuffs.shield || (profile.inventory.shield || 0) <= 0;
+  btnHB.disabled = !hasOpp || isFullLives || gameState.roundBuffs.heartBargain || (profile.inventory.heartBargain || 0) <= 0;
+  btnDJ.disabled = !hasOpp || gameState.roundBuffs.doubleJeopardy || (profile.inventory.doubleJeopardy || 0) <= 0;
+
+  const summaryEl = document.getElementById("vsActiveBuffSummary");
+  if (!hasOpp) {
+    summaryEl.textContent = "Bye Round — Power-ups paused";
+    summaryEl.style.color = "var(--muted)";
+  } else {
+    const armed = formatBuffLabels(gameState.roundBuffs);
+    if (armed.length > 0) {
+      summaryEl.textContent = "Armed: " + armed.join(" • ");
+      summaryEl.style.color = "var(--green)";
+    } else {
+      summaryEl.textContent = "None armed";
+      summaryEl.style.color = "var(--muted)";
+    }
+  }
+}
+
+function usePowerup(type) {
+  // Power-ups can ONLY be used during the 6-second pre-question VS screen
+  if (!document.getElementById("vsScreen").classList.contains("active")) return;
+  if (!gameState.myOpponentId) return;
+  if ((profile.inventory[type] || 0) <= 0) return;
+
+  const myId = myPeerOrLocalId();
+  const me = gameState.players.find(p => p.id === myId);
+  const rightPlayer = gameState.players.find(p => p.id === gameState.myOpponentId) || null;
+  if (!me || me.lives <= 0 || !rightPlayer) return;
+
+  let activated = false;
+
+  if (type === "fiftyFifty" && !gameState.roundBuffs.fiftyFiftyUsed) {
+    profile.inventory.fiftyFifty--;
+    gameState.roundBuffs.fiftyFiftyUsed = true;
+    activated = true;
+    showToast("✂️ 50/50 Sabotage armed for next question!");
+  } else if (type === "freeze" && !gameState.roundBuffs.freeze) {
+    profile.inventory.freeze--;
+    gameState.roundBuffs.freeze = true;
+    activated = true;
+    showToast("❄️ Cryo Delay (+3.0s) armed against opponent!");
+  } else if (type === "shield" && !gameState.roundBuffs.shield) {
+    profile.inventory.shield--;
+    gameState.roundBuffs.shield = true;
+    activated = true;
+    showToast("🛡️ Aegis Life Shield armed!");
+  } else if (type === "heartBargain" && !gameState.roundBuffs.heartBargain && me.lives < 3) {
+    profile.inventory.heartBargain--;
+    gameState.roundBuffs.heartBargain = true;
+    activated = true;
+    showToast("💝 Heart Bargain armed! Beat your opponent to regain 1 ❤️!");
+  } else if (type === "doubleJeopardy" && !gameState.roundBuffs.doubleJeopardy) {
+    profile.inventory.doubleJeopardy--;
+    gameState.roundBuffs.doubleJeopardy = true;
+    activated = true;
+    showToast("⚡ Double Jeopardy armed! 2 ❤️ on the line!");
+  }
+
+  if (!activated) return;
+
+  if (!gameState.preRoundBuffs[myId]) gameState.preRoundBuffs[myId] = {};
+  Object.assign(gameState.preRoundBuffs[myId], gameState.roundBuffs);
+
+  saveProfile();
+  updateVSPowerupButtonsUI(me, rightPlayer);
+
+  // Notify opponent in online multiplayer
+  if (gameState.mode === "online_client") {
+    sendToHost({
+      type: "USE_VS_POWERUP",
+      playerId: myId,
+      targetId: rightPlayer.id,
+      powerup: type,
+      buffs: gameState.roundBuffs
+    });
+  } else if (gameState.mode === "online_host" && !rightPlayer.isBot) {
+    const targetConnObj = clientConns.find(c => c.id === rightPlayer.id);
+    if (targetConnObj && targetConnObj.conn && targetConnObj.conn.open) {
+      targetConnObj.conn.send({
+        type: "OPPONENT_USED_POWERUP",
+        fromId: myId,
+        fromName: me.name,
+        powerup: type,
+        buffs: gameState.roundBuffs
+      });
+    }
+  }
 }
 
 // ==================== STEP 2 OF ROUND: 20-SECOND QUESTION ARENA ====================
@@ -1777,7 +2023,6 @@ function setupRoundUI() {
   const alive = gameState.players.filter(p => p.lives > 0);
   const isSpectating = !me || me.lives <= 0;
 
-  // In single-player, if the human is eliminated, end match immediately
   if (isSpectating && (gameState.mode === "single" || gameState.mode === "superhard")) {
     concludeMatch();
     return;
@@ -1801,7 +2046,6 @@ function setupRoundUI() {
     gameState.myOpponentId = oppId;
     rightFighter = gameState.players.find(p => p.id === oppId) || null;
   } else {
-    // Online Spectator UI (for eliminated host or eliminated client watching remaining players)
     document.getElementById("arenaSpectatorBanner").style.display = "flex";
     document.getElementById("clientLeaveEarlyBtn").style.display = (gameState.mode === "online_client") ? "inline-block" : "none";
     document.getElementById("powerupBar").style.display = "none";
@@ -1850,20 +2094,29 @@ function setupRoundUI() {
     optGrid.appendChild(btn);
   });
 
+  // Apply pre-armed 50/50 Sabotage & show read-only active buffs for both fighters
   if (!isSpectating) {
-    document.getElementById("inv5050").textContent = profile.inventory.fiftyFifty || 0;
-    document.getElementById("invFreeze").textContent = profile.inventory.freeze || 0;
-    document.getElementById("invShield").textContent = profile.inventory.shield || 0;
-    document.getElementById("pu5050Btn").disabled = (profile.inventory.fiftyFifty || 0) <= 0;
-    document.getElementById("puFreezeBtn").disabled = (profile.inventory.freeze || 0) <= 0 || !rightFighter;
-    document.getElementById("puShieldBtn").disabled = (profile.inventory.shield || 0) <= 0 || !rightFighter;
+    if (gameState.roundBuffs.fiftyFiftyUsed) {
+      const correctIdx = q.a;
+      const wrongs = [0, 1, 2, 3].filter(i => i !== correctIdx).sort(() => Math.random() - 0.5);
+      wrongs.slice(0, 2).forEach(idx => {
+        const el = document.getElementById(`optBtn_${idx}`);
+        if (el) el.classList.add("eliminated-opt");
+      });
+    }
+
+    const myTags = formatBuffLabels(gameState.roundBuffs);
+    const oppBuffObj = rightFighter ? (gameState.preRoundBuffs?.[rightFighter.id] || {}) : {};
+    const oppTags = formatBuffLabels(oppBuffObj);
+
+    document.getElementById("arenaMyBuffsList").textContent = myTags.length ? myTags.join(", ") : "None";
+    document.getElementById("arenaOppBuffsList").textContent = oppTags.length ? oppTags.join(", ") : "None";
     document.getElementById("activeBuffNotice").textContent = "";
   }
 
   // Host or single-player simulates all bots for this round
   if (gameState.mode !== "online_client") {
     simulateBotsForRound();
-    // If host is spectating and there are 0 alive humans left (only bots fighting for 1st), resolve quickly!
     if (gameState.mode === "online_host") {
       checkAllHumansSubmittedOnline();
     }
@@ -1877,7 +2130,6 @@ function setupRoundUI() {
     document.getElementById("timerText").textContent = remaining.toFixed(1) + "s";
     document.getElementById("timerBar").style.width = ((remaining / 20.0) * 100) + "%";
 
-    // Single-player fast-forward once human answers and opponent bot's time elapses
     if ((gameState.mode === "single" || gameState.mode === "superhard") && gameState.myAnswer !== null) {
       const oppSub = gameState.myOpponentId ? gameState.roundSubmissions[gameState.myOpponentId] : { timeSec: 0 };
       if (!oppSub || elapsed >= Math.min(oppSub.timeSec, 4.0)) {
@@ -1917,7 +2169,8 @@ function simulateBotsForRound() {
     }
     const rawTime = spec.minTime + Math.random() * (spec.maxTime - spec.minTime);
     const timeSec = Math.round(rawTime * 100) / 100;
-    gameState.roundSubmissions[p.id] = { choice, timeSec, buffs: {} };
+    const botBuffs = { ...(gameState.preRoundBuffs?.[p.id] || {}) };
+    gameState.roundSubmissions[p.id] = { choice, timeSec, buffs: botBuffs };
   });
 }
 
@@ -1931,8 +2184,6 @@ function submitPlayerAnswer(choiceIdx) {
     b.disabled = true;
     if (i === choiceIdx) b.classList.add("selected");
   }
-  document.getElementById("pu5050Btn").disabled = true;
-  document.getElementById("puFreezeBtn").disabled = true;
 
   const myId = myPeerOrLocalId();
   if (gameState.mode === "online_client") {
@@ -1945,37 +2196,6 @@ function submitPlayerAnswer(choiceIdx) {
       checkAllHumansSubmittedOnline();
     }
   }
-}
-
-function usePowerup(type) {
-  if (gameState.myAnswer !== null) return;
-  if ((profile.inventory[type] || 0) <= 0) return;
-
-  if (type === "fiftyFifty" && !gameState.roundBuffs.fiftyFiftyUsed) {
-    profile.inventory.fiftyFifty--;
-    gameState.roundBuffs.fiftyFiftyUsed = true;
-    const correctIdx = gameState.currentQuestion.a;
-    const wrongs = [0, 1, 2, 3].filter(i => i !== correctIdx).sort(() => Math.random() - 0.5);
-    wrongs.slice(0, 2).forEach(idx => {
-      document.getElementById(`optBtn_${idx}`).classList.add("eliminated-opt");
-    });
-    document.getElementById("pu5050Btn").disabled = true;
-    document.getElementById("inv5050").textContent = profile.inventory.fiftyFifty;
-    document.getElementById("activeBuffNotice").textContent = "✂️ 50/50 Active!";
-  } else if (type === "freeze" && !gameState.roundBuffs.freeze) {
-    profile.inventory.freeze--;
-    gameState.roundBuffs.freeze = true;
-    document.getElementById("puFreezeBtn").disabled = true;
-    document.getElementById("invFreeze").textContent = profile.inventory.freeze;
-    document.getElementById("activeBuffNotice").textContent = "❄️ Opponent slowed (+3.0s)!";
-  } else if (type === "shield" && !gameState.roundBuffs.shield) {
-    profile.inventory.shield--;
-    gameState.roundBuffs.shield = true;
-    document.getElementById("puShieldBtn").disabled = true;
-    document.getElementById("invShield").textContent = profile.inventory.shield;
-    document.getElementById("activeBuffNotice").textContent = "🛡️ Life Shield Active!";
-  }
-  saveProfile();
 }
 
 // ==================== STEP 3 OF ROUND: RESOLVE & SCOREBOARD ====================
@@ -1995,11 +2215,17 @@ function resolveRound() {
     const subA = gameState.roundSubmissions[idA] || { choice: -1, timeSec: 20.0, buffs: {} };
     const subB = gameState.roundSubmissions[idB] || { choice: -1, timeSec: 20.0, buffs: {} };
 
+    const buffsA = { ...(gameState.preRoundBuffs?.[idA] || {}), ...(subA.buffs || {}) };
+    const buffsB = { ...(gameState.preRoundBuffs?.[idB] || {}), ...(subB.buffs || {}) };
+
     const rightA = subA.choice === q.a;
     const rightB = subB.choice === q.a;
 
-    const timeA = Math.round((subA.timeSec + (subB.buffs?.freeze ? 3.0 : 0)) * 100) / 100;
-    const timeB = Math.round((subB.timeSec + (subA.buffs?.freeze ? 3.0 : 0)) * 100) / 100;
+    const timeA = Math.round((subA.timeSec + (buffsB.freeze ? 3.0 : 0)) * 100) / 100;
+    const timeB = Math.round((subB.timeSec + (buffsA.freeze ? 3.0 : 0)) * 100) / 100;
+
+    const isDoubleJeopardy = !!(buffsA.doubleJeopardy || buffsB.doubleJeopardy);
+    const heartPenalty = isDoubleJeopardy ? 2 : 1;
 
     let loseA = false;
     let loseB = false;
@@ -2008,40 +2234,61 @@ function resolveRound() {
     if (!rightA && !rightB) {
       loseA = true;
       loseB = true;
-      reason = `Both <b>${pA.name}</b> and <b>${pB.name}</b> missed! Both lose 1 life.`;
+      reason = isDoubleJeopardy
+        ? `⚡ <b>Double Jeopardy!</b> Both <b>${pA.name}</b> and <b>${pB.name}</b> missed — both lose 2 lives!`
+        : `Both <b>${pA.name}</b> and <b>${pB.name}</b> missed! Both lose 1 life.`;
     } else if (rightA && !rightB) {
       loseB = true;
-      reason = `<b>${pA.name}</b> answered correctly (${timeA.toFixed(2)}s) while <b>${pB.name}</b> missed!`;
+      reason = `<b>${pA.name}</b> answered correctly (${timeA.toFixed(2)}s) while <b>${pB.name}</b> missed!${isDoubleJeopardy ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
     } else if (!rightA && rightB) {
       loseA = true;
-      reason = `<b>${pB.name}</b> answered correctly (${timeB.toFixed(2)}s) while <b>${pA.name}</b> missed!`;
+      reason = `<b>${pB.name}</b> answered correctly (${timeB.toFixed(2)}s) while <b>${pA.name}</b> missed!${isDoubleJeopardy ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
     } else {
       if (timeA < timeB) {
         loseB = true;
-        reason = `Both got it right, but <b>${pA.name}</b> was faster (${timeA.toFixed(2)}s vs ${timeB.toFixed(2)}s)!`;
+        reason = `Both got it right, but <b>${pA.name}</b> was faster (${timeA.toFixed(2)}s vs ${timeB.toFixed(2)}s)!${isDoubleJeopardy ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
       } else if (timeB < timeA) {
         loseA = true;
-        reason = `Both got it right, but <b>${pB.name}</b> was faster (${timeB.toFixed(2)}s vs ${timeA.toFixed(2)}s)!`;
+        reason = `Both got it right, but <b>${pB.name}</b> was faster (${timeB.toFixed(2)}s vs ${timeA.toFixed(2)}s)!${isDoubleJeopardy ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
       } else {
         reason = `Exact tie! Both answered correctly in <b>${timeA.toFixed(2)}s</b> — neither loses a life!`;
       }
     }
 
     if (loseA) {
-      if (subA.buffs?.shield) {
+      if (buffsA.shield) {
         reason += ` (<b>${pA.name}</b>'s Life Shield blocked the damage!)`;
       } else {
-        pA.lives = Math.max(0, pA.lives - 1);
+        pA.lives = Math.max(0, pA.lives - heartPenalty);
         if (pA.lives === 0 && pA.eliminatedRound === null) pA.eliminatedRound = gameState.round;
       }
     }
     if (loseB) {
-      if (subB.buffs?.shield) {
+      if (buffsB.shield) {
         reason += ` (<b>${pB.name}</b>'s Life Shield blocked the damage!)`;
       } else {
-        pB.lives = Math.max(0, pB.lives - 1);
+        pB.lives = Math.max(0, pB.lives - heartPenalty);
         if (pB.lives === 0 && pB.eliminatedRound === null) pB.eliminatedRound = gameState.round;
       }
+    }
+
+    // Heart Bargain: Gain back 1 heart (up to max 3) if you answered correctly and beat your opponent
+    const beatOppA = rightA && (!rightB || timeA < timeB);
+    const beatOppB = rightB && (!rightA || timeB < timeA);
+
+    if (beatOppA && buffsA.heartBargain) {
+      const before = pA.lives;
+      pA.lives = Math.min(3, pA.lives + 1);
+      reason += (pA.lives > before)
+        ? ` 💝 <b>${pA.name}</b>'s <b>Heart Bargain</b> paid off (+1 ❤️ restored)!`
+        : ` 💝 <b>${pA.name}</b>'s <b>Heart Bargain</b> succeeded (already at full 3 ❤️)!`;
+    }
+    if (beatOppB && buffsB.heartBargain) {
+      const before = pB.lives;
+      pB.lives = Math.min(3, pB.lives + 1);
+      reason += (pB.lives > before)
+        ? ` 💝 <b>${pB.name}</b>'s <b>Heart Bargain</b> paid off (+1 ❤️ restored)!`
+        : ` 💝 <b>${pB.name}</b>'s <b>Heart Bargain</b> succeeded (already at full 3 ❤️)!`;
     }
 
     const summary = `Correct Answer: <b>${q.opts[q.a]}</b><br>${reason}`;
@@ -2689,6 +2936,25 @@ function handleHostReceive(conn, data) {
     clientConns.push({ conn, id: data.id, name: data.name, skin: data.skin });
     updateOnlineWaitingList();
     broadcastLobbyState();
+  } else if (data.type === "USE_VS_POWERUP") {
+    if (!gameState.preRoundBuffs[data.playerId]) gameState.preRoundBuffs[data.playerId] = {};
+    Object.assign(gameState.preRoundBuffs[data.playerId], data.buffs || { [data.powerup]: true });
+    const sender = gameState.players.find(p => p.id === data.playerId);
+    const senderName = sender ? sender.name : "Opponent";
+    if (data.targetId === myPeerOrLocalId()) {
+      triggerOpponentPowerupNotification(senderName, data.powerup);
+    } else if (data.targetId) {
+      const targetConnObj = clientConns.find(c => c.id === data.targetId);
+      if (targetConnObj && targetConnObj.conn && targetConnObj.conn.open) {
+        targetConnObj.conn.send({
+          type: "OPPONENT_USED_POWERUP",
+          fromId: data.playerId,
+          fromName: senderName,
+          powerup: data.powerup,
+          buffs: data.buffs
+        });
+      }
+    }
   } else if (data.type === "SUBMIT_ANSWER") {
     gameState.roundSubmissions[data.playerId] = {
       choice: data.choice,
@@ -2730,14 +2996,24 @@ function handleClientReceive(data) {
     gameState.players = data.players;
     gameState.currentPairings = data.pairings;
     gameState.myAnswer = null;
-    gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false };
+    gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false };
+    gameState.preRoundBuffs = {};
     showPreRoundVSScreen();
+  } else if (data.type === "OPPONENT_USED_POWERUP") {
+    if (data.fromId) {
+      if (!gameState.preRoundBuffs[data.fromId]) gameState.preRoundBuffs[data.fromId] = {};
+      Object.assign(gameState.preRoundBuffs[data.fromId], data.buffs || { [data.powerup]: true });
+    }
+    triggerOpponentPowerupNotification(data.fromName || "Opponent", data.powerup);
   } else if (data.type === "ROUND_START") {
     gameState.mode = "online_client";
     gameState.round = data.round;
     gameState.players = data.players;
     gameState.currentQuestion = data.question;
     gameState.currentPairings = data.pairings;
+    if (data.preRoundBuffs) {
+      gameState.preRoundBuffs = { ...data.preRoundBuffs, ...gameState.preRoundBuffs };
+    }
     setupRoundUI();
   } else if (data.type === "ROUND_RESULT") {
     clearAllTimers();
@@ -2824,7 +3100,9 @@ function hostStartOnlineMatch() {
     vsInterval: null,
     sbInterval: null,
     myAnswer: null,
-    roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false },
+    botPuTimeout: null,
+    roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false },
+    preRoundBuffs: {},
     roundSubmissions: {},
     myPlacement: null,
     coinsAwarded: false
