@@ -90,6 +90,42 @@
     white-space: nowrap;
   }
   .pill.coins { color: var(--gold); border-color: rgba(251, 191, 36, 0.4); }
+  .pill.xp { color: #c084fc; border-color: rgba(192, 132, 252, 0.45); }
+  .xp-progress-wrap {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto 18px auto;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(192, 132, 252, 0.35);
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-align: left;
+  }
+  .xp-bar-track {
+    width: 100%;
+    height: 10px;
+    background: #090d16;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin: 7px 0 4px 0;
+  }
+  .xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #a855f7, #38bdf8);
+    transition: width 0.35s ease;
+  }
+  .level-up-banner {
+    display: inline-block;
+    background: linear-gradient(90deg, rgba(168,85,247,0.22), rgba(56,189,248,0.22));
+    border: 1px solid #c084fc;
+    color: #f3e8ff;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
   main { padding: 18px; flex: 1; width: 100%; }
   .screen { display: none; animation: fadeIn 0.2s ease; width: 100%; }
   .screen.active { display: block; }
@@ -662,6 +698,7 @@
     </div>
     <div class="hud-stats">
       <div id="activeSkinDisplay" class="skin-badge skin-default">Rookie</div>
+      <div class="pill xp" title="Earn 1,000 XP to level up and unlock Prestige Skins!">⭐ Lv. <span id="levelCount">0</span> <span style="opacity:0.8; font-size:0.78rem;">(<span id="xpCount">0</span>/1,000 XP)</span></div>
       <div class="pill coins">🪙 <span id="coinCount">0</span></div>
       <button class="btn secondary small" onclick="returnHomeConfirm()">Home</button>
     </div>
@@ -724,7 +761,8 @@
         <h3 style="margin-bottom:10px;">⚡ Battle Power-Ups (Consumables)</h3>
         <div class="grid-3" id="powerupShopGrid" style="margin-bottom:20px;"></div>
 
-        <h3 style="margin-bottom:8px;">✨ Prestige Skins (Themed Cosmetic Badges)</h3>
+        <h3 style="margin-bottom:4px;">✨ Prestige Skins (Level-Unlocked Cosmetic Badges)</h3>
+        <p class="sub" style="margin-bottom:10px;">Automatically unlock as you earn XP and level up (1,000 XP per level).</p>
         <div class="theme-filter-bar" id="skinThemeFilters"></div>
         <div id="skinShopContainer"></div>
       </div>
@@ -740,6 +778,8 @@
             <li><b>Winning a Duel:</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives if <b>Double Jeopardy</b> is active).</li>
             <li><b>Answer Streaks (🔥):</b> Real players who answer 4+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
             <li><b>Ties &amp; Double Misses:</b> If both answer wrong (or time out), <b>both lose 1 life</b>. If both answer right in the exact same time, <b>neither loses a life</b>.</li>
+            <li><b>XP, Levels &amp; Skin Unlocks:</b> Everyone starts at <b>Level 0 (0 XP)</b>. Earn <b>+1 XP</b> per correct answer plus placement bonuses: <b>Top 10 (+5 XP)</b>, <b>Top 7 (+10 XP)</b>, <b>Top 5 (+20 XP)</b>, <b>Top 3 (+40 XP)</b>, <b>2nd (+60 XP)</b>, <b>1st (+80 XP)</b>, or <b>Undefeated 1st without losing a heart (+150 XP)</b>. Every <b>1,000 XP</b> advances you +1 Level (resetting XP to 0) and automatically unlocks new Prestige Skins!</li>
+            <li><b>Juggernaut Power-Up (🦾):</b> Costs <b>3,000 🪙</b> and can <b>only</b> be activated on the Round 1 VS screen before Question 1 to start the match with <b>5 ❤️</b> instead of 3 ❤️. Each game, there is a 3% chance a random bot spawns with Juggernaut.</li>
             <li><b>Quick Match &amp; Private Rooms:</b> Click <b>Quick Match</b> to automatically join an open 60-second public lobby (or create one if none are open) to play with random players online, or use a 5-character Room Code for private matches. Bots never spawn as <i>Very Hard</i>, and if the host is eliminated early, the match keeps running so all remaining players can finish!</li>
           </ul>
         </div>
@@ -859,6 +899,7 @@
             <button id="vsPuShieldBtn" class="vs-pu-btn" onclick="usePowerup('shield')">🛡️ Shield (<span id="vsInvShield">0</span>)</button>
             <button id="vsPuHeartBargainBtn" class="vs-pu-btn" onclick="usePowerup('heartBargain')">💝 Heart Bargain (<span id="vsInvHeartBargain">0</span>)</button>
             <button id="vsPuDoubleJeopardyBtn" class="vs-pu-btn" onclick="usePowerup('doubleJeopardy')">⚡ Double Jeopardy (<span id="vsInvDoubleJeopardy">0</span>)</button>
+            <button id="vsPuJuggernautBtn" class="vs-pu-btn" onclick="usePowerup('juggernaut')">🦾 Juggernaut (<span id="vsInvJuggernaut">0</span>)</button>
           </div>
         </div>
 
@@ -873,7 +914,7 @@
     <section id="gameScreen" class="screen">
       <div id="arenaSpectatorBanner" class="spectator-banner" style="display:none;">
         <span>👁️ <b>SPECTATING LIVE ROUND</b> — Match is still active for surviving players!</span>
-        <button id="clientLeaveEarlyBtn" class="btn gold small" style="display:none;" onclick="clientClaimAndExitEarly()">Claim Coins &amp; Exit</button>
+        <button id="clientLeaveEarlyBtn" class="btn gold small" style="display:none;" onclick="clientClaimAndExitEarly()">Claim Rewards &amp; Exit</button>
       </div>
 
       <div class="matchup-banner">
@@ -949,7 +990,7 @@
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:12px;">
         <span id="sbAutoAdvanceText" style="font-size:0.85rem; color:var(--accent); font-weight:700;"></span>
         <div style="display:flex; gap:10px; margin-left:auto;">
-          <button id="sbClientExitBtn" class="btn secondary" style="display:none;" onclick="clientClaimAndExitEarly()">Claim Coins &amp; Leave</button>
+          <button id="sbClientExitBtn" class="btn secondary" style="display:none;" onclick="clientClaimAndExitEarly()">Claim Rewards &amp; Leave</button>
           <button id="nextRoundBtn" class="btn" onclick="proceedAfterScoreboard()">Next Round ➔</button>
         </div>
       </div>
@@ -961,8 +1002,25 @@
         <div id="endTrophy" style="font-size:3.2rem; margin-bottom:8px;">🏆</div>
         <h2 id="endHeadline" style="font-size:1.7rem;">Victory Royale!</h2>
         <p id="endPlacementText" class="sub" style="font-size:1.05rem; margin-bottom:14px;">You finished #1 out of 20 players!</p>
-        <div class="pill coins" style="font-size:1.15rem; padding:9px 18px; margin:0 auto 18px auto;">
-          +<span id="coinsEarnedText">100</span> Coins Earned!
+        <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:0 auto 12px auto;">
+          <div class="pill coins" style="font-size:1.1rem; padding:9px 18px;">
+            🪙 +<span id="coinsEarnedText">100</span> Coins
+          </div>
+          <div class="pill xp" style="font-size:1.1rem; padding:9px 18px;">
+            ⭐ +<span id="xpEarnedText">0</span> XP
+          </div>
+        </div>
+        <div id="xpBreakdownText" style="font-size:0.86rem; color:var(--muted); margin-bottom:12px;"></div>
+        <div id="levelUpBanner" class="level-up-banner" style="display:none;"></div>
+        <div class="xp-progress-wrap">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.86rem; font-weight:800;">
+            <span style="color:#c084fc;">Level <span id="endLevelNum">0</span></span>
+            <span style="color:var(--muted);"><span id="endXpNum">0</span> / 1,000 XP</span>
+          </div>
+          <div class="xp-bar-track">
+            <div id="endXpBarFill" class="xp-bar-fill" style="width:0%;"></div>
+          </div>
+          <div id="endNextUnlockText" style="font-size:0.78rem; color:var(--muted);"></div>
         </div>
         <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
           <button class="btn" onclick="returnAfterMatchOver()">Return to Lobby</button>
@@ -1364,9 +1422,10 @@ const POWERUP_ITEMS = [
   { id: "revive", name: "💖 Extra Life Revive", cost: 1500, desc: "Use upon elimination to restore 1 ❤️ and stay in the match." },
   { id: "fiftyFifty", name: "✂️ 50/50 Sabotage", cost: 800, desc: "Activate on the VS screen to eliminate 2 wrong answers on the next question." },
   { id: "freeze", name: "❄️ Cryo Delay (+3s)", cost: 1800, desc: "Activate on the VS screen to add +3.0 seconds to your opponent's answer time." },
-  { id: "shield", name: "🛡️ Aegis Life Shield", cost: 2000, desc: "Activate on the VS screen to block losing a life if you lose the next duel." },
+  { id: "shield", name: "🛡️ Aegis Life Shield", cost: 1500, desc: "Activate on the VS screen to block losing a life if you lose the next duel." },
   { id: "heartBargain", name: "💝 Heart Bargain", cost: 1000, desc: "Activate on the VS screen: answer the next question right and before your opponent to gain back 1 ❤️." },
-  { id: "doubleJeopardy", name: "⚡ Double Jeopardy", cost: 750, desc: "Activate on the VS screen: raises stakes so whoever loses (or both if both miss) loses 2 ❤️ instead of 1!" }
+  { id: "doubleJeopardy", name: "⚡ Double Jeopardy", cost: 750, desc: "Activate on the VS screen: raises stakes so whoever loses (or both if both miss) loses 2 ❤️ instead of 1!" },
+  { id: "juggernaut", name: "🦾 Juggernaut", cost: 3000, desc: "Activate ONLY on the Round 1 VS screen before the first question to start the match with 5 ❤️ instead of 3 ❤️." }
 ];
 
 const SKIN_THEMES = [
@@ -1383,75 +1442,75 @@ const SKIN_THEMES = [
 
 const SKIN_ITEMS = [
   // Generic
-  { id: "default", theme: "Generic", name: "Rookie", css: "skin-default", cost: 0, desc: "Standard competitor nameplate." },
-  { id: "neon", theme: "Generic", name: "⚡ Cyber Neon", css: "skin-neon", cost: 2500, desc: "Electric cyan-blue glowing aura." },
-  { id: "emerald", theme: "Generic", name: "🌿 Emerald Viper", css: "skin-emerald", cost: 5000, desc: "Rich venomous green prestige tag." },
-  { id: "crimson", theme: "Generic", name: "🔥 Crimson Warlord", css: "skin-crimson", cost: 10000, desc: "Intimidating scarlet battle badge." },
-  { id: "royal", theme: "Generic", name: "👑 Golden Sovereign", css: "skin-royal", cost: 25000, desc: "Luxurious gilded champion crest." },
-  { id: "cosmic", theme: "Generic", name: "🌌 Cosmic Omniscient", css: "skin-cosmic", cost: 50000, desc: "Ultra-rare animated nebula title." },
+  { id: "default", theme: "Generic", name: "Rookie", css: "skin-default", unlockLevel: 0, desc: "Standard competitor nameplate." },
+  { id: "neon", theme: "Generic", name: "⚡ Cyber Neon", css: "skin-neon", unlockLevel: 3, desc: "Electric cyan-blue glowing aura." },
+  { id: "emerald", theme: "Generic", name: "🌿 Emerald Viper", css: "skin-emerald", unlockLevel: 5, desc: "Rich venomous green prestige tag." },
+  { id: "crimson", theme: "Generic", name: "🔥 Crimson Warlord", css: "skin-crimson", unlockLevel: 10, desc: "Intimidating scarlet battle badge." },
+  { id: "royal", theme: "Generic", name: "👑 Golden Sovereign", css: "skin-royal", unlockLevel: 25, desc: "Luxurious gilded champion crest." },
+  { id: "cosmic", theme: "Generic", name: "🌌 Cosmic Omniscient", css: "skin-cosmic", unlockLevel: 50, desc: "Ultra-rare animated nebula title." },
 
   // Minecraft
-  { id: "mc_zombie", theme: "Minecraft", name: "🧟 Zombie", css: "skin-mc-zombie", cost: 2000, desc: "Classic Overworld undead mob badge." },
-  { id: "mc_skeleton", theme: "Minecraft", name: "💀 Skeleton", css: "skin-mc-skeleton", cost: 4000, desc: "Sharpshooting bone-white archer tag." },
-  { id: "mc_steve", theme: "Minecraft", name: "⛏️ Steve", css: "skin-mc-steve", cost: 10000, desc: "Iconic diamond-tier crafter emblem." },
-  { id: "mc_warden", theme: "Minecraft", name: "🔊 Warden", css: "skin-mc-warden", cost: 15000, desc: "Deep Dark sculk guardian nameplate." },
-  { id: "mc_herobrine", theme: "Minecraft", name: "👁️ Herobrine", css: "skin-mc-herobrine", cost: 25000, desc: "Mythical glowing-eyed legend badge." },
+  { id: "mc_zombie", theme: "Minecraft", name: "🧟 Zombie", css: "skin-mc-zombie", unlockLevel: 2, desc: "Classic Overworld undead mob badge." },
+  { id: "mc_skeleton", theme: "Minecraft", name: "💀 Skeleton", css: "skin-mc-skeleton", unlockLevel: 4, desc: "Sharpshooting bone-white archer tag." },
+  { id: "mc_steve", theme: "Minecraft", name: "⛏️ Steve", css: "skin-mc-steve", unlockLevel: 10, desc: "Iconic diamond-tier crafter emblem." },
+  { id: "mc_warden", theme: "Minecraft", name: "🔊 Warden", css: "skin-mc-warden", unlockLevel: 15, desc: "Deep Dark sculk guardian nameplate." },
+  { id: "mc_herobrine", theme: "Minecraft", name: "👁️ Herobrine", css: "skin-mc-herobrine", unlockLevel: 25, desc: "Mythical glowing-eyed legend badge." },
 
   // Presidents
-  { id: "pres_buchanan", theme: "Presidents", name: "🎩 James Buchanan", css: "skin-pres-buchanan", cost: 1500, desc: "15th U.S. President commemorative tag." },
-  { id: "pres_johnson", theme: "Presidents", name: "📜 Andrew Johnson", css: "skin-pres-johnson", cost: 3000, desc: "17th U.S. President historical crest." },
-  { id: "pres_taft", theme: "Presidents", name: "⚖️ Taft", css: "skin-pres-taft", cost: 8000, desc: "27th President & Chief Justice badge." },
-  { id: "pres_jfk", theme: "Presidents", name: "🚀 JFK", css: "skin-pres-jfk", cost: 13000, desc: "35th President New Frontier emblem." },
-  { id: "pres_lincoln", theme: "Presidents", name: "🎩 Abraham Lincoln", css: "skin-pres-lincoln", cost: 20000, desc: "16th President gold-trimmed honors." },
-  { id: "pres_washington", theme: "Presidents", name: "🇺🇸 George Washington", css: "skin-pres-washington", cost: 20000, desc: "1st President Founding Father crest." },
+  { id: "pres_buchanan", theme: "Presidents", name: "🎩 James Buchanan", css: "skin-pres-buchanan", unlockLevel: 2, desc: "15th U.S. President commemorative tag." },
+  { id: "pres_johnson", theme: "Presidents", name: "📜 Andrew Johnson", css: "skin-pres-johnson", unlockLevel: 3, desc: "17th U.S. President historical crest." },
+  { id: "pres_taft", theme: "Presidents", name: "⚖️ Taft", css: "skin-pres-taft", unlockLevel: 8, desc: "27th President & Chief Justice badge." },
+  { id: "pres_jfk", theme: "Presidents", name: "🚀 JFK", css: "skin-pres-jfk", unlockLevel: 13, desc: "35th President New Frontier emblem." },
+  { id: "pres_lincoln", theme: "Presidents", name: "🎩 Abraham Lincoln", css: "skin-pres-lincoln", unlockLevel: 20, desc: "16th President gold-trimmed honors." },
+  { id: "pres_washington", theme: "Presidents", name: "🇺🇸 George Washington", css: "skin-pres-washington", unlockLevel: 20, desc: "1st President Founding Father crest." },
 
   // Nintendo
-  { id: "nin_toad", theme: "Nintendo", name: "🍄 Toad", css: "skin-nin-toad", cost: 5000, desc: "Mushroom Kingdom loyal retainer tag." },
-  { id: "nin_luigi", theme: "Nintendo", name: "💚 Luigi", css: "skin-nin-luigi", cost: 10000, desc: "Emerald jump-master hero badge." },
-  { id: "nin_peach", theme: "Nintendo", name: "👑 Princess Peach", css: "skin-nin-peach", cost: 15000, desc: "Royal Mushroom Kingdom sovereign." },
-  { id: "nin_mario", theme: "Nintendo", name: "🔴 Mario", css: "skin-nin-mario", cost: 20000, desc: "Super Star champion nameplate." },
-  { id: "nin_bowser", theme: "Nintendo", name: "🔥 Bowser", css: "skin-nin-bowser", cost: 30000, desc: "King of the Koopas fiery crest." },
+  { id: "nin_toad", theme: "Nintendo", name: "🍄 Toad", css: "skin-nin-toad", unlockLevel: 5, desc: "Mushroom Kingdom loyal retainer tag." },
+  { id: "nin_luigi", theme: "Nintendo", name: "💚 Luigi", css: "skin-nin-luigi", unlockLevel: 10, desc: "Emerald jump-master hero badge." },
+  { id: "nin_peach", theme: "Nintendo", name: "👑 Princess Peach", css: "skin-nin-peach", unlockLevel: 15, desc: "Royal Mushroom Kingdom sovereign." },
+  { id: "nin_mario", theme: "Nintendo", name: "🔴 Mario", css: "skin-nin-mario", unlockLevel: 20, desc: "Super Star champion nameplate." },
+  { id: "nin_bowser", theme: "Nintendo", name: "🔥 Bowser", css: "skin-nin-bowser", unlockLevel: 30, desc: "King of the Koopas fiery crest." },
 
   // The Office
-  { id: "off_attrm", theme: "The Office", name: "📋 Assistant to the Regional Manager", css: "skin-off-attrm", cost: 4000, desc: "Schrute Farms' most dedicated title." },
-  { id: "off_pam", theme: "The Office", name: "🎨 Pam", css: "skin-off-pam", cost: 10000, desc: "Dunder Mifflin Scranton artist badge." },
-  { id: "off_michael", theme: "The Office", name: "☕ Michael Scott", css: "skin-off-michael", cost: 15000, desc: "World's Best Boss prestige tag." },
-  { id: "off_scarn", theme: "The Office", name: "🕶️ Agent Michael Scarn", css: "skin-off-scarn", cost: 25000, desc: "Threat Level Midnight secret agent." },
-  { id: "off_arm", theme: "The Office", name: "💼 Assistant Regional Manager", css: "skin-off-arm", cost: 30000, desc: "Official promoted executive title." },
+  { id: "off_attrm", theme: "The Office", name: "📋 Assistant to the Regional Manager", css: "skin-off-attrm", unlockLevel: 4, desc: "Schrute Farms' most dedicated title." },
+  { id: "off_pam", theme: "The Office", name: "🎨 Pam", css: "skin-off-pam", unlockLevel: 10, desc: "Dunder Mifflin Scranton artist badge." },
+  { id: "off_michael", theme: "The Office", name: "☕ Michael Scott", css: "skin-off-michael", unlockLevel: 15, desc: "World's Best Boss prestige tag." },
+  { id: "off_scarn", theme: "The Office", name: "🕶️ Agent Michael Scarn", css: "skin-off-scarn", unlockLevel: 25, desc: "Threat Level Midnight secret agent." },
+  { id: "off_arm", theme: "The Office", name: "💼 Assistant Regional Manager", css: "skin-off-arm", unlockLevel: 30, desc: "Official promoted executive title." },
 
   // Supercell
-  { id: "sc_barbarian", theme: "Supercell", name: "⚔️ Barbarian", css: "skin-sc-barbarian", cost: 2500, desc: "Fierce mustachioed arena warrior." },
-  { id: "sc_goblin", theme: "Supercell", name: "💰 Goblin", css: "skin-sc-goblin", cost: 3000, desc: "Fast, gold-hungry elixir raider." },
-  { id: "sc_archer", theme: "Supercell", name: "🏹 Archer", css: "skin-sc-archer", cost: 7000, desc: "Sharp-eyed pink-haired sharpshooter." },
-  { id: "sc_elprimo", theme: "Supercell", name: "🤼 El Primo", css: "skin-sc-elprimo", cost: 15000, desc: "Heavyweight Brawl Stars luchador." },
-  { id: "sc_pekka", theme: "Supercell", name: "🤖 P.E.K.K.A", css: "skin-sc-pekka", cost: 20000, desc: "Butterfly-chasing armored juggernaut." },
-  { id: "sc_megaknight", theme: "Supercell", name: "🛡️ Mega Knight", css: "skin-sc-megaknight", cost: 20000, desc: "Spiked-gauntlet splash-damage titan." },
-  { id: "sc_archerqueen", theme: "Supercell", name: "👑 Archer Queen", css: "skin-sc-archerqueen", cost: 30000, desc: "Royal X-Bow hero with cloaking ability." },
-  { id: "sc_barbarianking", theme: "Supercell", name: "👑 Barbarian King", css: "skin-sc-barbarianking", cost: 30000, desc: "Mighty Iron Fist monarch of the arena." },
+  { id: "sc_barbarian", theme: "Supercell", name: "⚔️ Barbarian", css: "skin-sc-barbarian", unlockLevel: 3, desc: "Fierce mustachioed arena warrior." },
+  { id: "sc_goblin", theme: "Supercell", name: "💰 Goblin", css: "skin-sc-goblin", unlockLevel: 3, desc: "Fast, gold-hungry elixir raider." },
+  { id: "sc_archer", theme: "Supercell", name: "🏹 Archer", css: "skin-sc-archer", unlockLevel: 7, desc: "Sharp-eyed pink-haired sharpshooter." },
+  { id: "sc_elprimo", theme: "Supercell", name: "🤼 El Primo", css: "skin-sc-elprimo", unlockLevel: 15, desc: "Heavyweight Brawl Stars luchador." },
+  { id: "sc_pekka", theme: "Supercell", name: "🤖 P.E.K.K.A", css: "skin-sc-pekka", unlockLevel: 20, desc: "Butterfly-chasing armored juggernaut." },
+  { id: "sc_megaknight", theme: "Supercell", name: "🛡️ Mega Knight", css: "skin-sc-megaknight", unlockLevel: 20, desc: "Spiked-gauntlet splash-damage titan." },
+  { id: "sc_archerqueen", theme: "Supercell", name: "👑 Archer Queen", css: "skin-sc-archerqueen", unlockLevel: 30, desc: "Royal X-Bow hero with cloaking ability." },
+  { id: "sc_barbarianking", theme: "Supercell", name: "👑 Barbarian King", css: "skin-sc-barbarianking", unlockLevel: 30, desc: "Mighty Iron Fist monarch of the arena." },
 
   // Animals
-  { id: "ani_wolf", theme: "Animals", name: "🐺 Wolf", css: "skin-ani-wolf", cost: 3000, desc: "Apex pack hunter silver-gray tag." },
-  { id: "ani_gorilla", theme: "Animals", name: "🦍 Gorilla", css: "skin-ani-gorilla", cost: 7000, desc: "Silverback jungle powerhouse badge." },
-  { id: "ani_rhino", theme: "Animals", name: "🦏 Rhino", css: "skin-ani-rhino", cost: 10000, desc: "Unstoppable armored savanna charger." },
-  { id: "ani_mammoth", theme: "Animals", name: "🦣 Woolly Mammoth", css: "skin-ani-mammoth", cost: 15000, desc: "Ice Age tusked colossus emblem." },
-  { id: "ani_megalodon", theme: "Animals", name: "🦈 Megalodon", css: "skin-ani-megalodon", cost: 20000, desc: "Prehistoric deep-ocean apex shark." },
-  { id: "ani_titanoboa", theme: "Animals", name: "🐍 Titanoboa", css: "skin-ani-titanoboa", cost: 20000, desc: "Colossal ancient rainforest serpent." },
-  { id: "ani_trex", theme: "Animals", name: "🦖 T-Rex", css: "skin-ani-trex", cost: 20000, desc: "Tyrant lizard king of the Cretaceous." },
+  { id: "ani_wolf", theme: "Animals", name: "🐺 Wolf", css: "skin-ani-wolf", unlockLevel: 3, desc: "Apex pack hunter silver-gray tag." },
+  { id: "ani_gorilla", theme: "Animals", name: "🦍 Gorilla", css: "skin-ani-gorilla", unlockLevel: 7, desc: "Silverback jungle powerhouse badge." },
+  { id: "ani_rhino", theme: "Animals", name: "🦏 Rhino", css: "skin-ani-rhino", unlockLevel: 10, desc: "Unstoppable armored savanna charger." },
+  { id: "ani_mammoth", theme: "Animals", name: "🦣 Woolly Mammoth", css: "skin-ani-mammoth", unlockLevel: 15, desc: "Ice Age tusked colossus emblem." },
+  { id: "ani_megalodon", theme: "Animals", name: "🦈 Megalodon", css: "skin-ani-megalodon", unlockLevel: 20, desc: "Prehistoric deep-ocean apex shark." },
+  { id: "ani_titanoboa", theme: "Animals", name: "🐍 Titanoboa", css: "skin-ani-titanoboa", unlockLevel: 20, desc: "Colossal ancient rainforest serpent." },
+  { id: "ani_trex", theme: "Animals", name: "🦖 T-Rex", css: "skin-ani-trex", unlockLevel: 20, desc: "Tyrant lizard king of the Cretaceous." },
 
   // Space
-  { id: "spc_mercury", theme: "Space", name: "☿️ Mercury", css: "skin-spc-mercury", cost: 3000, desc: "Swift innermost rocky planet badge." },
-  { id: "spc_earth", theme: "Space", name: "🌍 Earth", css: "skin-spc-earth", cost: 9000, desc: "Pale blue dot homeworld emblem." },
-  { id: "spc_neptune", theme: "Space", name: "🔵 Neptune", css: "skin-spc-neptune", cost: 15000, desc: "Supersonic cobalt ice giant tag." },
-  { id: "spc_saturn", theme: "Space", name: "🪐 Saturn", css: "skin-spc-saturn", cost: 20000, desc: "Golden ringed gas giant crest." },
-  { id: "spc_jupiter", theme: "Space", name: "🟠 Jupiter", css: "skin-spc-jupiter", cost: 25000, desc: "Great Red Spot colossal planet." },
-  { id: "spc_sun", theme: "Space", name: "☀️ The Sun", css: "skin-spc-sun", cost: 40000, desc: "Blazing solar core radiant badge." },
-  { id: "spc_blackhole", theme: "Space", name: "🕳️ Black Hole", css: "skin-spc-blackhole", cost: 75000, desc: "Event-horizon singularity prestige." },
+  { id: "spc_mercury", theme: "Space", name: "☿️ Mercury", css: "skin-spc-mercury", unlockLevel: 3, desc: "Swift innermost rocky planet badge." },
+  { id: "spc_earth", theme: "Space", name: "🌍 Earth", css: "skin-spc-earth", unlockLevel: 9, desc: "Pale blue dot homeworld emblem." },
+  { id: "spc_neptune", theme: "Space", name: "🔵 Neptune", css: "skin-spc-neptune", unlockLevel: 15, desc: "Supersonic cobalt ice giant tag." },
+  { id: "spc_saturn", theme: "Space", name: "🪐 Saturn", css: "skin-spc-saturn", unlockLevel: 20, desc: "Golden ringed gas giant crest." },
+  { id: "spc_jupiter", theme: "Space", name: "🟠 Jupiter", css: "skin-spc-jupiter", unlockLevel: 25, desc: "Great Red Spot colossal planet." },
+  { id: "spc_sun", theme: "Space", name: "☀️ The Sun", css: "skin-spc-sun", unlockLevel: 40, desc: "Blazing solar core radiant badge." },
+  { id: "spc_blackhole", theme: "Space", name: "🕳️ Black Hole", css: "skin-spc-blackhole", unlockLevel: 75, desc: "Event-horizon singularity prestige." },
 
   // Medieval Ranks
-  { id: "med_peasant", theme: "Medieval Ranks", name: "🌾 Peasant", css: "skin-med-peasant", cost: 2000, desc: "Humble feudal villager and serf badge." },
-  { id: "med_knight", theme: "Medieval Ranks", name: "🛡️ Knight", css: "skin-med-knight", cost: 11000, desc: "Sworn steel-armored chivalric warrior." },
-  { id: "med_lord", theme: "Medieval Ranks", name: "⚜️ Lord", css: "skin-med-lord", cost: 20000, desc: "Noble manor ruler and feudal barony crest." },
-  { id: "med_king", theme: "Medieval Ranks", name: "👑 King", css: "skin-med-king", cost: 35000, desc: "Sovereign monarch of the medieval realm." }
+  { id: "med_peasant", theme: "Medieval Ranks", name: "🌾 Peasant", css: "skin-med-peasant", unlockLevel: 2, desc: "Humble feudal villager and serf badge." },
+  { id: "med_knight", theme: "Medieval Ranks", name: "🛡️ Knight", css: "skin-med-knight", unlockLevel: 11, desc: "Sworn steel-armored chivalric warrior." },
+  { id: "med_lord", theme: "Medieval Ranks", name: "⚜️ Lord", css: "skin-med-lord", unlockLevel: 20, desc: "Noble manor ruler and feudal barony crest." },
+  { id: "med_king", theme: "Medieval Ranks", name: "👑 King", css: "skin-med-king", unlockLevel: 35, desc: "Sovereign monarch of the medieval realm." }
 ];
 
 let selectedSkinThemeFilter = "ALL";
@@ -1459,12 +1518,26 @@ let selectedSkinThemeFilter = "ALL";
 let profile = {
   name: "Player",
   coins: 250,
-  inventory: { revive: 0, fiftyFifty: 0, freeze: 0, shield: 0, heartBargain: 0, doubleJeopardy: 0 },
+  xp: 0,
+  level: 0,
+  inventory: { revive: 0, fiftyFifty: 0, freeze: 0, shield: 0, heartBargain: 0, doubleJeopardy: 0, juggernaut: 0 },
   unlockedSkins: ["default"],
   equippedSkin: "default",
   currentStreak: 0,
   longestStreak: 0
 };
+
+function syncLevelUnlockedSkins() {
+  if (!Array.isArray(profile.unlockedSkins)) profile.unlockedSkins = ["default"];
+  const newlyUnlocked = [];
+  SKIN_ITEMS.forEach(skin => {
+    if ((profile.level || 0) >= (skin.unlockLevel || 0) && !profile.unlockedSkins.includes(skin.id)) {
+      profile.unlockedSkins.push(skin.id);
+      newlyUnlocked.push(skin);
+    }
+  });
+  return newlyUnlocked;
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -1492,12 +1565,19 @@ function loadProfile() {
       profile = {
         ...profile,
         ...parsed,
+        xp: Math.max(0, Number(parsed.xp) || 0),
+        level: Math.max(0, Number(parsed.level) || 0),
         inventory: { ...profile.inventory, ...(parsed.inventory || {}) },
         currentStreak: Number(parsed.currentStreak) || 0,
         longestStreak: Number(parsed.longestStreak) || 0
       };
     }
   } catch (e) {}
+  while (profile.xp >= 1000) {
+    profile.xp -= 1000;
+    profile.level += 1;
+  }
+  syncLevelUnlockedSkins();
   document.getElementById("playerNameInput").value = profile.name;
   updateHeaderHUD();
   renderShop();
@@ -1516,6 +1596,10 @@ function savePlayerName() {
 
 function updateHeaderHUD() {
   document.getElementById("coinCount").textContent = profile.coins.toLocaleString();
+  const lvlEl = document.getElementById("levelCount");
+  const xpEl = document.getElementById("xpCount");
+  if (lvlEl) lvlEl.textContent = (profile.level || 0).toLocaleString();
+  if (xpEl) xpEl.textContent = (profile.xp || 0).toLocaleString();
   const skin = SKIN_ITEMS.find(s => s.id === profile.equippedSkin) || SKIN_ITEMS[0];
   const badge = document.getElementById("activeSkinDisplay");
   badge.className = `skin-badge ${skin.css}`;
@@ -1600,7 +1684,8 @@ function renderShop() {
     grid.style.marginBottom = "12px";
 
     items.forEach(skin => {
-      const unlocked = profile.unlockedSkins.includes(skin.id);
+      const reqLevel = skin.unlockLevel || 0;
+      const unlocked = (profile.level || 0) >= reqLevel || profile.unlockedSkins.includes(skin.id);
       const equipped = profile.equippedSkin === skin.id;
       const div = document.createElement("div");
       div.className = `card ${equipped ? "highlight" : ""}`;
@@ -1610,11 +1695,17 @@ function renderShop() {
       } else if (unlocked) {
         btnHtml = `<button class="btn" onclick="equipSkin('${skin.id}')">Equip Skin</button>`;
       } else {
-        btnHtml = `<button class="btn gold" ${profile.coins < skin.cost ? "disabled" : ""} onclick="buySkin('${skin.id}', ${skin.cost})">Buy for ${skin.cost.toLocaleString()} 🪙</button>`;
+        btnHtml = `<button class="btn secondary" disabled>🔒 Unlocks at Level ${reqLevel}</button>`;
       }
+      const reqBadge = reqLevel === 0
+        ? `<span class="pill" style="font-size:0.74rem; padding:3px 8px;">Starter</span>`
+        : `<span class="pill xp" style="font-size:0.74rem; padding:3px 8px;">Lv. ${reqLevel}</span>`;
       div.innerHTML = `
         <div>
-          <div style="margin-bottom:8px;"><span class="skin-badge ${skin.css}">${skin.name}</span></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px;">
+            <span class="skin-badge ${skin.css}">${skin.name}</span>
+            ${reqBadge}
+          </div>
           <p class="sub" style="margin-bottom:0;">${skin.desc}</p>
         </div>
         ${btnHtml}
@@ -1635,17 +1726,14 @@ function buyPowerup(id, cost) {
   showToast("Purchased power-up!");
 }
 
-function buySkin(id, cost) {
-  if (profile.coins < cost || profile.unlockedSkins.includes(id)) return;
-  profile.coins -= cost;
-  profile.unlockedSkins.push(id);
-  profile.equippedSkin = id;
-  saveProfile();
-  renderShop();
-  showToast("Unlocked & equipped new skin!");
-}
-
 function equipSkin(id) {
+  const skin = SKIN_ITEMS.find(s => s.id === id);
+  if (!skin) return;
+  const unlocked = (profile.level || 0) >= (skin.unlockLevel || 0) || profile.unlockedSkins.includes(id);
+  if (!unlocked) {
+    showToast(`Reach Level ${skin.unlockLevel} to unlock ${skin.name}!`);
+    return;
+  }
   profile.equippedSkin = id;
   saveProfile();
   renderShop();
@@ -1692,11 +1780,11 @@ let gameState = {
   sbInterval: null,
   botPuTimeout: null,
   myAnswer: null,
-  roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false },
+  roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false },
   preRoundBuffs: {},
   roundSubmissions: {},
   myPlacement: null,
-  coinsAwarded: false
+  rewardsAwarded: false
 };
 
 function clearAllTimers() {
@@ -1725,11 +1813,22 @@ function generateBots(count, modeType) {
       difficulty: diffObj.key,
       diffSpec: diffObj,
       lives: 3,
+      maxLives: 3,
+      hasJuggernaut: false,
       eliminatedRound: null,
       skin: "default",
       streak: 0,
+      correctAnswers: 0,
+      lostAnyHeart: false,
       isMe: false
     });
+  }
+  // Each game, there is a 3% chance that a random bot starts with Juggernaut (5 hearts)
+  if (bots.length > 0 && Math.random() < 0.03) {
+    const jugBot = bots[Math.floor(Math.random() * bots.length)];
+    jugBot.lives = 5;
+    jugBot.maxLives = 5;
+    jugBot.hasJuggernaut = true;
   }
   return bots;
 }
@@ -1742,9 +1841,13 @@ function startSinglePlayer(isSuperHard) {
     isBot: false,
     difficulty: "Human",
     lives: 3,
+    maxLives: 3,
+    hasJuggernaut: false,
     eliminatedRound: null,
     skin: profile.equippedSkin,
     streak: profile.currentStreak || 0,
+    correctAnswers: 0,
+    lostAnyHeart: false,
     isMe: true
   };
   const bots = generateBots(19, isSuperHard ? "superhard" : "normal");
@@ -1763,11 +1866,11 @@ function startSinglePlayer(isSuperHard) {
     sbInterval: null,
     myAnswer: null,
     botPuTimeout: null,
-    roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false },
+    roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false },
     preRoundBuffs: {},
     roundSubmissions: {},
     myPlacement: null,
-    coinsAwarded: false
+    rewardsAwarded: false
   };
   startNextRound();
 }
@@ -1808,7 +1911,7 @@ function startNextRound() {
 
   gameState.round += 1;
   gameState.myAnswer = null;
-  gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false };
+  gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false };
   gameState.preRoundBuffs = {};
   gameState.roundSubmissions = {};
   gameState.currentQuestion = pickRandomQuestion();
@@ -1835,6 +1938,7 @@ function formatBuffLabels(buffObj) {
   if (buffObj.shield) tags.push("🛡️ Life Shield");
   if (buffObj.heartBargain) tags.push("💝 Heart Bargain");
   if (buffObj.doubleJeopardy) tags.push("⚡ Double Jeopardy");
+  if (buffObj.juggernaut) tags.push("🦾 Juggernaut (5 ❤️)");
   return tags;
 }
 
@@ -1845,7 +1949,8 @@ function triggerOpponentPowerupNotification(oppName, powerupType) {
     heartBargain: "💝 Heart Bargain (Gains +1 ❤️ if they beat you!)",
     freeze: "❄️ Cryo Delay (+3.0s added to your answer time!)",
     shield: "🛡️ Aegis Life Shield (Protected from losing a heart!)",
-    fiftyFifty: "✂️ 50/50 Sabotage (Eliminated 2 wrong choices for themselves!)"
+    fiftyFifty: "✂️ 50/50 Sabotage (Eliminated 2 wrong choices for themselves!)",
+    juggernaut: "🦾 Juggernaut (Started the match with 5 ❤️!)"
   };
   const label = descMap[powerupType] || powerupType;
   const msg = `⚠️ OPPONENT POWER-UP: ${oppName} activated ${label}`;
@@ -1905,7 +2010,7 @@ function showPreRoundVSScreen() {
     const leftSkinEl = document.getElementById("vsLeftSkin");
     leftSkinEl.className = `skin-badge ${skinObj.css}`;
     leftSkinEl.textContent = leftPlayer.isBot ? leftPlayer.difficulty : skinObj.name;
-    document.getElementById("vsLeftHearts").textContent = renderHearts(leftPlayer.lives);
+    document.getElementById("vsLeftHearts").textContent = renderHearts(leftPlayer.lives, leftPlayer.maxLives || 3);
     document.getElementById("vsLeftLivesText").textContent = `${leftPlayer.lives} ${leftPlayer.lives === 1 ? "Life" : "Lives"} Left`;
   }
 
@@ -1914,7 +2019,7 @@ function showPreRoundVSScreen() {
     document.getElementById("vsRightTag").textContent = isSpectating ? "SURVIVOR 2" : "OPPONENT";
     document.getElementById("vsRightName").innerHTML = formatPlayerNameHTML(rightPlayer);
     document.getElementById("vsRightDiff").textContent = rightPlayer.isBot ? `Bot • ${rightPlayer.difficulty}` : "Human Player";
-    document.getElementById("vsRightHearts").textContent = renderHearts(rightPlayer.lives);
+    document.getElementById("vsRightHearts").textContent = renderHearts(rightPlayer.lives, rightPlayer.maxLives || 3);
     document.getElementById("vsRightLivesText").textContent = `${rightPlayer.lives} ${rightPlayer.lives === 1 ? "Life" : "Lives"} Left`;
   } else {
     document.getElementById("vsRightTag").textContent = "BYE ROUND";
@@ -1933,10 +2038,15 @@ function showPreRoundVSScreen() {
     updateVSPowerupButtonsUI(me, rightPlayer);
   }
 
-  // 3% chance for bot opponent to use Double Jeopardy or Heart Bargain against you
+  // Notify if facing a Juggernaut bot in Round 1, or 3% chance for bot opponent to use Double Jeopardy / Heart Bargain
   if (!isSpectating && rightPlayer && rightPlayer.isBot) {
-    if (Math.random() < 0.03) {
-      const botPu = (rightPlayer.lives < 3 && Math.random() < 0.5) ? "heartBargain" : "doubleJeopardy";
+    if (gameState.round === 1 && rightPlayer.hasJuggernaut) {
+      gameState.botPuTimeout = setTimeout(() => {
+        triggerOpponentPowerupNotification(rightPlayer.name, "juggernaut");
+      }, 700);
+    } else if (Math.random() < 0.03) {
+      const maxBotLives = rightPlayer.maxLives || 3;
+      const botPu = (rightPlayer.lives < maxBotLives && Math.random() < 0.5) ? "heartBargain" : "doubleJeopardy";
       if (!gameState.preRoundBuffs[rightPlayer.id]) gameState.preRoundBuffs[rightPlayer.id] = {};
       gameState.preRoundBuffs[rightPlayer.id][botPu] = true;
       gameState.botPuTimeout = setTimeout(() => {
@@ -1978,25 +2088,30 @@ function showPreRoundVSScreen() {
 
 function updateVSPowerupButtonsUI(me, rightPlayer) {
   const hasOpp = !!rightPlayer;
-  const isFullLives = me && me.lives >= 3;
+  const maxL = (me && me.maxLives) ? me.maxLives : 3;
+  const isFullLives = me && me.lives >= maxL;
+  const isRoundOne = gameState.round === 1;
 
   document.getElementById("vsInv5050").textContent = profile.inventory.fiftyFifty || 0;
   document.getElementById("vsInvFreeze").textContent = profile.inventory.freeze || 0;
   document.getElementById("vsInvShield").textContent = profile.inventory.shield || 0;
   document.getElementById("vsInvHeartBargain").textContent = profile.inventory.heartBargain || 0;
   document.getElementById("vsInvDoubleJeopardy").textContent = profile.inventory.doubleJeopardy || 0;
+  document.getElementById("vsInvJuggernaut").textContent = profile.inventory.juggernaut || 0;
 
   const btn5050 = document.getElementById("vsPu5050Btn");
   const btnFreeze = document.getElementById("vsPuFreezeBtn");
   const btnShield = document.getElementById("vsPuShieldBtn");
   const btnHB = document.getElementById("vsPuHeartBargainBtn");
   const btnDJ = document.getElementById("vsPuDoubleJeopardyBtn");
+  const btnJug = document.getElementById("vsPuJuggernautBtn");
 
   btn5050.classList.toggle("armed", !!gameState.roundBuffs.fiftyFiftyUsed);
   btnFreeze.classList.toggle("armed", !!gameState.roundBuffs.freeze);
   btnShield.classList.toggle("armed", !!gameState.roundBuffs.shield);
   btnHB.classList.toggle("armed", !!gameState.roundBuffs.heartBargain);
   btnDJ.classList.toggle("armed", !!gameState.roundBuffs.doubleJeopardy);
+  btnJug.classList.toggle("armed", !!gameState.roundBuffs.juggernaut);
 
   btn5050.disabled = !hasOpp || gameState.roundBuffs.fiftyFiftyUsed || (profile.inventory.fiftyFifty || 0) <= 0;
   btnFreeze.disabled = !hasOpp || gameState.roundBuffs.freeze || (profile.inventory.freeze || 0) <= 0;
@@ -2004,33 +2119,36 @@ function updateVSPowerupButtonsUI(me, rightPlayer) {
   btnHB.disabled = !hasOpp || isFullLives || gameState.roundBuffs.heartBargain || (profile.inventory.heartBargain || 0) <= 0;
   btnDJ.disabled = !hasOpp || gameState.roundBuffs.doubleJeopardy || (profile.inventory.doubleJeopardy || 0) <= 0;
 
+  // Juggernaut can ONLY be used before the very first question (Round 1 VS screen)
+  btnJug.style.display = isRoundOne ? "" : "none";
+  btnJug.disabled = !isRoundOne || !!gameState.roundBuffs.juggernaut || (profile.inventory.juggernaut || 0) <= 0;
+
   const summaryEl = document.getElementById("vsActiveBuffSummary");
-  if (!hasOpp) {
-    summaryEl.textContent = "Bye Round — Power-ups paused";
+  const armed = formatBuffLabels(gameState.roundBuffs);
+  if (!hasOpp && armed.length === 0) {
+    summaryEl.textContent = isRoundOne ? "Bye Round — Juggernaut available before Q1" : "Bye Round — Duel power-ups paused";
     summaryEl.style.color = "var(--muted)";
+  } else if (armed.length > 0) {
+    summaryEl.textContent = "Armed: " + armed.join(" • ");
+    summaryEl.style.color = "var(--green)";
   } else {
-    const armed = formatBuffLabels(gameState.roundBuffs);
-    if (armed.length > 0) {
-      summaryEl.textContent = "Armed: " + armed.join(" • ");
-      summaryEl.style.color = "var(--green)";
-    } else {
-      summaryEl.textContent = "None armed";
-      summaryEl.style.color = "var(--muted)";
-    }
+    summaryEl.textContent = "None armed";
+    summaryEl.style.color = "var(--muted)";
   }
 }
 
 function usePowerup(type) {
   // Power-ups can ONLY be used during the 6-second pre-question VS screen
   if (!document.getElementById("vsScreen").classList.contains("active")) return;
-  if (!gameState.myOpponentId) return;
   if ((profile.inventory[type] || 0) <= 0) return;
 
   const myId = myPeerOrLocalId();
   const me = gameState.players.find(p => p.id === myId);
-  const rightPlayer = gameState.players.find(p => p.id === gameState.myOpponentId) || null;
-  if (!me || me.lives <= 0 || !rightPlayer) return;
+  const rightPlayer = gameState.myOpponentId ? (gameState.players.find(p => p.id === gameState.myOpponentId) || null) : null;
+  if (!me || me.lives <= 0) return;
+  if (type !== "juggernaut" && !rightPlayer) return;
 
+  const maxL = me.maxLives || 3;
   let activated = false;
 
   if (type === "fiftyFifty" && !gameState.roundBuffs.fiftyFiftyUsed) {
@@ -2048,7 +2166,7 @@ function usePowerup(type) {
     gameState.roundBuffs.shield = true;
     activated = true;
     showToast("🛡️ Aegis Life Shield armed!");
-  } else if (type === "heartBargain" && !gameState.roundBuffs.heartBargain && me.lives < 3) {
+  } else if (type === "heartBargain" && !gameState.roundBuffs.heartBargain && me.lives < maxL) {
     profile.inventory.heartBargain--;
     gameState.roundBuffs.heartBargain = true;
     activated = true;
@@ -2058,6 +2176,16 @@ function usePowerup(type) {
     gameState.roundBuffs.doubleJeopardy = true;
     activated = true;
     showToast("⚡ Double Jeopardy armed! 2 ❤️ on the line!");
+  } else if (type === "juggernaut" && gameState.round === 1 && !gameState.roundBuffs.juggernaut) {
+    profile.inventory.juggernaut--;
+    gameState.roundBuffs.juggernaut = true;
+    me.lives = 5;
+    me.maxLives = 5;
+    me.hasJuggernaut = true;
+    activated = true;
+    document.getElementById("vsLeftHearts").textContent = renderHearts(me.lives, 5);
+    document.getElementById("vsLeftLivesText").textContent = "5 Lives Left";
+    showToast("🦾 Juggernaut activated! You start with 5 ❤️!");
   }
 
   if (!activated) return;
@@ -2068,16 +2196,16 @@ function usePowerup(type) {
   saveProfile();
   updateVSPowerupButtonsUI(me, rightPlayer);
 
-  // Notify opponent in online multiplayer
+  // Notify opponent / host in online multiplayer
   if (gameState.mode === "online_client") {
     sendToHost({
       type: "USE_VS_POWERUP",
       playerId: myId,
-      targetId: rightPlayer.id,
+      targetId: rightPlayer ? rightPlayer.id : null,
       powerup: type,
       buffs: gameState.roundBuffs
     });
-  } else if (gameState.mode === "online_host" && !rightPlayer.isBot) {
+  } else if (gameState.mode === "online_host" && rightPlayer && !rightPlayer.isBot) {
     const targetConnObj = clientConns.find(c => c.id === rightPlayer.id);
     if (targetConnObj && targetConnObj.conn && targetConnObj.conn.open) {
       targetConnObj.conn.send({
@@ -2134,14 +2262,14 @@ function setupRoundUI() {
 
   if (leftFighter) {
     document.getElementById("myArenaName").innerHTML = formatPlayerNameHTML(leftFighter);
-    document.getElementById("myArenaHearts").textContent = renderHearts(leftFighter.lives);
+    document.getElementById("myArenaHearts").textContent = renderHearts(leftFighter.lives, leftFighter.maxLives || 3);
   }
   document.getElementById("roundIndicator").textContent = `ROUND ${gameState.round} • VS`;
 
   if (rightFighter) {
     document.getElementById("oppArenaName").innerHTML = formatPlayerNameHTML(rightFighter);
     document.getElementById("oppArenaDiff").textContent = rightFighter.isBot ? `BOT (${rightFighter.difficulty.toUpperCase()})` : "ONLINE PLAYER";
-    document.getElementById("oppArenaHearts").textContent = renderHearts(rightFighter.lives);
+    document.getElementById("oppArenaHearts").textContent = renderHearts(rightFighter.lives, rightFighter.maxLives || 3);
   } else {
     document.getElementById("oppArenaName").textContent = "BYE ROUND";
     document.getElementById("oppArenaDiff").textContent = "SAFE THIS ROUND";
@@ -2297,6 +2425,9 @@ function resolveRound() {
     const rightA = subA.choice === q.a;
     const rightB = subB.choice === q.a;
 
+    if (rightA) pA.correctAnswers = (pA.correctAnswers || 0) + 1;
+    if (rightB) pB.correctAnswers = (pB.correctAnswers || 0) + 1;
+
     const timeA = Math.round((subA.timeSec + (buffsB.freeze ? 3.0 : 0)) * 100) / 100;
     const timeB = Math.round((subB.timeSec + (buffsA.freeze ? 3.0 : 0)) * 100) / 100;
 
@@ -2336,6 +2467,7 @@ function resolveRound() {
         reason += ` (<b>${pA.name}</b>'s Life Shield blocked the damage!)`;
       } else {
         pA.lives = Math.max(0, pA.lives - heartPenalty);
+        pA.lostAnyHeart = true;
         if (pA.lives === 0 && pA.eliminatedRound === null) pA.eliminatedRound = gameState.round;
       }
     }
@@ -2344,6 +2476,7 @@ function resolveRound() {
         reason += ` (<b>${pB.name}</b>'s Life Shield blocked the damage!)`;
       } else {
         pB.lives = Math.max(0, pB.lives - heartPenalty);
+        pB.lostAnyHeart = true;
         if (pB.lives === 0 && pB.eliminatedRound === null) pB.eliminatedRound = gameState.round;
       }
     }
@@ -2364,20 +2497,22 @@ function resolveRound() {
       pB.streak = 0;
     }
 
-    // Heart Bargain: Gain back 1 heart (up to max 3) if you answered correctly and beat your opponent
+    // Heart Bargain: Gain back 1 heart (up to maxLives) if you answered correctly and beat your opponent
     if (beatOppA && buffsA.heartBargain) {
+      const maxA = pA.maxLives || 3;
       const before = pA.lives;
-      pA.lives = Math.min(3, pA.lives + 1);
+      pA.lives = Math.min(maxA, pA.lives + 1);
       reason += (pA.lives > before)
         ? ` 💝 <b>${pA.name}</b>'s <b>Heart Bargain</b> paid off (+1 ❤️ restored)!`
-        : ` 💝 <b>${pA.name}</b>'s <b>Heart Bargain</b> succeeded (already at full 3 ❤️)!`;
+        : ` 💝 <b>${pA.name}</b>'s <b>Heart Bargain</b> succeeded (already at full ${maxA} ❤️)!`;
     }
     if (beatOppB && buffsB.heartBargain) {
+      const maxB = pB.maxLives || 3;
       const before = pB.lives;
-      pB.lives = Math.min(3, pB.lives + 1);
+      pB.lives = Math.min(maxB, pB.lives + 1);
       reason += (pB.lives > before)
         ? ` 💝 <b>${pB.name}</b>'s <b>Heart Bargain</b> paid off (+1 ❤️ restored)!`
-        : ` 💝 <b>${pB.name}</b>'s <b>Heart Bargain</b> succeeded (already at full 3 ❤️)!`;
+        : ` 💝 <b>${pB.name}</b>'s <b>Heart Bargain</b> succeeded (already at full ${maxB} ❤️)!`;
     }
 
     const summary = `Correct Answer: <b>${q.opts[q.a]}</b><br>${reason}`;
@@ -2507,7 +2642,7 @@ function renderScoreboard(duelLogs) {
       <div style="display:flex; align-items:center; gap:5px; min-width:0; flex:1;">
         <b style="min-width:0; display:inline-flex; max-width:100%;">${formatPlayerNameHTML(p)}</b> ${diffLabel}
       </div>
-      <div style="flex-shrink:0;">${p.lives > 0 ? renderHearts(p.lives) : "💀"}</div>
+      <div style="flex-shrink:0;">${p.lives > 0 ? renderHearts(p.lives, p.maxLives || 3) : "💀"}</div>
     `;
     listEl.appendChild(item);
   });
@@ -2615,9 +2750,51 @@ function concludeMatch() {
   const multiplier = gameState.superHard ? 2 : 1;
   const earned = baseCoins * multiplier;
 
-  if (!gameState.coinsAwarded) {
+  // XP Calculation: +1 XP per correct answer + placement bonus
+  const correctCount = me ? (me.correctAnswers || 0) : 0;
+  const questionXp = correctCount * 1;
+  let placementXp = 0;
+  let placementXpLabel = "";
+  if (placement === 1) {
+    if (me && !me.lostAnyHeart) {
+      placementXp = 150;
+      placementXpLabel = "Flawless 1st Place (+150 XP)";
+    } else {
+      placementXp = 80;
+      placementXpLabel = "1st Place (+80 XP)";
+    }
+  } else if (placement === 2) {
+    placementXp = 60;
+    placementXpLabel = "2nd Place (+60 XP)";
+  } else if (placement === 3) {
+    placementXp = 40;
+    placementXpLabel = "Top 3 (+40 XP)";
+  } else if (placement <= 5) {
+    placementXp = 20;
+    placementXpLabel = "Top 5 (+20 XP)";
+  } else if (placement <= 7) {
+    placementXp = 10;
+    placementXpLabel = "Top 7 (+10 XP)";
+  } else if (placement <= 10) {
+    placementXp = 5;
+    placementXpLabel = "Top 10 (+5 XP)";
+  }
+  const totalXpEarned = questionXp + placementXp;
+
+  let levelsGained = 0;
+  let unlockedThisMatch = [];
+
+  if (!gameState.rewardsAwarded) {
+    const startLevel = profile.level || 0;
     profile.coins += earned;
-    gameState.coinsAwarded = true;
+    profile.xp = (profile.xp || 0) + totalXpEarned;
+    while (profile.xp >= 1000) {
+      profile.xp -= 1000;
+      profile.level = (profile.level || 0) + 1;
+    }
+    levelsGained = (profile.level || 0) - startLevel;
+    unlockedThisMatch = syncLevelUnlockedSkins();
+    gameState.rewardsAwarded = true;
     saveProfile();
   }
 
@@ -2625,7 +2802,37 @@ function concludeMatch() {
   document.getElementById("endTrophy").textContent = placement === 1 ? "👑" : (placement <= 3 ? "🥈" : (placement <= 10 ? "🎖️" : "💀"));
   document.getElementById("endHeadline").textContent = placement === 1 ? "VICTORY ROYALE!" : `Finished #${placement}`;
   document.getElementById("endPlacementText").textContent = `You placed #${placement} out of 20 players${gameState.superHard ? " (Super Hard 2x Mode)" : ""}.`;
-  document.getElementById("coinsEarnedText").textContent = earned;
+  document.getElementById("coinsEarnedText").textContent = earned.toLocaleString();
+  document.getElementById("xpEarnedText").textContent = totalXpEarned.toLocaleString();
+
+  const breakdownParts = [`${correctCount} correct ${correctCount === 1 ? "answer" : "answers"} (+${questionXp} XP)`];
+  if (placementXp > 0) breakdownParts.push(placementXpLabel);
+  document.getElementById("xpBreakdownText").textContent = breakdownParts.join("  •  ");
+
+  const lvlBanner = document.getElementById("levelUpBanner");
+  if (levelsGained > 0) {
+    const skinUnlockNote = unlockedThisMatch.length > 0
+      ? ` • Unlocked ${unlockedThisMatch.map(s => s.name).join(", ")}!`
+      : "";
+    lvlBanner.textContent = `🎉 LEVEL UP! Reached Level ${profile.level}!${skinUnlockNote}`;
+    lvlBanner.style.display = "inline-block";
+  } else {
+    lvlBanner.style.display = "none";
+  }
+
+  document.getElementById("endLevelNum").textContent = (profile.level || 0).toLocaleString();
+  document.getElementById("endXpNum").textContent = (profile.xp || 0).toLocaleString();
+  document.getElementById("endXpBarFill").style.width = Math.min(100, ((profile.xp || 0) / 1000) * 100) + "%";
+
+  const nextLockedSkin = [...SKIN_ITEMS]
+    .filter(s => (s.unlockLevel || 0) > (profile.level || 0))
+    .sort((a, b) => a.unlockLevel - b.unlockLevel)[0];
+  const nextUnlockEl = document.getElementById("endNextUnlockText");
+  if (nextLockedSkin) {
+    nextUnlockEl.textContent = `${(1000 - (profile.xp || 0)).toLocaleString()} XP to Level ${(profile.level || 0) + 1} • Next skin unlock at Level ${nextLockedSkin.unlockLevel}: ${nextLockedSkin.name}`;
+  } else {
+    nextUnlockEl.textContent = `${(1000 - (profile.xp || 0)).toLocaleString()} XP to Level ${(profile.level || 0) + 1} • All Prestige Skins unlocked!`;
+  }
 }
 
 function returnAfterMatchOver(openShop) {
@@ -2639,8 +2846,9 @@ function returnAfterMatchOver(openShop) {
   }
 }
 
-function renderHearts(count) {
-  return "❤️".repeat(count) + "🖤".repeat(Math.max(0, 3 - count));
+function renderHearts(count, maxLives = 3) {
+  const cap = Math.max(count, maxLives || 3);
+  return "❤️".repeat(count) + "🖤".repeat(Math.max(0, cap - count));
 }
 
 // ==================== ONLINE MULTIPLAYER (PeerJS WebRTC + Public Slot Queue) ====================
@@ -2810,7 +3018,7 @@ function probePublicSlot(slotNum) {
       conn.on("data", msg => handleClientReceive(msg));
       conn.on("close", () => {
         clearInterval(publicLobbyInterval);
-        if (!gameState.coinsAwarded && gameState.mode === "online_client") {
+        if (!gameState.rewardsAwarded && gameState.mode === "online_client") {
           showToast("Host disconnected. Awarding current standing...");
           concludeMatch();
         } else {
@@ -2993,7 +3201,7 @@ function joinOnlineRoom() {
     });
     hostConn.on("data", data => handleClientReceive(data));
     hostConn.on("close", () => {
-      if (!gameState.coinsAwarded && (gameState.mode === "online_client")) {
+      if (!gameState.rewardsAwarded && (gameState.mode === "online_client")) {
         showToast("Host disconnected. Awarding current standing...");
         concludeMatch();
       } else {
@@ -3042,6 +3250,11 @@ function handleHostReceive(conn, data) {
     if (!gameState.preRoundBuffs[data.playerId]) gameState.preRoundBuffs[data.playerId] = {};
     Object.assign(gameState.preRoundBuffs[data.playerId], data.buffs || { [data.powerup]: true });
     const sender = gameState.players.find(p => p.id === data.playerId);
+    if (sender && data.powerup === "juggernaut" && gameState.round === 1) {
+      sender.lives = 5;
+      sender.maxLives = 5;
+      sender.hasJuggernaut = true;
+    }
     const senderName = sender ? sender.name : "Opponent";
     if (data.targetId === myPeerOrLocalId()) {
       triggerOpponentPowerupNotification(senderName, data.powerup);
@@ -3098,13 +3311,23 @@ function handleClientReceive(data) {
     gameState.players = data.players;
     gameState.currentPairings = data.pairings;
     gameState.myAnswer = null;
-    gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false };
+    gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false };
     gameState.preRoundBuffs = {};
     showPreRoundVSScreen();
   } else if (data.type === "OPPONENT_USED_POWERUP") {
     if (data.fromId) {
       if (!gameState.preRoundBuffs[data.fromId]) gameState.preRoundBuffs[data.fromId] = {};
       Object.assign(gameState.preRoundBuffs[data.fromId], data.buffs || { [data.powerup]: true });
+      if (data.powerup === "juggernaut") {
+        const senderPlayer = gameState.players.find(p => p.id === data.fromId);
+        if (senderPlayer) {
+          senderPlayer.lives = 5;
+          senderPlayer.maxLives = 5;
+          senderPlayer.hasJuggernaut = true;
+          document.getElementById("vsRightHearts").textContent = renderHearts(5, 5);
+          document.getElementById("vsRightLivesText").textContent = "5 Lives Left";
+        }
+      }
     }
     triggerOpponentPowerupNotification(data.fromName || "Opponent", data.powerup);
   } else if (data.type === "ROUND_START") {
@@ -3193,9 +3416,13 @@ function hostStartOnlineMatch() {
     isBot: false,
     difficulty: "Human",
     lives: 3,
+    maxLives: 3,
+    hasJuggernaut: false,
     eliminatedRound: null,
     skin: h.skin,
     streak: i === 0 ? (profile.currentStreak || 0) : (h.streak || 0),
+    correctAnswers: 0,
+    lostAnyHeart: false,
     isMe: i === 0
   }));
 
@@ -3221,7 +3448,7 @@ function hostStartOnlineMatch() {
     preRoundBuffs: {},
     roundSubmissions: {},
     myPlacement: null,
-    coinsAwarded: false
+    rewardsAwarded: false
   };
 
   startNextRound();
