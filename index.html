@@ -146,6 +146,43 @@
   }
   input[type="text"]:focus { border-color: var(--accent); }
 
+  /* Answer Streak UI */
+  .longest-streak-title {
+    margin-top: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 0.2px;
+  }
+  .player-name-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    min-width: 0;
+    vertical-align: middle;
+  }
+  .player-name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .streak-flame-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(249, 115, 22, 0.22);
+    border: 1px solid rgba(251, 146, 60, 0.65);
+    color: #fdba74;
+    font-size: 0.78em;
+    font-weight: 800;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   .nav-tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
   .tab-btn {
     background: var(--panel-2);
@@ -278,7 +315,7 @@
     justify-content: space-between;
   }
 
-  /* 5-Second Pre-Question VS Screen */
+  /* 6-Second Pre-Question VS Screen */
   .vs-showcase {
     background: linear-gradient(135deg, rgba(14, 23, 42, 0.95), rgba(26, 35, 58, 0.95));
     border: 1px solid var(--border);
@@ -302,6 +339,7 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
+    min-width: 0;
   }
   .vs-fighter-card.me-card {
     border-color: var(--accent);
@@ -400,9 +438,8 @@
   .fighter-name {
     font-weight: 800;
     font-size: 1.02rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
     max-width: 100%;
   }
   .hearts { letter-spacing: 2px; font-size: 1rem; }
@@ -502,7 +539,7 @@
   /* Scoreboard Table */
   .sb-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
     gap: 8px;
     max-height: 320px;
     overflow-y: auto;
@@ -529,6 +566,7 @@
     background: #1e293b;
     color: var(--muted);
     font-weight: 600;
+    flex-shrink: 0;
   }
   .duel-summary {
     background: #0f172a;
@@ -632,13 +670,14 @@
   <main>
     <!-- HOME / MENU SCREEN -->
     <section id="menuScreen" class="screen active">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
         <div>
           <h2>Enter the 20-Player Trivia Arena</h2>
           <p class="sub" style="margin-bottom:0;">Out-think and out-click 19 opponents in 1v1 sudden-death trivia duels.</p>
         </div>
         <div style="width:220px; max-width:100%;">
           <input type="text" id="playerNameInput" maxlength="16" placeholder="Your Player Name" oninput="savePlayerName()" onchange="savePlayerName()" />
+          <div id="longestStreakMenuDisplay" class="longest-streak-title">Longest Answer Streak: 0</div>
         </div>
       </div>
 
@@ -699,6 +738,7 @@
             <li><b>6-Second Matchup &amp; Power-Up Preview:</b> Before every question, a 6-second VS screen reveals your opponent, both players' remaining lives, and lets you activate Power-Ups for the upcoming duel.</li>
             <li><b>1v1 Pairings:</b> Each round, surviving players face off with a <b>20-second timer</b>. (If an odd number remain, one player receives a Bye).</li>
             <li><b>Winning a Duel:</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives if <b>Double Jeopardy</b> is active).</li>
+            <li><b>Answer Streaks (🔥):</b> Real players who answer 4+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
             <li><b>Ties &amp; Double Misses:</b> If both answer wrong (or time out), <b>both lose 1 life</b>. If both answer right in the exact same time, <b>neither loses a life</b>.</li>
             <li><b>Quick Match &amp; Private Rooms:</b> Click <b>Quick Match</b> to automatically join an open 60-second public lobby (or create one if none are open) to play with random players online, or use a 5-character Room Code for private matches. Bots never spawn as <i>Very Hard</i>, and if the host is eliminated early, the match keeps running so all remaining players can finish!</li>
           </ul>
@@ -791,7 +831,7 @@
         <div class="vs-cards-row">
           <div class="vs-fighter-card me-card">
             <div id="vsLeftTag" style="font-size:0.78rem; color:var(--accent); font-weight:800;">YOU</div>
-            <div id="vsLeftName" style="font-size:1.25rem; font-weight:900;">Player</div>
+            <div id="vsLeftName" style="font-size:1.25rem; font-weight:900; max-width:100%;">Player</div>
             <div id="vsLeftSkin" class="skin-badge skin-default">Rookie</div>
             <div id="vsLeftHearts" class="vs-hearts-large">❤️❤️❤️</div>
             <div id="vsLeftLivesText" style="font-size:0.86rem; color:var(--muted); font-weight:700;">3 Lives Left</div>
@@ -801,7 +841,7 @@
 
           <div class="vs-fighter-card opp-card">
             <div id="vsRightTag" style="font-size:0.78rem; color:var(--orange); font-weight:800;">OPPONENT</div>
-            <div id="vsRightName" style="font-size:1.25rem; font-weight:900;">Bot</div>
+            <div id="vsRightName" style="font-size:1.25rem; font-weight:900; max-width:100%;">Bot</div>
             <div id="vsRightDiff" class="diff-tag" style="font-size:0.8rem;">Medium</div>
             <div id="vsRightHearts" class="vs-hearts-large">❤️❤️❤️</div>
             <div id="vsRightLivesText" style="font-size:0.86rem; color:var(--muted); font-weight:700;">3 Lives Left</div>
@@ -1421,15 +1461,41 @@ let profile = {
   coins: 250,
   inventory: { revive: 0, fiftyFifty: 0, freeze: 0, shield: 0, heartBargain: 0, doubleJeopardy: 0 },
   unlockedSkins: ["default"],
-  equippedSkin: "default"
+  equippedSkin: "default",
+  currentStreak: 0,
+  longestStreak: 0
 };
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatPlayerNameHTML(player) {
+  const safeName = escapeHtml(player?.name || "Player");
+  const streak = (!player?.isBot && typeof player?.streak === "number") ? player.streak : 0;
+  if (streak >= 4) {
+    return `<span class="player-name-wrap"><span class="player-name-text">${safeName}</span><span class="streak-flame-badge">🔥 ${streak}</span></span>`;
+  }
+  return `<span class="player-name-wrap"><span class="player-name-text">${safeName}</span></span>`;
+}
 
 function loadProfile() {
   try {
     const raw = localStorage.getItem("triviaRoyale20_save");
     if (raw) {
       const parsed = JSON.parse(raw);
-      profile = { ...profile, ...parsed, inventory: { ...profile.inventory, ...(parsed.inventory || {}) } };
+      profile = {
+        ...profile,
+        ...parsed,
+        inventory: { ...profile.inventory, ...(parsed.inventory || {}) },
+        currentStreak: Number(parsed.currentStreak) || 0,
+        longestStreak: Number(parsed.longestStreak) || 0
+      };
     }
   } catch (e) {}
   document.getElementById("playerNameInput").value = profile.name;
@@ -1454,6 +1520,14 @@ function updateHeaderHUD() {
   const badge = document.getElementById("activeSkinDisplay");
   badge.className = `skin-badge ${skin.css}`;
   badge.textContent = skin.name;
+
+  const longestEl = document.getElementById("longestStreakMenuDisplay");
+  if (longestEl) {
+    const best = profile.longestStreak || 0;
+    longestEl.textContent = best >= 4
+      ? `Longest Answer Streak: 🔥 ${best}`
+      : `Longest Answer Streak: ${best}`;
+  }
 }
 
 function showToast(msg) {
@@ -1607,7 +1681,7 @@ let gameState = {
   mode: "single", // "single" | "superhard" | "online_host" | "online_client"
   superHard: false,
   round: 0,
-  players: [], // { id, name, isBot, difficulty, lives, eliminatedRound, skin, isMe }
+  players: [], // { id, name, isBot, difficulty, lives, eliminatedRound, skin, streak, isMe }
   usedQuestionIndices: new Set(),
   currentQuestion: null,
   currentPairings: [],
@@ -1653,6 +1727,7 @@ function generateBots(count, modeType) {
       lives: 3,
       eliminatedRound: null,
       skin: "default",
+      streak: 0,
       isMe: false
     });
   }
@@ -1669,6 +1744,7 @@ function startSinglePlayer(isSuperHard) {
     lives: 3,
     eliminatedRound: null,
     skin: profile.equippedSkin,
+    streak: profile.currentStreak || 0,
     isMe: true
   };
   const bots = generateBots(19, isSuperHard ? "superhard" : "normal");
@@ -1824,7 +1900,7 @@ function showPreRoundVSScreen() {
 
   // Populate Left Card
   if (leftPlayer) {
-    document.getElementById("vsLeftName").textContent = leftPlayer.name;
+    document.getElementById("vsLeftName").innerHTML = formatPlayerNameHTML(leftPlayer);
     const skinObj = SKIN_ITEMS.find(s => s.id === leftPlayer.skin) || SKIN_ITEMS[0];
     const leftSkinEl = document.getElementById("vsLeftSkin");
     leftSkinEl.className = `skin-badge ${skinObj.css}`;
@@ -1836,7 +1912,7 @@ function showPreRoundVSScreen() {
   // Populate Right Card
   if (rightPlayer) {
     document.getElementById("vsRightTag").textContent = isSpectating ? "SURVIVOR 2" : "OPPONENT";
-    document.getElementById("vsRightName").textContent = rightPlayer.name;
+    document.getElementById("vsRightName").innerHTML = formatPlayerNameHTML(rightPlayer);
     document.getElementById("vsRightDiff").textContent = rightPlayer.isBot ? `Bot • ${rightPlayer.difficulty}` : "Human Player";
     document.getElementById("vsRightHearts").textContent = renderHearts(rightPlayer.lives);
     document.getElementById("vsRightLivesText").textContent = `${rightPlayer.lives} ${rightPlayer.lives === 1 ? "Life" : "Lives"} Left`;
@@ -2057,13 +2133,13 @@ function setupRoundUI() {
   }
 
   if (leftFighter) {
-    document.getElementById("myArenaName").textContent = leftFighter.name;
+    document.getElementById("myArenaName").innerHTML = formatPlayerNameHTML(leftFighter);
     document.getElementById("myArenaHearts").textContent = renderHearts(leftFighter.lives);
   }
   document.getElementById("roundIndicator").textContent = `ROUND ${gameState.round} • VS`;
 
   if (rightFighter) {
-    document.getElementById("oppArenaName").textContent = rightFighter.name;
+    document.getElementById("oppArenaName").innerHTML = formatPlayerNameHTML(rightFighter);
     document.getElementById("oppArenaDiff").textContent = rightFighter.isBot ? `BOT (${rightFighter.difficulty.toUpperCase()})` : "ONLINE PLAYER";
     document.getElementById("oppArenaHearts").textContent = renderHearts(rightFighter.lives);
   } else {
@@ -2272,10 +2348,23 @@ function resolveRound() {
       }
     }
 
-    // Heart Bargain: Gain back 1 heart (up to max 3) if you answered correctly and beat your opponent
+    // Did player answer right and before their opponent?
     const beatOppA = rightA && (!rightB || timeA < timeB);
     const beatOppB = rightB && (!rightA || timeB < timeA);
 
+    // Update Answer Streak for real players only (bots excluded)
+    if (!pA.isBot) {
+      pA.streak = beatOppA ? ((pA.streak || 0) + 1) : 0;
+    } else {
+      pA.streak = 0;
+    }
+    if (!pB.isBot) {
+      pB.streak = beatOppB ? ((pB.streak || 0) + 1) : 0;
+    } else {
+      pB.streak = 0;
+    }
+
+    // Heart Bargain: Gain back 1 heart (up to max 3) if you answered correctly and beat your opponent
     if (beatOppA && buffsA.heartBargain) {
       const before = pA.lives;
       pA.lives = Math.min(3, pA.lives + 1);
@@ -2298,6 +2387,17 @@ function resolveRound() {
   });
 
   duelLogs["_spectator"] = generalLog;
+
+  // Persist local player's streak & longest streak
+  const myId = myPeerOrLocalId();
+  const me = gameState.players.find(p => p.id === myId);
+  if (me && !me.isBot) {
+    profile.currentStreak = me.streak || 0;
+    if (profile.currentStreak > (profile.longestStreak || 0)) {
+      profile.longestStreak = profile.currentStreak;
+    }
+    saveProfile();
+  }
 
   if (gameState.mode === "online_host") {
     broadcastOnline({
@@ -2356,7 +2456,7 @@ function renderScoreboard(duelLogs) {
       nextBtn.disabled = false;
       nextBtn.textContent = "View Final Results ➔";
     } else if (gameState.mode === "online_host") {
-      // CRITICAL FIX: Host was eliminated, but online match continues for surviving players!
+      // Host was eliminated, but online match continues for surviving players
       specBanner.style.display = "flex";
       document.getElementById("sbSpecPlacement").textContent = gameState.myPlacement;
       nextBtn.disabled = false;
@@ -2404,10 +2504,10 @@ function renderScoreboard(duelLogs) {
     item.className = `sb-item ${p.id === myId ? "me" : ""} ${p.lives === 0 ? "dead" : ""}`;
     const diffLabel = p.isBot ? `<span class="diff-tag">${p.difficulty}</span>` : `<span class="diff-tag" style="color:var(--accent);">Human</span>`;
     item.innerHTML = `
-      <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-        <b>${p.name}</b> ${diffLabel}
+      <div style="display:flex; align-items:center; gap:5px; min-width:0; flex:1;">
+        <b style="min-width:0; display:inline-flex; max-width:100%;">${formatPlayerNameHTML(p)}</b> ${diffLabel}
       </div>
-      <div>${p.lives > 0 ? renderHearts(p.lives) : "💀"}</div>
+      <div style="flex-shrink:0;">${p.lives > 0 ? renderHearts(p.lives) : "💀"}</div>
     `;
     listEl.appendChild(item);
   });
@@ -2666,7 +2766,8 @@ function probePublicSlot(slotNum) {
       type: "JOIN_PUBLIC_HELLO",
       id: probePeer.id,
       name: profile.name || "Player",
-      skin: profile.equippedSkin
+      skin: profile.equippedSkin,
+      streak: profile.currentStreak || 0
     });
   });
 
@@ -2886,7 +2987,8 @@ function joinOnlineRoom() {
         type: "JOIN_HELLO",
         id: peer.id,
         name: profile.name || "Player",
-        skin: profile.equippedSkin
+        skin: profile.equippedSkin,
+        streak: profile.currentStreak || 0
       });
     });
     hostConn.on("data", data => handleClientReceive(data));
@@ -2913,7 +3015,7 @@ function handleHostReceive(conn, data) {
       setTimeout(() => { try { conn.close(); } catch (e) {} }, 250);
       return;
     }
-    clientConns.push({ conn, id: data.id, name: data.name, skin: data.skin });
+    clientConns.push({ conn, id: data.id, name: data.name, skin: data.skin, streak: Number(data.streak) || 0 });
     updateOnlineWaitingList();
     const remSec = Math.max(1, (publicLobbyEndsAt - performance.now()) / 1000);
     conn.send({
@@ -2933,7 +3035,7 @@ function handleHostReceive(conn, data) {
     }
   } else if (data.type === "JOIN_HELLO") {
     if (gameState.mode === "online_host" || clientConns.length >= 19) return;
-    clientConns.push({ conn, id: data.id, name: data.name, skin: data.skin });
+    clientConns.push({ conn, id: data.id, name: data.name, skin: data.skin, streak: Number(data.streak) || 0 });
     updateOnlineWaitingList();
     broadcastLobbyState();
   } else if (data.type === "USE_VS_POWERUP") {
@@ -3018,6 +3120,18 @@ function handleClientReceive(data) {
   } else if (data.type === "ROUND_RESULT") {
     clearAllTimers();
     gameState.players = data.players;
+
+    // Sync local client's persistent streak stats from host round resolution
+    const myId = myPeerOrLocalId();
+    const me = (data.players || []).find(p => p.id === myId);
+    if (me && !me.isBot && typeof me.streak === "number") {
+      profile.currentStreak = me.streak;
+      if (profile.currentStreak > (profile.longestStreak || 0)) {
+        profile.longestStreak = profile.currentStreak;
+      }
+      saveProfile();
+    }
+
     renderScoreboard(data.duelLogs);
   } else if (data.type === "MATCH_OVER") {
     clearAllTimers();
@@ -3037,8 +3151,8 @@ function sendToHost(payload) {
 }
 
 function getLobbyHumansList() {
-  const list = [{ id: peer.id, name: profile.name || "Host", skin: profile.equippedSkin }];
-  clientConns.forEach(c => list.push({ id: c.id, name: c.name, skin: c.skin }));
+  const list = [{ id: peer.id, name: profile.name || "Host", skin: profile.equippedSkin, streak: profile.currentStreak || 0 }];
+  clientConns.forEach(c => list.push({ id: c.id, name: c.name, skin: c.skin, streak: c.streak || 0 }));
   return list;
 }
 
@@ -3061,7 +3175,8 @@ function renderLobbyHumans(humans) {
   humans.forEach((h, idx) => {
     const div = document.createElement("div");
     div.className = "sb-item me";
-    div.innerHTML = `<b>${h.name}</b> <span class="diff-tag">${idx === 0 ? "HOST" : "PLAYER"}</span>`;
+    const nameHtml = formatPlayerNameHTML({ name: h.name, isBot: false, streak: h.streak || 0 });
+    div.innerHTML = `<b style="min-width:0; display:inline-flex; max-width:100%;">${nameHtml}</b> <span class="diff-tag">${idx === 0 ? "HOST" : "PLAYER"}</span>`;
     box.appendChild(div);
   });
 }
@@ -3080,6 +3195,7 @@ function hostStartOnlineMatch() {
     lives: 3,
     eliminatedRound: null,
     skin: h.skin,
+    streak: i === 0 ? (profile.currentStreak || 0) : (h.streak || 0),
     isMe: i === 0
   }));
 
