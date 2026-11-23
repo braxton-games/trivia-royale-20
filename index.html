@@ -1760,12 +1760,12 @@ function generateBots(count, modeType) {
     jugBot.hasJuggernaut = true;
   }
 
-  // Independent 2% chance each for a bot to spawn with Ironclad, Buzzer Beater, Last Stand, or Lucky Draw
+  // Independent 5% chance each for a bot to spawn with Ironclad, Buzzer Beater, Last Stand, or Lucky Draw
   // (at most 1 bot can receive each specific ability)
   const BOT_PASSIVE_POOL = ["ironclad", "buzzerBeater", "lastStand", "luckyDraw"];
   if (bots.length > 0) {
     BOT_PASSIVE_POOL.forEach(passiveId => {
-      if (Math.random() < 0.92) {
+      if (Math.random() < 0.05) {
         const chosenBot = bots[Math.floor(Math.random() * bots.length)];
         if (!chosenBot.passives.includes(passiveId)) {
           chosenBot.passives.push(passiveId);
