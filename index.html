@@ -2350,12 +2350,24 @@ function setupRoundUI() {
   }, 60);
 }
 
+const LAST_STAND_BOT_ACCURACY = {
+  "Very Very Easy": 0.70,
+  "Very Easy":      0.75,
+  "Easy":           0.80,
+  "Medium":         0.85,
+  "Hard":           0.90
+};
+
 function simulateBotsForRound() {
   const q = gameState.currentQuestion;
   gameState.players.forEach(p => {
     if (!p.isBot || p.lives <= 0) return;
     const spec = p.diffSpec || DIFFICULTIES.find(d => d.key === p.difficulty) || DIFFICULTIES[2];
-    const isCorrect = Math.random() < spec.accuracy;
+    let effectiveAccuracy = spec.accuracy;
+    if (hasPassive(p, "lastStand") && p.lives === 1 && LAST_STAND_BOT_ACCURACY[spec.key] !== undefined) {
+      effectiveAccuracy = Math.max(effectiveAccuracy, LAST_STAND_BOT_ACCURACY[spec.key]);
+    }
+    const isCorrect = Math.random() < effectiveAccuracy;
     let choice = q.a;
     if (!isCorrect) {
       const wrongs = [0, 1, 2, 3].filter(i => i !== q.a);
