@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Trivia Royale 20 — Battle Royale Trivia</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="questions.js"></script>
 <style>
   :root {
     --bg: #0b0f19;
@@ -176,13 +177,13 @@
     color: var(--text);
     padding: 10px 12px;
     border-radius: 10px;
-    font-size: 16px; /* Prevents iOS Safari auto-zoom on focus */
+    font-size: 16px;
     width: 100%;
     outline: none;
   }
   input[type="text"]:focus { border-color: var(--accent); }
 
-  /* Answer Streak UI */
+  /* Answer Streak & Passive Ability Badges */
   .longest-streak-title {
     margin-top: 6px;
     font-size: 0.82rem;
@@ -218,6 +219,34 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
+  .vs-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 100%;
+  }
+  .passive-inline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(168, 85, 247, 0.22);
+    border: 1px solid rgba(192, 132, 252, 0.6);
+    color: #e9d5ff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .sb-passive-sub {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #d8b4fe;
+    margin-top: 2px;
+    line-height: 1.25;
+  }
 
   .nav-tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
   .tab-btn {
@@ -232,6 +261,31 @@
     touch-action: manipulation;
   }
   .tab-btn.active { background: var(--accent); color: #090d16; border-color: var(--accent); }
+
+  .shop-subtabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+  .shop-subtab-btn {
+    background: #111827;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.84rem;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .shop-subtab-btn.active {
+    background: linear-gradient(135deg, #a855f7, #38bdf8);
+    color: #090d16;
+    border-color: transparent;
+  }
 
   /* Skin Preview */
   .skin-badge {
@@ -575,7 +629,7 @@
   /* Scoreboard Table */
   .sb-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
     gap: 8px;
     max-height: 320px;
     overflow-y: auto;
@@ -698,7 +752,7 @@
     </div>
     <div class="hud-stats">
       <div id="activeSkinDisplay" class="skin-badge skin-default">Rookie</div>
-      <div class="pill xp" title="Earn 1,000 XP to level up and unlock Prestige Skins!">⭐ Lv. <span id="levelCount">0</span> <span style="opacity:0.8; font-size:0.78rem;">(<span id="xpCount">0</span>/1,000 XP)</span></div>
+      <div class="pill xp" title="Level up to unlock Prestige Skins!">⭐ Lv. <span id="levelCount">0</span> <span style="opacity:0.8; font-size:0.78rem;">(<span id="xpCount">0</span>/<span id="xpNeededCount">250</span> XP)</span></div>
       <div class="pill coins">🪙 <span id="coinCount">0</span></div>
       <button class="btn secondary small" onclick="returnHomeConfirm()">Home</button>
     </div>
@@ -758,13 +812,32 @@
 
       <!-- SHOP TAB -->
       <div id="shopTab" class="home-tab" style="display:none;">
-        <h3 style="margin-bottom:10px;">⚡ Battle Power-Ups (Consumables)</h3>
-        <div class="grid-3" id="powerupShopGrid" style="margin-bottom:20px;"></div>
+        <div class="shop-subtabs">
+          <button class="shop-subtab-btn active" onclick="switchShopSubTab('consumablesSubTab', this)">⚡ Consumable Power-Ups</button>
+          <button class="shop-subtab-btn" onclick="switchShopSubTab('passivesSubTab', this)">🔮 Passive Abilities</button>
+          <button class="shop-subtab-btn" onclick="switchShopSubTab('skinsSubTab', this)">✨ Prestige Skins</button>
+        </div>
 
-        <h3 style="margin-bottom:4px;">✨ Prestige Skins (Level-Unlocked Cosmetic Badges)</h3>
-        <p class="sub" style="margin-bottom:10px;">Automatically unlock as you earn XP and level up (1,000 XP per level).</p>
-        <div class="theme-filter-bar" id="skinThemeFilters"></div>
-        <div id="skinShopContainer"></div>
+        <div id="consumablesSubTab" class="shop-subtab">
+          <h3 style="margin-bottom:10px;">⚡ Battle Power-Ups (Consumables)</h3>
+          <div class="grid-3" id="powerupShopGrid" style="margin-bottom:12px;"></div>
+        </div>
+
+        <div id="passivesSubTab" class="shop-subtab" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+            <h3 style="margin:0;">🔮 Passive Abilities (Permanent Unlocks)</h3>
+            <span id="equippedPassiveStatusBadge" class="pill" style="color:#d8b4fe; border-color:rgba(192,132,252,0.5);">Equipped: None (0/1)</span>
+          </div>
+          <p class="sub" style="margin-bottom:12px;">Non-consumable abilities unlocked permanently with coins. Equip 1 at a time (or 2 with <b>Dual Wielding</b>).</p>
+          <div class="grid-3" id="passiveShopGrid" style="margin-bottom:12px;"></div>
+        </div>
+
+        <div id="skinsSubTab" class="shop-subtab" style="display:none;">
+          <h3 style="margin-bottom:4px;">✨ Prestige Skins (Level-Unlocked Cosmetic Badges)</h3>
+          <p class="sub" style="margin-bottom:10px;">Automatically unlock as you earn XP and level up.</p>
+          <div class="theme-filter-bar" id="skinThemeFilters"></div>
+          <div id="skinShopContainer"></div>
+        </div>
       </div>
 
       <!-- RULES TAB -->
@@ -773,14 +846,14 @@
           <h3>How Trivia Royale 20 Works</h3>
           <ul style="padding-left:20px; line-height:1.65; color:var(--muted); font-size:0.92rem;">
             <li><b>20-Player Lobby:</b> Every match has 20 total combatants. Every player/bot starts with <b>3 lives (❤️❤️❤️)</b>.</li>
-            <li><b>6-Second Matchup &amp; Power-Up Preview:</b> Before every question, a 6-second VS screen reveals your opponent, both players' remaining lives, and lets you activate Power-Ups for the upcoming duel.</li>
+            <li><b>6-Second Matchup &amp; Power-Up Preview:</b> Before every question, a 6-second VS screen reveals your opponent, equipped passive abilities, both players' remaining lives, and lets you activate Consumable Power-Ups for the upcoming duel.</li>
             <li><b>1v1 Pairings:</b> Each round, surviving players face off with a <b>20-second timer</b>. (If an odd number remain, one player receives a Bye).</li>
-            <li><b>Winning a Duel:</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives if <b>Double Jeopardy</b> is active).</li>
+            <li><b>Winning a Duel:</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives with <b>Double Jeopardy</b> or <b>Buzzer Beater</b>).</li>
+            <li><b>Passive Abilities (🔮):</b> Permanent non-consumable perks bought in the Shop. Equip 1 at a time (or 2 with <b>Dual Wielding</b>). Bots also have a 2% independent chance each to spawn with <i>Ironclad</i>, <i>Buzzer Beater</i>, <i>Last Stand</i>, or <i>Lucky Draw</i> (max 1 bot per ability).</li>
             <li><b>Answer Streaks (🔥):</b> Real players who answer 4+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
-            <li><b>Ties &amp; Double Misses:</b> If both answer wrong (or time out), <b>both lose 1 life</b>. If both answer right in the exact same time, <b>neither loses a life</b>.</li>
-            <li><b>XP, Levels &amp; Skin Unlocks:</b> Everyone starts at <b>Level 0 (0 XP)</b>. Earn <b>+1 XP</b> per correct answer plus placement bonuses: <b>Top 10 (+5 XP)</b>, <b>Top 7 (+10 XP)</b>, <b>Top 5 (+20 XP)</b>, <b>Top 3 (+40 XP)</b>, <b>2nd (+60 XP)</b>, <b>1st (+80 XP)</b>, or <b>Undefeated 1st without losing a heart (+150 XP)</b>. Every <b>1,000 XP</b> advances you +1 Level (resetting XP to 0) and automatically unlocks new Prestige Skins!</li>
-            <li><b>Juggernaut Power-Up (🦾):</b> Costs <b>3,000 🪙</b> and can <b>only</b> be activated on the Round 1 VS screen before Question 1 to start the match with <b>5 ❤️</b> instead of 3 ❤️. Each game, there is a 3% chance a random bot spawns with Juggernaut.</li>
-            <li><b>Quick Match &amp; Private Rooms:</b> Click <b>Quick Match</b> to automatically join an open 60-second public lobby (or create one if none are open) to play with random players online, or use a 5-character Room Code for private matches. Bots never spawn as <i>Very Hard</i>, and if the host is eliminated early, the match keeps running so all remaining players can finish!</li>
+            <li><b>Ties &amp; Double Misses:</b> If both answer wrong (or time out), <b>both lose 1 life</b>. If both answer right in the exact same time, <b>neither loses a life</b> (and <b>Lucky Draw</b> grants +1 ❤️!).</li>
+            <li><b>XP, Levels &amp; Skin Unlocks:</b> Everyone starts at <b>Level 0 (0 XP)</b>. Earn <b>+1 XP</b> per correct answer plus placement bonuses: <b>Top 10 (+5 XP)</b>, <b>Top 7 (+10 XP)</b>, <b>Top 5 (+20 XP)</b>, <b>Top 3 (+40 XP)</b>, <b>2nd (+60 XP)</b>, <b>1st (+80 XP)</b>, or <b>Undefeated 1st (+150 XP)</b>. Leveling requires <b>250 XP</b> (Lv 0→1), <b>500 XP</b> per level (Lv 1–5), <b>750 XP</b> per level (Lv 5–10), and <b>1,000 XP</b> per level from Lv 10 onward.</li>
+            <li><b>Juggernaut &amp; Bot Power-Ups:</b> <b>Juggernaut</b> (3,000 🪙) can only be activated on the Round 1 VS screen to start with <b>5 ❤️</b> (3% chance a bot spawns with it). Bots also have a 3% chance per duel to activate <i>Double Jeopardy</i>, <i>Heart Bargain</i>, or <i>Aegis Life Shield</i>.</li>
           </ul>
         </div>
       </div>
@@ -865,13 +938,16 @@
 
         <div id="vsOpponentPowerupAlert" class="opp-pu-alert" style="display:none;"></div>
 
-        <h2 id="vsHeaderTitle" style="margin-top:6px;">Next Duel Starting Soon!</h2>
+        <h2 id="vsHeaderTitle" style="margin-top:6px;">Your Next Opponent</h2>
         <p class="sub" style="margin-bottom:8px;">Activate Power-Ups now before the question starts!</p>
 
         <div class="vs-cards-row">
           <div class="vs-fighter-card me-card">
             <div id="vsLeftTag" style="font-size:0.78rem; color:var(--accent); font-weight:800;">YOU</div>
-            <div id="vsLeftName" style="font-size:1.25rem; font-weight:900; max-width:100%;">Player</div>
+            <div class="vs-name-row">
+              <div id="vsLeftName" style="font-size:1.25rem; font-weight:900; max-width:100%;">Player</div>
+              <span id="vsLeftPassiveBadge" class="passive-inline-badge" style="display:none;"></span>
+            </div>
             <div id="vsLeftSkin" class="skin-badge skin-default">Rookie</div>
             <div id="vsLeftHearts" class="vs-hearts-large">❤️❤️❤️</div>
             <div id="vsLeftLivesText" style="font-size:0.86rem; color:var(--muted); font-weight:700;">3 Lives Left</div>
@@ -881,7 +957,10 @@
 
           <div class="vs-fighter-card opp-card">
             <div id="vsRightTag" style="font-size:0.78rem; color:var(--orange); font-weight:800;">OPPONENT</div>
-            <div id="vsRightName" style="font-size:1.25rem; font-weight:900; max-width:100%;">Bot</div>
+            <div class="vs-name-row">
+              <div id="vsRightName" style="font-size:1.25rem; font-weight:900; max-width:100%;">Bot</div>
+              <span id="vsRightPassiveBadge" class="passive-inline-badge" style="display:none;"></span>
+            </div>
             <div id="vsRightDiff" class="diff-tag" style="font-size:0.8rem;">Medium</div>
             <div id="vsRightHearts" class="vs-hearts-large">❤️❤️❤️</div>
             <div id="vsRightLivesText" style="font-size:0.86rem; color:var(--muted); font-weight:700;">3 Lives Left</div>
@@ -1015,7 +1094,7 @@
         <div class="xp-progress-wrap">
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.86rem; font-weight:800;">
             <span style="color:#c084fc;">Level <span id="endLevelNum">0</span></span>
-            <span style="color:var(--muted);"><span id="endXpNum">0</span> / 1,000 XP</span>
+            <span style="color:var(--muted);"><span id="endXpNum">0</span> / <span id="endXpNeededNum">250</span> XP</span>
           </div>
           <div class="xp-bar-track">
             <div id="endXpBarFill" class="xp-bar-fill" style="width:0%;"></div>
@@ -1032,373 +1111,7 @@
 </div>
 
 <div id="toast" class="toast"></div>
-
 <script>
-// ==================== QUESTION BANK ====================
-const QUESTIONS = [
-  {"c": "Science", "q": "What is the chemical symbol for gold?", "opts": ["Au", "Ag", "Gd", "Go"], "a": 0},
-  {"c": "Science", "q": "Which planet has the most moons in our solar system?", "opts": ["Jupiter", "Saturn", "Uranus", "Neptune"], "a": 1},
-  {"c": "Science", "q": "What is the powerhouse of the cell?", "opts": ["Ribosome", "Nucleus", "Mitochondria", "Golgi apparatus"], "a": 2},
-  {"c": "Science", "q": "What gas do plants absorb from the atmosphere during photosynthesis?", "opts": ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], "a": 2},
-  {"c": "Science", "q": "What is the speed of light in a vacuum approximately?", "opts": ["300,000 km/s", "150,000 km/s", "30,000 km/s", "3,000 km/s"], "a": 0},
-  {"c": "Science", "q": "Which element has the atomic number 1?", "opts": ["Helium", "Oxygen", "Hydrogen", "Carbon"], "a": 2},
-  {"c": "Science", "q": "What type of rock is formed from cooled lava or magma?", "opts": ["Sedimentary", "Metamorphic", "Igneous", "Limestone"], "a": 2},
-  {"c": "Science", "q": "How many bones are in the adult human body?", "opts": ["206", "212", "198", "224"], "a": 0},
-  {"c": "Science", "q": "What is the hardest natural substance on Earth?", "opts": ["Quartz", "Titanium", "Diamond", "Obsidian"], "a": 2},
-  {"c": "Science", "q": "Which organ produces insulin in the human body?", "opts": ["Liver", "Pancreas", "Kidney", "Spleen"], "a": 1},
-  {"c": "Science", "q": "What is absolute zero in Celsius?", "opts": ["-100°C", "-273.15°C", "-459.67°C", "0°C"], "a": 1},
-  {"c": "Science", "q": "Which blood type is known as the universal donor?", "opts": ["AB+", "A-", "O-", "O+"], "a": 2},
-  {"c": "Science", "q": "What is the most abundant gas in Earth's atmosphere?", "opts": ["Oxygen", "Nitrogen", "Carbon Dioxide", "Argon"], "a": 1},
-  {"c": "Science", "q": "Which planet is the hottest in our solar system?", "opts": ["Mercury", "Venus", "Mars", "Jupiter"], "a": 1},
-  {"c": "Science", "q": "What is the chemical symbol for potassium?", "opts": ["P", "Pt", "K", "Po"], "a": 2},
-  {"c": "Science", "q": "What colored part of the eye controls the size of the pupil?", "opts": ["Cornea", "Retina", "Iris", "Lens"], "a": 2},
-  {"c": "Science", "q": "What force keeps planets in orbit around the Sun?", "opts": ["Magnetism", "Gravity", "Friction", "Inertia"], "a": 1},
-  {"c": "Science", "q": "What is the pH value of pure water at room temperature?", "opts": ["5", "7", "9", "14"], "a": 1},
-  {"c": "Science", "q": "Which subatomic particle carries a negative electrical charge?", "opts": ["Proton", "Neutron", "Electron", "Positron"], "a": 2},
-  {"c": "Science", "q": "What is the process of a solid turning directly into a gas called?", "opts": ["Condensation", "Sublimation", "Evaporation", "Deposition"], "a": 1},
-  {"c": "Geography", "q": "What is the capital city of Australia?", "opts": ["Sydney", "Melbourne", "Canberra", "Perth"], "a": 2},
-  {"c": "Geography", "q": "Which river is the longest in the world?", "opts": ["Amazon", "Nile", "Yangtze", "Mississippi"], "a": 1},
-  {"c": "Geography", "q": "Which country has the largest land area in the world?", "opts": ["Canada", "China", "United States", "Russia"], "a": 3},
-  {"c": "Geography", "q": "Mount Kilimanjaro is located in which country?", "opts": ["Kenya", "Tanzania", "Uganda", "Ethiopia"], "a": 1},
-  {"c": "Geography", "q": "What is the smallest country in the world by land area?", "opts": ["Monaco", "San Marino", "Vatican City", "Liechtenstein"], "a": 2},
-  {"c": "Geography", "q": "Which desert is the largest hot desert in the world?", "opts": ["Gobi", "Sahara", "Arabian", "Mojave"], "a": 1},
-  {"c": "Geography", "q": "What is the capital of Canada?", "opts": ["Toronto", "Vancouver", "Montreal", "Ottawa"], "a": 3},
-  {"c": "Geography", "q": "Which strait separates Asia from North America?", "opts": ["Strait of Gibraltar", "Bering Strait", "Strait of Malacca", "Bass Strait"], "a": 1},
-  {"c": "Geography", "q": "In which ocean is the Mariana Trench located?", "opts": ["Atlantic Ocean", "Indian Ocean", "Pacific Ocean", "Arctic Ocean"], "a": 2},
-  {"c": "Geography", "q": "What is the capital of Japan?", "opts": ["Kyoto", "Osaka", "Tokyo", "Hiroshima"], "a": 2},
-  {"c": "Geography", "q": "Which European country is shaped like a boot?", "opts": ["Spain", "Greece", "Italy", "Portugal"], "a": 2},
-  {"c": "Geography", "q": "What is the longest mountain range above sea level?", "opts": ["Himalayas", "Rockies", "Andes", "Alps"], "a": 2},
-  {"c": "Geography", "q": "Which country has the most natural lakes in the world?", "opts": ["United States", "Finland", "Canada", "Russia"], "a": 2},
-  {"c": "Geography", "q": "What is the capital city of Brazil?", "opts": ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"], "a": 2},
-  {"c": "Geography", "q": "Which African country is completely landlocked inside South Africa?", "opts": ["Eswatini", "Lesotho", "Botswana", "Namibia"], "a": 1},
-  {"c": "Geography", "q": "What is the largest island in the world that is not a continent?", "opts": ["Madagascar", "Borneo", "New Guinea", "Greenland"], "a": 3},
-  {"c": "Geography", "q": "Which river flows through the city of London?", "opts": ["River Seine", "River Thames", "River Danube", "River Rhine"], "a": 1},
-  {"c": "Geography", "q": "What is the capital city of South Korea?", "opts": ["Busan", "Incheon", "Seoul", "Daegu"], "a": 2},
-  {"c": "Geography", "q": "Which two continents are connected by the Isthmus of Panama?", "opts": ["Europe and Asia", "North and South America", "Asia and Africa", "Europe and Africa"], "a": 1},
-  {"c": "Geography", "q": "What is the highest mountain peak in North America?", "opts": ["Mount Whitney", "Mount Rainier", "Denali", "Mount Logan"], "a": 2},
-  {"c": "History", "q": "In what year did World War II end?", "opts": ["1943", "1944", "1945", "1946"], "a": 2},
-  {"c": "History", "q": "Who was the first President of the United States?", "opts": ["Thomas Jefferson", "John Adams", "George Washington", "James Madison"], "a": 2},
-  {"c": "History", "q": "Which ancient civilization built Machu Picchu?", "opts": ["Aztec", "Maya", "Inca", "Olmec"], "a": 2},
-  {"c": "History", "q": "In what year did the Titanic sink?", "opts": ["1910", "1912", "1914", "1918"], "a": 1},
-  {"c": "History", "q": "Who was the first human to walk on the Moon?", "opts": ["Buzz Aldrin", "Yuri Gagarin", "Neil Armstrong", "Michael Collins"], "a": 2},
-  {"c": "History", "q": "Which wall fell in 1989 symbolizing the end of the Cold War?", "opts": ["Great Wall", "Hadrian's Wall", "Berlin Wall", "Western Wall"], "a": 2},
-  {"c": "History", "q": "Who painted the Mona Lisa?", "opts": ["Michelangelo", "Raphael", "Leonardo da Vinci", "Donatello"], "a": 2},
-  {"c": "History", "q": "Which empire was ruled by Julius Caesar?", "opts": ["Greek Empire", "Roman Republic/Empire", "Ottoman Empire", "Persian Empire"], "a": 1},
-  {"c": "History", "q": "In what year was the Declaration of Independence signed?", "opts": ["1774", "1776", "1778", "1781"], "a": 1},
-  {"c": "History", "q": "Who discovered penicillin in 1928?", "opts": ["Louis Pasteur", "Alexander Fleming", "Marie Curie", "Isaac Newton"], "a": 1},
-  {"c": "History", "q": "Which Egyptian queen was famous for her alliances with Julius Caesar and Mark Antony?", "opts": ["Nefertiti", "Hatshepsut", "Cleopatra", "Nefertari"], "a": 2},
-  {"c": "History", "q": "What was the name of the ship that carried the Pilgrims to America in 1620?", "opts": ["Santa Maria", "Mayflower", "Endeavour", "Victoria"], "a": 1},
-  {"c": "History", "q": "Which of the Seven Wonders of the Ancient World is the only one still standing?", "opts": ["Colossus of Rhodes", "Hanging Gardens of Babylon", "Great Pyramid of Giza", "Lighthouse of Alexandria"], "a": 2},
-  {"c": "History", "q": "Who founded and led the Mongol Empire to become the largest contiguous land empire?", "opts": ["Kublai Khan", "Attila the Hun", "Genghis Khan", "Tamerlane"], "a": 2},
-  {"c": "History", "q": "In what year was construction of the Berlin Wall begun?", "opts": ["1955", "1961", "1968", "1972"], "a": 1},
-  {"c": "History", "q": "What was the name of the ship on which Charles Darwin sailed to the Galápagos Islands?", "opts": ["HMS Victory", "HMS Beagle", "HMS Endeavour", "HMS Bounty"], "a": 1},
-  {"c": "History", "q": "Who served as Prime Minister of the United Kingdom for most of World War II?", "opts": ["Neville Chamberlain", "Clement Attlee", "Winston Churchill", "Anthony Eden"], "a": 2},
-  {"c": "History", "q": "Which ancient Mesopotamian civilization developed cuneiform writing?", "opts": ["Sumerians", "Phoenicians", "Hittites", "Minoans"], "a": 0},
-  {"c": "History", "q": "In what year did the Apollo 11 Moon landing take place?", "opts": ["1967", "1968", "1969", "1970"], "a": 2},
-  {"c": "History", "q": "Who was the famous female pharaoh who ruled Egypt during the 18th Dynasty?", "opts": ["Cleopatra", "Hatshepsut", "Nefertiti", "Ankhesenamun"], "a": 1},
-  {"c": "Pop Culture", "q": "Which movie features the character Jack Dawson?", "opts": ["Inception", "Titanic", "The Aviator", "Catch Me If You Can"], "a": 1},
-  {"c": "Pop Culture", "q": "Who is the creator of the Star Wars franchise?", "opts": ["Steven Spielberg", "George Lucas", "James Cameron", "Ridley Scott"], "a": 1},
-  {"c": "Pop Culture", "q": "What is the name of Harry Potter's pet owl?", "opts": ["Errol", "Crookshanks", "Hedwig", "Scabbers"], "a": 2},
-  {"c": "Pop Culture", "q": "Which video game series features Master Chief?", "opts": ["Gears of War", "Destiny", "Halo", "Mass Effect"], "a": 2},
-  {"c": "Pop Culture", "q": "What is the highest-grossing film of all time (unadjusted for inflation)?", "opts": ["Avengers: Endgame", "Avatar", "Titanic", "Star Wars: The Force Awakens"], "a": 1},
-  {"c": "Pop Culture", "q": "Which band released the album 'Abbey Road'?", "opts": ["The Rolling Stones", "The Beatles", "Pink Floyd", "Led Zeppelin"], "a": 1},
-  {"c": "Pop Culture", "q": "In 'The Matrix', what color pill does Neo take?", "opts": ["Blue", "Green", "Red", "Yellow"], "a": 2},
-  {"c": "Pop Culture", "q": "What is the name of Mario's brother in Nintendo games?", "opts": ["Wario", "Luigi", "Toad", "Yoshi"], "a": 1},
-  {"c": "Pop Culture", "q": "Which superhero is also known as Bruce Wayne?", "opts": ["Superman", "Iron Man", "Batman", "Spider-Man"], "a": 2},
-  {"c": "Pop Culture", "q": "What fictional continent is 'Game of Thrones' primarily set on?", "opts": ["Essos", "Westeros", "Middle-earth", "Narnia"], "a": 1},
-  {"c": "Pop Culture", "q": "Which actor plays Tony Stark / Iron Man in the Marvel Cinematic Universe?", "opts": ["Chris Evans", "Robert Downey Jr.", "Mark Ruffalo", "Chris Hemsworth"], "a": 1},
-  {"c": "Pop Culture", "q": "What is the name of the town where 'The Simpsons' live?", "opts": ["Quahog", "Springfield", "South Park", "Shelbyville"], "a": 1},
-  {"c": "Pop Culture", "q": "Which streaming platform produced the hit South Korean series 'Squid Game'?", "opts": ["Hulu", "Netflix", "Prime Video", "Disney+"], "a": 1},
-  {"c": "Pop Culture", "q": "Who released the best-selling 1982 album 'Thriller'?", "opts": ["Prince", "Michael Jackson", "Whitney Houston", "Stevie Wonder"], "a": 1},
-  {"c": "Pop Culture", "q": "What is the first name of Batman's loyal butler?", "opts": ["Jarvis", "Alfred", "Winston", "Arthur"], "a": 1},
-  {"c": "Pop Culture", "q": "Which Pixar movie follows a clownfish named Marlin searching for his son?", "opts": ["Shark Tale", "Finding Nemo", "Luca", "The Incredibles"], "a": 1},
-  {"c": "Pop Culture", "q": "In 'Star Wars', what is the name of Han Solo's iconic starship?", "opts": ["Star Destroyer", "X-Wing", "Millennium Falcon", "Slave I"], "a": 2},
-  {"c": "Pop Culture", "q": "Which singer is widely nicknamed the 'Queen of Pop'?", "opts": ["Britney Spears", "Madonna", "Lady Gaga", "Beyoncé"], "a": 1},
-  {"c": "Sports", "q": "How many players are on a standard soccer (football) team on the field?", "opts": ["9", "10", "11", "12"], "a": 2},
-  {"c": "Sports", "q": "In which sport would you perform a slam dunk?", "opts": ["Volleyball", "Basketball", "Tennis", "Handball"], "a": 1},
-  {"c": "Sports", "q": "How many rings are on the Olympic flag?", "opts": ["4", "5", "6", "7"], "a": 1},
-  {"c": "Sports", "q": "Which country won the 2022 FIFA World Cup?", "opts": ["France", "Brazil", "Argentina", "Croatia"], "a": 2},
-  {"c": "Sports", "q": "In baseball, how many strikes make an out?", "opts": ["2", "3", "4", "5"], "a": 1},
-  {"c": "Sports", "q": "What is the maximum break possible in a standard game of snooker?", "opts": ["147", "155", "180", "120"], "a": 0},
-  {"c": "Sports", "q": "Which tennis tournament is played on grass courts?", "opts": ["US Open", "French Open", "Wimbledon", "Australian Open"], "a": 2},
-  {"c": "Sports", "q": "How many points is a touchdown worth in American football?", "opts": ["3", "6", "7", "2"], "a": 1},
-  {"c": "Sports", "q": "How many holes are played in a standard round of golf?", "opts": ["9", "12", "18", "24"], "a": 2},
-  {"c": "Sports", "q": "Which NBA player holds the all-time regular-season career scoring record?", "opts": ["Kareem Abdul-Jabbar", "Michael Jordan", "LeBron James", "Kobe Bryant"], "a": 2},
-  {"c": "Sports", "q": "In bowling, what is it called when you knock down all 10 pins on your first ball?", "opts": ["Spare", "Strike", "Turkey", "Split"], "a": 1},
-  {"c": "Sports", "q": "How many players per team are on an ice hockey rink during standard full-strength play?", "opts": ["5", "6", "7", "8"], "a": 1},
-  {"c": "Sports", "q": "Which country hosted the 2016 Summer Olympic Games?", "opts": ["Japan", "United Kingdom", "Brazil", "China"], "a": 2},
-  {"c": "Sports", "q": "What term is used for a score of zero in tennis?", "opts": ["Nil", "Zero", "Love", "Ace"], "a": 2},
-  {"c": "Sports", "q": "How long is a standard marathon race in miles?", "opts": ["24.2 miles", "26.2 miles", "28.2 miles", "30.0 miles"], "a": 1},
-  {"c": "Sports", "q": "In boxing, how many seconds does a knocked-down fighter have to rise before a knockout?", "opts": ["8", "10", "12", "15"], "a": 1},
-  {"c": "Literature", "q": "Who wrote 'Romeo and Juliet'?", "opts": ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"], "a": 1},
-  {"c": "Literature", "q": "Who is the author of '1984' and 'Animal Farm'?", "opts": ["Aldous Huxley", "George Orwell", "Ray Bradbury", "Ernest Hemingway"], "a": 1},
-  {"c": "Literature", "q": "In 'The Hobbit', what kind of creature is Smaug?", "opts": ["Troll", "Goblin", "Dragon", "Orc"], "a": 2},
-  {"c": "Literature", "q": "Who wrote 'To Kill a Mockingbird'?", "opts": ["Harper Lee", "F. Scott Fitzgerald", "John Steinbeck", "Toni Morrison"], "a": 0},
-  {"c": "Literature", "q": "What is the name of Sherlock Holmes's loyal friend and chronicler?", "opts": ["Dr. Watson", "Inspector Lestrade", "Mycroft", "Moriarty"], "a": 0},
-  {"c": "Literature", "q": "Who wrote 'The Great Gatsby'?", "opts": ["Ernest Hemingway", "F. Scott Fitzgerald", "William Faulkner", "J.D. Salinger"], "a": 1},
-  {"c": "Literature", "q": "Who wrote the 'Harry Potter' book series?", "opts": ["Suzanne Collins", "J.K. Rowling", "Rick Riordan", "Stephenie Meyer"], "a": 1},
-  {"c": "Literature", "q": "Which classic novel opens with the famous line 'Call me Ishmael'?", "opts": ["Treasure Island", "Moby-Dick", "The Old Man and the Sea", "Robinson Crusoe"], "a": 1},
-  {"c": "Literature", "q": "Who wrote 'Pride and Prejudice'?", "opts": ["Emily Brontë", "Charlotte Brontë", "Jane Austen", "Mary Shelley"], "a": 2},
-  {"c": "Literature", "q": "What is the name of the pig who becomes the tyrannical leader in 'Animal Farm'?", "opts": ["Snowball", "Boxer", "Napoleon", "Squealer"], "a": 2},
-  {"c": "Literature", "q": "Who wrote 'The Catcher in the Rye'?", "opts": ["J.D. Salinger", "Kurt Vonnegut", "Jack Kerouac", "Arthur Miller"], "a": 0},
-  {"c": "Literature", "q": "In Homer's 'The Odyssey', what is the name of the hero trying to return home to Ithaca?", "opts": ["Achilles", "Hector", "Odysseus", "Agamemnon"], "a": 2},
-  {"c": "Literature", "q": "Who wrote the gothic novel 'Frankenstein'?", "opts": ["Bram Stoker", "Mary Shelley", "Edgar Allan Poe", "H.G. Wells"], "a": 1},
-  {"c": "Literature", "q": "Which Ray Bradbury novel depicts a future where firemen burn books?", "opts": ["Brave New World", "Fahrenheit 451", "The Giver", "Dune"], "a": 1},
-  {"c": "Tech & Math", "q": "What does 'CPU' stand for?", "opts": ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Core Processing Unit"], "a": 0},
-  {"c": "Tech & Math", "q": "What is the value of Pi to two decimal places?", "opts": ["3.12", "3.14", "3.16", "3.18"], "a": 1},
-  {"c": "Tech & Math", "q": "How many bits are in a byte?", "opts": ["4", "8", "16", "32"], "a": 1},
-  {"c": "Tech & Math", "q": "What is the square root of 144?", "opts": ["10", "11", "12", "14"], "a": 2},
-  {"c": "Tech & Math", "q": "Who co-founded Microsoft alongside Bill Gates?", "opts": ["Steve Jobs", "Paul Allen", "Steve Wozniak", "Larry Ellison"], "a": 1},
-  {"c": "Tech & Math", "q": "What does 'HTTP' stand for?", "opts": ["HyperText Transfer Protocol", "High Tech Transmission Process", "Hyperlink Text Transfer Program", "Host Transfer Text Protocol"], "a": 0},
-  {"c": "Tech & Math", "q": "What is 15% of 200?", "opts": ["20", "25", "30", "35"], "a": 2},
-  {"c": "Tech & Math", "q": "Which programming language is named after a British comedy group?", "opts": ["Java", "Ruby", "Python", "Swift"], "a": 2},
-  {"c": "Tech & Math", "q": "What does 'RAM' stand for in computer hardware?", "opts": ["Read Access Memory", "Random Access Memory", "Rapid Application Module", "Runtime Array Memory"], "a": 1},
-  {"c": "Tech & Math", "q": "What is the only even prime number?", "opts": ["0", "2", "4", "6"], "a": 1},
-  {"c": "Tech & Math", "q": "Who is widely recognized as the world's first computer programmer?", "opts": ["Grace Hopper", "Ada Lovelace", "Alan Turing", "Charles Babbage"], "a": 1},
-  {"c": "Tech & Math", "q": "How is the decimal number 5 written in binary?", "opts": ["100", "101", "110", "111"], "a": 1},
-  {"c": "Tech & Math", "q": "What does 'URL' stand for?", "opts": ["Universal Resource Link", "Uniform Resource Locator", "Unified Routing Language", "User Reference Locator"], "a": 1},
-  {"c": "Tech & Math", "q": "What is the sum of the interior angles of any triangle?", "opts": ["90°", "180°", "270°", "360°"], "a": 1},
-  {"c": "Tech & Math", "q": "Which technology company created the iPhone in 2007?", "opts": ["Samsung", "Nokia", "Apple", "Microsoft"], "a": 2},
-  {"c": "Tech & Math", "q": "What is 2 raised to the 6th power (2⁶)?", "opts": ["32", "48", "64", "128"], "a": 2},
-  {"c": "General", "q": "How many continents are there on Earth?", "opts": ["5", "6", "7", "8"], "a": 2},
-  {"c": "General", "q": "What is the largest mammal in the world?", "opts": ["African Elephant", "Blue Whale", "Giraffe", "Colossal Squid"], "a": 1},
-  {"c": "General", "q": "Which color is NOT a primary color of light (RGB)?", "opts": ["Red", "Green", "Blue", "Yellow"], "a": 3},
-  {"c": "General", "q": "How many days are in a leap year?", "opts": ["364", "365", "366", "367"], "a": 2},
-  {"c": "General", "q": "What is the main ingredient in guacamole?", "opts": ["Tomato", "Avocado", "Lime", "Cucumber"], "a": 1},
-  {"c": "General", "q": "Which animal is known as the 'Ship of the Desert'?", "opts": ["Horse", "Camel", "Llama", "Donkey"], "a": 1},
-  {"c": "General", "q": "How many strings does a standard guitar have?", "opts": ["4", "5", "6", "7"], "a": 2},
-  {"c": "General", "q": "What is the currency of Japan?", "opts": ["Yuan", "Won", "Yen", "Ringgit"], "a": 2},
-  {"c": "General", "q": "Which planet is closest to the Sun?", "opts": ["Venus", "Mars", "Mercury", "Earth"], "a": 2},
-  {"c": "General", "q": "What do bees collect from flowers to make honey?", "opts": ["Pollen", "Nectar", "Sap", "Dew"], "a": 1},
-  {"c": "General", "q": "How many sides does a hexagon have?", "opts": ["5", "6", "7", "8"], "a": 1},
-  {"c": "General", "q": "What is the boiling point of water at sea level in Fahrenheit?", "opts": ["100°F", "180°F", "212°F", "250°F"], "a": 2},
-  {"c": "General", "q": "How many keys are on a standard full-size piano?", "opts": ["76", "82", "88", "92"], "a": 2},
-  {"c": "General", "q": "What is the official language of Brazil?", "opts": ["Spanish", "Portuguese", "French", "English"], "a": 1},
-  {"c": "General", "q": "Which red gemstone is a variety of the mineral corundum?", "opts": ["Emerald", "Sapphire", "Ruby", "Topaz"], "a": 2},
-  {"c": "General", "q": "How many colors are traditionally listed in a rainbow?", "opts": ["5", "6", "7", "8"], "a": 2},
-  {"c": "General", "q": "What is the national bird of the United States?", "opts": ["Peregrine Falcon", "Bald Eagle", "Red-tailed Hawk", "Wild Turkey"], "a": 1},
-  {"c": "General", "q": "Which spice is the most expensive in the world by weight?", "opts": ["Vanilla", "Cardamom", "Saffron", "Cinnamon"], "a": 2},
-  {"c": "General", "q": "What does 'ZIP' stand for in a U.S. ZIP code?", "opts": ["Zone Improvement Plan", "Zero Index Postal", "Zonal Information Protocol", "Zone Identification Post"], "a": 0},
-  {"c": "General", "q": "How many months of the year have 31 days?", "opts": ["5", "6", "7", "8"], "a": 2},
-  {"c": "General", "q": "What is the tallest species of grass in the world?", "opts": ["Sugarcane", "Bamboo", "Pampas Grass", "Wheat"], "a": 1},
-  {"c": "General", "q": "In which cardinal direction does the Sun appear to rise?", "opts": ["North", "South", "East", "West"], "a": 2},
-  {"c": "General", "q": "How many players are on a standard indoor volleyball court per team?", "opts": ["5", "6", "7", "8"], "a": 1},
-  {"c": "General", "q": "What is a group of lions called?", "opts": ["Pack", "Herd", "Pride", "Troop"], "a": 2},
-  {"c": "General", "q": "Which metallic element is liquid at standard room temperature?", "opts": ["Gallium", "Mercury", "Lead", "Zinc"], "a": 1},
-  {"c": "General", "q": "What does a barometer measure?", "opts": ["Wind speed", "Atmospheric pressure", "Humidity", "Rainfall"], "a": 1},
-  {"c": "General", "q": "How many sides does a standard U.S. stop sign have?", "opts": ["6", "7", "8", "10"], "a": 2},
-  {"c": "General", "q": "Which nut is the main ingredient used to make marzipan?", "opts": ["Walnut", "Almond", "Hazelnut", "Pistachio"], "a": 1},
-  {"c": "General", "q": "What is the medical term for an intense fear of spiders?", "opts": ["Claustrophobia", "Acrophobia", "Arachnophobia", "Agoraphobia"], "a": 2},
-  {"c": "General", "q": "How many full weeks are in a standard calendar year?", "opts": ["48", "50", "52", "54"], "a": 2},
-  {"c": "U.S. Presidents", "q": "Who was the only U.S. president to serve more than two terms?", "opts": ["Theodore Roosevelt", "Franklin D. Roosevelt", "Woodrow Wilson", "Harry S. Truman"], "a": 1},
-  {"c": "U.S. Presidents", "q": "Which U.S. president issued the Emancipation Proclamation in 1863?", "opts": ["Ulysses S. Grant", "Andrew Johnson", "Abraham Lincoln", "James Buchanan"], "a": 2},
-  {"c": "U.S. Presidents", "q": "Who was the 3rd President of the United States and principal author of the Declaration of Independence?", "opts": ["John Adams", "Thomas Jefferson", "James Madison", "James Monroe"], "a": 1},
-  {"c": "U.S. Presidents", "q": "Which U.S. president resigned from office in 1974 following the Watergate scandal?", "opts": ["Gerald Ford", "Lyndon B. Johnson", "Richard Nixon", "Jimmy Carter"], "a": 2},
-  {"c": "U.S. Presidents", "q": "Who became the youngest U.S. president in history at age 42?", "opts": ["John F. Kennedy", "Theodore Roosevelt", "Bill Clinton", "Barack Obama"], "a": 1},
-  {"c": "U.S. Presidents", "q": "Which U.S. president served as Supreme Allied Commander in Europe during World War II?", "opts": ["Harry S. Truman", "Dwight D. Eisenhower", "George H.W. Bush", "John F. Kennedy"], "a": 1},
-  {"c": "U.S. Presidents", "q": "Who was the first U.S. president to serve two non-consecutive terms?", "opts": ["Grover Cleveland", "Benjamin Harrison", "William McKinley", "Chester A. Arthur"], "a": 0},
-  {"c": "U.S. Presidents", "q": "Which U.S. president proposed the 'Fourteen Points' peace plan after World War I?", "opts": ["William Howard Taft", "Warren G. Harding", "Woodrow Wilson", "Calvin Coolidge"], "a": 2},
-  {"c": "U.S. Presidents", "q": "Who was the 44th President of the United States, serving from 2009 to 2017?", "opts": ["George W. Bush", "Barack Obama", "Joe Biden", "Bill Clinton"], "a": 1},
-  {"c": "U.S. Presidents", "q": "Which U.S. president famously said 'Mr. Gorbachev, tear down this wall!' in 1987?", "opts": ["Jimmy Carter", "George H.W. Bush", "Ronald Reagan", "Gerald Ford"], "a": 2},
-  {"c": "U.S. Presidents", "q": "Who was the second U.S. president to be assassinated?", "opts": ["William McKinley", "James A. Garfield", "John F. Kennedy", "Abraham Lincoln"], "a": 1},
-  {"c": "2010s Songs", "q": "Who sang lead vocals on Mark Ronson's 2014 chart-topping hit 'Uptown Funk'?", "opts": ["Pharrell Williams", "Bruno Mars", "Justin Timberlake", "The Weeknd"], "a": 1},
-  {"c": "2010s Songs", "q": "Which Canadian artist released the 2016 global hit 'One Dance'?", "opts": ["Justin Bieber", "Shawn Mendes", "Drake", "The Weeknd"], "a": 2},
-  {"c": "2010s Songs", "q": "Who sang the 2015 smash ballad 'Hello'?", "opts": ["Adele", "Sia", "Sam Smith", "Rihanna"], "a": 0},
-  {"c": "2010s Songs", "q": "Which artist released the 2019 hit 'Old Town Road' featuring Billy Ray Cyrus?", "opts": ["Post Malone", "Lil Nas X", "Travis Scott", "Khalid"], "a": 1},
-  {"c": "2010s Songs", "q": "Who sang the 2013 breakout hit 'Royals'?", "opts": ["Halsey", "Lorde", "Lana Del Rey", "Ellie Goulding"], "a": 1},
-  {"c": "2010s Songs", "q": "Which pop star released the 2014 hit single 'Shake It Off'?", "opts": ["Katy Perry", "Ariana Grande", "Taylor Swift", "Selena Gomez"], "a": 2},
-  {"c": "2010s Songs", "q": "Who sang the 2017 hit song 'Shape of You'?", "opts": ["Shawn Mendes", "Ed Sheeran", "Charlie Puth", "Harry Styles"], "a": 1},
-  {"c": "2010s Songs", "q": "Which 2017 Spanish-language hit by Luis Fonsi and Daddy Yankee became a worldwide phenomenon?", "opts": ["Bailando", "Despacito", "Mi Gente", "Vivir Mi Vida"], "a": 1},
-  {"c": "2010s Songs", "q": "Who performed the 2012 viral hit 'Gangnam Style'?", "opts": ["BTS", "PSY", "BIGBANG", "EXO"], "a": 1},
-  {"c": "2010s Songs", "q": "Which artist released the 2019 chart-topping song 'Bad Guy'?", "opts": ["Dua Lipa", "Billie Eilish", "Camila Cabello", "Olivia Rodrigo"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "In 'SpongeBob SquarePants', what is the name of SpongeBob's pet snail?", "opts": ["Larry", "Gary", "Sheldon", "Patrick"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "Which keychain digital pet from the late 1990s and 2000s required kids to feed and clean up after it?", "opts": ["Furby", "Tamagotchi", "Polly Pocket", "Bakugan"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "In 'Avatar: The Last Airbender', what species of animal is Aang's companion Appa?", "opts": ["Winged Lemur", "Flying Bison", "Badgermole", "Sky Tiger"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "Which 2000s Disney Channel series starred Miley Cyrus as a teenager living a secret pop-star life?", "opts": ["That's So Raven", "Hannah Montana", "Lizzie McGuire", "Wizards of Waverly Place"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "In which 2000s online virtual world did players adopt Puffles and play mini-games on an icy island?", "opts": ["Neopets", "Club Penguin", "Poptropica", "Moshi Monsters"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "In 'Phineas and Ferb', what is Perry the Platypus's secret codename?", "opts": ["Agent X", "Agent P", "Agent 00", "Agent D"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "Which plush toy line came with a secret code tag to unlock your pet inside an online virtual world?", "opts": ["Beanie Babies", "Webkinz", "Build-A-Bear", "Squishmallows"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "In 'Minecraft', which green hostile mob silently sneaks up on players and explodes?", "opts": ["Enderman", "Creeper", "Zombie", "Slime"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "Which Nickelodeon cartoon follows 10-year-old Timmy Turner and his fairy godparents Cosmo and Wanda?", "opts": ["Danny Phantom", "The Fairly OddParents", "Jimmy Neutron", "Rugrats"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "In 'Adventure Time', what is the name of Finn's shape-shifting magical dog brother?", "opts": ["BMO", "Jake", "Marceline", "Ice King"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "Which spinning-top battling toy craze featured ripcord launchers and plastic arenas?", "opts": ["Bakugan", "Beyblade", "Bionicle", "Hot Wheels"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "In 'iCarly', what is the name of Carly Shay's eccentric artist older brother?", "opts": ["Freddie", "Gibby", "Spencer", "Sam"], "a": 2},
-  {"c": "2000s-2010s Kids", "q": "Which 2003 Cartoon Network series followed five teen heroes living in a giant T-shaped tower?", "opts": ["Ben 10", "Teen Titans", "Young Justice", "Generator Rex"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "What is the name of the main middle-school protagonist in the 'Diary of a Wimpy Kid' book series?", "opts": ["Rowley Jefferson", "Greg Heffley", "Rodrick Heffley", "Nate Wright"], "a": 1},
-  {"c": "2000s-2010s Kids", "q": "Which 2011 video game allowed kids to place physical toy figures onto a 'Portal of Power' to play as them?", "opts": ["Disney Infinity", "Skylanders: Spyro's Adventure", "Lego Dimensions", "Amiibo Festival"], "a": 1},
-  {"c": "Breaking Bad / BCS", "q": "What is Walter White's infamous drug-kingpin alias in 'Breaking Bad'?", "opts": ["Oppenheimer", "Heisenberg", "Schrödinger", "Cap'n Cook"], "a": 1},
-  {"c": "Breaking Bad / BCS", "q": "What is the name of Gus Fring's fast-food fried chicken restaurant chain?", "opts": ["Pollo Loco", "Los Pollos Hermanos", "Taco Cabeza", "Twisters"], "a": 1},
-  {"c": "Breaking Bad / BCS", "q": "What was Saul Goodman's real birth name before he changed it?", "opts": ["Chuck McGill", "Jimmy McGill", "Howard Hamlin", "Gene Takavic"], "a": 1},
-  {"c": "Breaking Bad / BCS", "q": "What high school subject did Walter White teach before entering the meth trade?", "opts": ["Biology", "Physics", "Chemistry", "Algebra"], "a": 2},
-  {"c": "Breaking Bad / BCS", "q": "Who is Jimmy McGill's longtime legal colleague and romantic partner in 'Better Call Saul'?", "opts": ["Skyler White", "Kim Wexler", "Lydia Rodarte-Quayle", "Francesca Liddy"], "a": 1},
-  {"c": "Middle School", "q": "What are the three branches of the United States federal government?", "opts": ["Legislative, Executive, Judicial", "Federal, State, Local", "Senate, House, Supreme Court", "Military, Civil, Diplomatic"], "a": 0},
-  {"c": "Middle School", "q": "What is the perimeter of a rectangle with a length of 8 and a width of 5?", "opts": ["13", "26", "40", "20"], "a": 1},
-  {"c": "Middle School", "q": "Which thick layer of Earth lies directly beneath the outer crust?", "opts": ["Inner Core", "Outer Core", "Mantle", "Lithosphere"], "a": 2},
-  {"c": "Middle School", "q": "In English grammar, what part of speech describes or modifies a noun?", "opts": ["Verb", "Adverb", "Adjective", "Preposition"], "a": 2},
-  {"c": "Middle School", "q": "What ancient network of trade routes connected China to the Mediterranean Sea?", "opts": ["Amber Road", "Silk Road", "Spice Trail", "Royal Road"], "a": 1},
-  {"c": "Middle School", "q": "What is the formula for the area of a triangle?", "opts": ["base × height", "1/2 × base × height", "2 × base + height", "π × radius²"], "a": 1},
-  {"c": "Middle School", "q": "Which green organelle in plant cells carries out photosynthesis?", "opts": ["Mitochondria", "Vacuole", "Chloroplast", "Ribosome"], "a": 2},
-  {"c": "Middle School", "q": "What is the smallest positive prime number?", "opts": ["1", "2", "3", "5"], "a": 1},
-  {"c": "Middle School", "q": "Which imaginary line of latitude divides Earth into the Northern and Southern Hemispheres?", "opts": ["Prime Meridian", "Tropic of Cancer", "Equator", "International Date Line"], "a": 2},
-  {"c": "Middle School", "q": "What type of figurative language compares two unlike things using 'like' or 'as'?", "opts": ["Metaphor", "Simile", "Hyperbole", "Alliteration"], "a": 1},
-  {"c": "High School", "q": "According to Newton's Second Law of Motion, force equals mass multiplied by what?", "opts": ["Velocity", "Acceleration", "Momentum", "Gravity"], "a": 1},
-  {"c": "High School", "q": "In William Shakespeare's tragedy 'Macbeth', in which country does the play take place?", "opts": ["England", "Denmark", "Scotland", "Ireland"], "a": 2},
-  {"c": "High School", "q": "What is the slope of the linear equation y = 4x - 7?", "opts": ["-7", "4", "7", "-4"], "a": 1},
-  {"c": "High School", "q": "Which double-helix molecule carries genetic instructions in living organisms?", "opts": ["RNA", "ATP", "DNA", "Glucose"], "a": 2},
-  {"c": "High School", "q": "What economic term describes a sustained rise in general price levels over time?", "opts": ["Deflation", "Inflation", "Recession", "Tariff"], "a": 1},
-  {"c": "High School", "q": "In chemistry, what type of chemical bond involves the sharing of electron pairs between atoms?", "opts": ["Ionic bond", "Covalent bond", "Metallic bond", "Hydrogen bond"], "a": 1},
-  {"c": "High School", "q": "Which 1803 U.S. Supreme Court ruling established the power of judicial review?", "opts": ["Brown v. Board of Education", "Marbury v. Madison", "McCulloch v. Maryland", "Gideon v. Wainwright"], "a": 1},
-  {"c": "High School", "q": "In calculus, what is the derivative of x² with respect to x?", "opts": ["x", "2x", "x²", "2"], "a": 1},
-  {"c": "High School", "q": "Which 1919 peace treaty formally ended World War I between Germany and the Allied Powers?", "opts": ["Treaty of Paris", "Treaty of Versailles", "Treaty of Ghent", "Treaty of Utrecht"], "a": 1},
-  {"c": "High School", "q": "What molecule serves as the primary energy currency of cells during cellular respiration?", "opts": ["ADP", "ATP", "NADH", "DNA"], "a": 1},
-  {"c": "Elementary School", "q": "How many days are in a standard non-leap year?", "opts": ["360", "364", "365", "366"], "a": 2},
-  {"c": "Elementary School", "q": "On which continent is the Sahara Desert located?", "opts": ["Asia", "South America", "Africa", "Australia"], "a": 2},
-  {"c": "Elementary School", "q": "What does a caterpillar transform into inside its chrysalis?", "opts": ["Beetle", "Butterfly", "Dragonfly", "Grasshopper"], "a": 1},
-  {"c": "Elementary School", "q": "How many U.S. quarters equal one dollar?", "opts": ["2", "4", "5", "10"], "a": 1},
-  {"c": "Elementary School", "q": "Which season comes immediately after summer?", "opts": ["Spring", "Winter", "Autumn (Fall)", "Monsoon"], "a": 2},
-  {"c": "Elementary School", "q": "Which continent is the United States located on?", "opts": ["South America", "Europe", "North America", "Australia"], "a": 2},
-  {"c": "Elementary School", "q": "What is a baby frog called before it grows legs and loses its tail?", "opts": ["Larva", "Tadpole", "Fry", "Nymph"], "a": 1},
-  {"c": "Elementary School", "q": "Which planet in our solar system is most famous for its large, bright rings?", "opts": ["Mars", "Saturn", "Venus", "Mercury"], "a": 1},
-  {"c": "Elementary School", "q": "How many minutes are in two hours?", "opts": ["60", "90", "120", "180"], "a": 2},
-  {"c": "Elementary School", "q": "What color do you get when you mix blue and yellow paint together?", "opts": ["Purple", "Orange", "Green", "Brown"], "a": 2},
-  {"c": "The Sopranos", "q": "What is the name of Tony Soprano's psychiatrist throughout 'The Sopranos'?", "opts": ["Dr. Jennifer Melfi", "Dr. Elliot Kupferberg", "Dr. Wendy Kobler", "Dr. Bruce Cusamano"], "a": 0},
-  {"c": "The Sopranos", "q": "What is the name of the strip club managed by Silvio Dante that serves as Tony's crew headquarters?", "opts": ["Satriale's", "Bada Bing!", "Vesuvio", "The Executive Lounge"], "a": 1},
-  {"c": "The Sopranos", "q": "In which U.S. state is 'The Sopranos' primarily set?", "opts": ["New York", "New Jersey", "Connecticut", "Pennsylvania"], "a": 1},
-  {"c": "BoJack Horseman", "q": "What was the title of the 1990s family sitcom that made BoJack Horseman a star?", "opts": ["Mr. Peanutbutter's House", "Horsin' Around", "Philbert", "Birthday Dad"], "a": 1},
-  {"c": "BoJack Horseman", "q": "Who is BoJack's loyal human roommate who sleeps on his couch and wears a yellow beanie?", "opts": ["Herb Kazzaz", "Todd Chavez", "Judah Mannowdog", "Rutabaga Rabitowitz"], "a": 1},
-  {"c": "BoJack Horseman", "q": "What species of animal is BoJack's agent and manager, Princess Carolyn?", "opts": ["Golden Retriever", "Persian Cat", "Red Fox", "Cottontail Rabbit"], "a": 1},
-  {"c": "Nintendo Wii", "q": "In what year was the Nintendo Wii console first launched?", "opts": ["2004", "2006", "2008", "2010"], "a": 1},
-  {"c": "Nintendo Wii", "q": "Which motion-controlled game was bundled with the Nintendo Wii at launch in North America?", "opts": ["Wii Play", "Wii Sports", "Mario Kart Wii", "Super Mario Galaxy"], "a": 1},
-  {"c": "Nintendo Wii", "q": "What is the name of the wired controller attachment with an analog stick that plugs into the Wii Remote?", "opts": ["Wii MotionPlus", "Nunchuk", "Classic Pro", "Balance Board"], "a": 1},
-  {"c": "Mario Kart Wii", "q": "Which heavyweight character in 'Mario Kart Wii' is famous for having the highest speed stat bonus?", "opts": ["Bowser", "Funky Kong", "Wario", "Dry Bowser"], "a": 1},
-  {"c": "Philosophy", "q": "Which ancient Greek philosopher is associated with the paradox 'I know that I know nothing'?", "opts": ["Aristotle", "Socrates", "Epicurus", "Diogenes"], "a": 1},
-  {"c": "Philosophy", "q": "Which philosopher wrote 'The Republic' and founded the Academy in Athens?", "opts": ["Plato", "Socrates", "Pythagoras", "Heraclitus"], "a": 0},
-  {"c": "Philosophy", "q": "Which French philosopher wrote 'Cogito, ergo sum' ('I think, therefore I am')?", "opts": ["Jean-Paul Sartre", "Voltaire", "René Descartes", "Michel Foucault"], "a": 2},
-  {"c": "Philosophy", "q": "Which ethical philosophy argues that the right action is the one that maximizes overall happiness?", "opts": ["Stoicism", "Utilitarianism", "Nihilism", "Existentialism"], "a": 1},
-  {"c": "Philosophy", "q": "Which ancient Greek philosopher served as the personal tutor to Alexander the Great?", "opts": ["Plato", "Aristotle", "Zeno", "Democritus"], "a": 1},
-  {"c": "Philosophy", "q": "Which German philosopher wrote 'Thus Spoke Zarathustra' and introduced the 'Übermensch'?", "opts": ["Immanuel Kant", "Friedrich Nietzsche", "Karl Marx", "Arthur Schopenhauer"], "a": 1},
-  {"c": "Philosophy", "q": "What branch of philosophy investigates the origin, nature, and limits of human knowledge?", "opts": ["Metaphysics", "Epistemology", "Aesthetics", "Logic"], "a": 1},
-  {"c": "All-Time Movies", "q": "Who directed the 1972 crime masterpiece 'The Godfather'?", "opts": ["Martin Scorsese", "Francis Ford Coppola", "Brian De Palma", "Sidney Lumet"], "a": 1},
-  {"c": "All-Time Movies", "q": "In 'The Shawshank Redemption', what small tool does Andy Dufresne use to tunnel through his cell wall?", "opts": ["Spoon", "Rock hammer", "Screwdriver", "Chisel"], "a": 1},
-  {"c": "All-Time Movies", "q": "Which 1994 Quentin Tarantino film stars John Travolta and Samuel L. Jackson as hitmen?", "opts": ["Reservoir Dogs", "Pulp Fiction", "Jackie Brown", "Goodfellas"], "a": 1},
-  {"c": "All-Time Movies", "q": "Who directed the 1993 blockbuster 'Jurassic Park'?", "opts": ["James Cameron", "George Lucas", "Steven Spielberg", "Ridley Scott"], "a": 2},
-  {"c": "All-Time Movies", "q": "In the 1939 film 'The Wizard of Oz', what color are Dorothy's magical slippers?", "opts": ["Silver", "Gold", "Ruby", "Emerald"], "a": 2},
-  {"c": "All-Time Movies", "q": "Which 1994 film stars Tom Hanks as a man recounting his extraordinary life from a bus-stop bench?", "opts": ["Cast Away", "Forrest Gump", "Big", "The Green Mile"], "a": 1},
-  {"c": "Animals", "q": "What is the fastest land animal in the world?", "opts": ["Pronghorn Antelope", "Cheetah", "Lion", "Greyhound"], "a": 1},
-  {"c": "Animals", "q": "How many hearts does an octopus have?", "opts": ["1", "2", "3", "4"], "a": 2},
-  {"c": "Animals", "q": "What is the largest living bird species in the world by both height and weight?", "opts": ["Emu", "Albatross", "Ostrich", "Cassowary"], "a": 2},
-  {"c": "Animals", "q": "What is the only mammal capable of true, sustained powered flight?", "opts": ["Flying Squirrel", "Bat", "Sugar Glider", "Colugo"], "a": 1},
-  {"c": "Animals", "q": "Which land mammal has the longest pregnancy (gestation period), lasting nearly 22 months?", "opts": ["Giraffe", "Rhinoceros", "Elephant", "Hippopotamus"], "a": 2},
-  {"c": "Animals", "q": "What is a baby kangaroo called?", "opts": ["Kit", "Joey", "Cub", "Pup"], "a": 1},
-  {"c": "Animals", "q": "Which marine mammal navigates and hunts using biological sonar (echolocation)?", "opts": ["Manatee", "Sea Otter", "Dolphin", "Walrus"], "a": 2},
-  {"c": "Animals", "q": "What color is a polar bear's skin underneath its translucent white fur?", "opts": ["Pink", "White", "Black", "Gray"], "a": 2},
-  {"c": "Animals", "q": "Which lizard is famous for independently rotating eyes and changing skin color?", "opts": ["Iguana", "Gecko", "Chameleon", "Komodo Dragon"], "a": 2},
-  {"c": "Animals", "q": "What is the tallest living terrestrial animal on Earth?", "opts": ["African Elephant", "Giraffe", "Moose", "Camel"], "a": 1},
-  {"c": "Extinct Animals", "q": "What does the dinosaur name 'Tyrannosaurus rex' mean in English?", "opts": ["Thunder lizard", "Tyrant lizard king", "Terrible claw", "Swift thief"], "a": 1},
-  {"c": "Extinct Animals", "q": "Which shaggy Ice Age relative of modern elephants had long curved tusks?", "opts": ["Mastodon", "Woolly Mammoth", "Ground Sloth", "Glyptodon"], "a": 1},
-  {"c": "Extinct Animals", "q": "Which extinct prehistoric shark was the largest shark ever to live, reaching up to 60 feet?", "opts": ["Dunkleosteus", "Megalodon", "Helicoprion", "Mosasaurus"], "a": 1},
-  {"c": "Extinct Animals", "q": "Which plant-eating dinosaur had three facial horns and a large bony neck frill?", "opts": ["Stegosaurus", "Triceratops", "Ankylosaurus", "Brachiosaurus"], "a": 1},
-  {"c": "Extinct Animals", "q": "Which flightless bird native to the island of Mauritius went extinct in the late 1600s?", "opts": ["Moa", "Great Auk", "Dodo", "Passenger Pigeon"], "a": 2},
-  {"c": "Extinct Animals", "q": "Which long-necked prehistoric marine reptile swam using four large paddle-like flippers?", "opts": ["Pteranodon", "Plesiosaur", "Velociraptor", "Dimetrodon"], "a": 1},
-  {"c": "Extinct Animals", "q": "Which Ice Age predator was famous for its pair of oversized, blade-like upper canine teeth?", "opts": ["Dire Wolf", "Smilodon (Saber-toothed cat)", "Cave Bear", "Terror Bird"], "a": 1},
-  {"c": "NFL", "q": "Which NFL team is tied with the New England Patriots for the most Super Bowl wins (6)?", "opts": ["Dallas Cowboys", "San Francisco 49ers", "Pittsburgh Steelers", "Green Bay Packers"], "a": 2},
-  {"c": "NFL", "q": "Who holds the NFL all-time career record for passing touchdowns?", "opts": ["Peyton Manning", "Drew Brees", "Tom Brady", "Aaron Rodgers"], "a": 2},
-  {"c": "NFL", "q": "How many teams currently compete in the National Football League (NFL)?", "opts": ["28", "30", "32", "34"], "a": 2},
-  {"c": "NFL", "q": "Which NFL franchise is the only publicly owned, non-profit major sports team in the U.S.?", "opts": ["Chicago Bears", "Green Bay Packers", "Buffalo Bills", "Kansas City Chiefs"], "a": 1},
-  {"c": "NFL", "q": "What is the rarest scoring play in American football, worth just 1 point during a conversion try?", "opts": ["Fair catch kick", "One-point safety", "Drop-kick field goal", "Defensive rouge"], "a": 1},
-  {"c": "The 1970s", "q": "Which British rock band released the six-minute classic 'Bohemian Rhapsody' in 1975?", "opts": ["Led Zeppelin", "Queen", "The Who", "Fleetwood Mac"], "a": 1},
-  {"c": "The 1970s", "q": "In what year was the original 'Star Wars' film released in theaters?", "opts": ["1975", "1977", "1979", "1980"], "a": 1},
-  {"c": "The 1970s", "q": "Which 1977 disco film starring John Travolta featured music by the Bee Gees?", "opts": ["Grease", "Saturday Night Fever", "Boogie Nights", "Footloose"], "a": 1},
-  {"c": "The 1970s", "q": "Which nuclear power plant in Pennsylvania experienced a partial meltdown in March 1979?", "opts": ["Chernobyl", "Three Mile Island", "Fukushima", "Indian Point"], "a": 1},
-  {"c": "Common Sense", "q": "If you are in a race and you overtake the person in 2nd place, what place are you in now?", "opts": ["1st place", "2nd place", "3rd place", "Last place"], "a": 1},
-  {"c": "Common Sense", "q": "Which weighs more: a pound of bricks or a pound of feathers?", "opts": ["A pound of bricks", "A pound of feathers", "They weigh the exact same", "Depends on altitude"], "a": 2},
-  {"c": "Common Sense", "q": "If a rooster lays an egg on the peak of a slanted barn roof, which side does it roll down?", "opts": ["Left side", "Right side", "Roosters do not lay eggs", "It stays on top"], "a": 2},
-  {"c": "Common Sense", "q": "How many months in a calendar year have 28 days?", "opts": ["1", "2", "6", "All 12"], "a": 3},
-  {"c": "Common Sense", "q": "What gets wetter and wetter the more it dries?", "opts": ["A sponge", "A towel", "Rain", "Ice"], "a": 1},
-  {"c": "Common Sense", "q": "If there are 6 apples in a bowl and you take away 4 of them, how many apples do YOU have?", "opts": ["2", "4", "6", "0"], "a": 1},
-  {"c": "Common Sense", "q": "Before Mount Everest was officially discovered, what was the tallest mountain on Earth?", "opts": ["K2", "Mount Kilimanjaro", "Mount Everest", "Mount Fuji"], "a": 2},
-  {"c": "Common Sense", "q": "If an airplane crashes directly on the border between the U.S. and Canada, where do they bury the survivors?", "opts": ["United States", "Canada", "You don't bury survivors", "Nearest town"], "a": 2},
-  {"c": "Common Sense", "q": "What belongs exclusively to you, yet other people use it much more often than you do?", "opts": ["Your phone", "Your name", "Your car", "Your house"], "a": 1},
-  {"c": "Common Sense", "q": "If 5 machines take 5 minutes to make 5 widgets, how long do 100 machines take to make 100 widgets?", "opts": ["100 minutes", "20 minutes", "5 minutes", "1 minute"], "a": 2},
-  {"c": "Quick Puzzles", "q": "What number comes next in the sequence: 2, 4, 8, 16, ___?", "opts": ["24", "30", "32", "64"], "a": 2},
-  {"c": "Quick Puzzles", "q": "I have cities, but no houses; forests, but no trees; and water, but no fish. What am I?", "opts": ["A globe/map", "A dream", "A painting", "A book"], "a": 0},
-  {"c": "Quick Puzzles", "q": "What number comes next in the Fibonacci sequence: 1, 1, 2, 3, 5, 8, ___?", "opts": ["11", "12", "13", "15"], "a": 2},
-  {"c": "Quick Puzzles", "q": "What has keys that open no locks, space, and you can enter, but you cannot go outside?", "opts": ["A piano", "A computer keyboard", "A safe", "A maze"], "a": 1},
-  {"c": "Quick Puzzles", "q": "If A = 1, B = 2, and C = 3, what word does 3 - 1 - 20 spell?", "opts": ["BAT", "CAT", "HAT", "RAT"], "a": 1},
-  {"c": "Quick Puzzles", "q": "What has two hands and a face, yet has no arms or legs?", "opts": ["A statue", "A clock", "A mirror", "A coin"], "a": 1},
-  {"c": "Quick Puzzles", "q": "What letter comes next in this pattern: J, F, M, A, M, J, ___?", "opts": ["A", "S", "J", "O"], "a": 2},
-  {"c": "Quick Puzzles", "q": "The more you take away from me, the larger I grow. What am I?", "opts": ["A shadow", "A hole", "A debt", "A cloud"], "a": 1},
-  {"c": "Quick Puzzles", "q": "If 3 cats catch 3 mice in 3 minutes, how many minutes does it take 1 cat to catch 1 mouse?", "opts": ["1 minute", "3 minutes", "6 minutes", "9 minutes"], "a": 1},
-  {"c": "Quick Puzzles", "q": "Which English word is always spelled incorrectly in every single dictionary?", "opts": ["Misspelled", "Incorrectly", "Dictionary", "Wrong"], "a": 1},
-  {"c": "Famous Wars", "q": "Between which two opposing sides was the American Civil War fought (1861–1865)?", "opts": ["Patriots and Loyalists", "The Union and the Confederacy", "North Korea and South Korea", "Allies and Axis"], "a": 1},
-  {"c": "Famous Wars", "q": "Which 1950–1953 conflict ended with an armistice creating a Demilitarized Zone along the 38th parallel?", "opts": ["Vietnam War", "Korean War", "Cold War", "Gulf War"], "a": 1},
-  {"c": "Famous Wars", "q": "Which legendary ancient conflict featured Greeks sneaking into a besieged city inside a giant wooden horse?", "opts": ["Peloponnesian War", "Trojan War", "Punic Wars", "Persian Wars"], "a": 1},
-  {"c": "Famous Wars", "q": "Which global conflict fought from 1914 to 1918 was originally called 'The Great War'?", "opts": ["World War I", "World War II", "The Napoleonic Wars", "The Hundred Years' War"], "a": 0},
-  {"c": "The Office", "q": "What is the name of the regional paper supply company in 'The Office' (U.S.)?", "opts": ["Wernham Hogg", "Dunder Mifflin", "Sabre Print", "Vance Refrigeration"], "a": 1},
-  {"c": "The Office", "q": "What is the name of the beet farm and bed-and-breakfast owned by Dwight Schrute?", "opts": ["Schrute Acres", "Schrute Farms", "Mose Manor", "Scranton Beets"], "a": 1},
-  {"c": "The Office", "q": "Who is the mild-mannered Human Resources representative that Michael Scott despises?", "opts": ["Oscar Martinez", "Toby Flenderson", "Kevin Malone", "Gabe Lewis"], "a": 1},
-  {"c": "The Office", "q": "What is the name of the annual office awards ceremony hosted by Michael Scott?", "opts": ["The Miffies", "The Dundies", "The Scrantons", "The Scotties"], "a": 1},
-  {"c": "The Office", "q": "Who does Jim Halpert marry in Season 6 of 'The Office'?", "opts": ["Karen Filippelli", "Pam Beesly", "Erin Hannon", "Kelly Kapoor"], "a": 1},
-  {"c": "Quick Math", "q": "What is 47 + 38?", "opts": ["75", "85", "95", "83"], "a": 1},
-  {"c": "Quick Math", "q": "What is 93 - 46?", "opts": ["47", "57", "43", "53"], "a": 0},
-  {"c": "Quick Math", "q": "What is 12 × 11?", "opts": ["121", "122", "132", "142"], "a": 2},
-  {"c": "Quick Math", "q": "What is 144 ÷ 12?", "opts": ["11", "12", "13", "14"], "a": 1},
-  {"c": "Quick Math", "q": "What is 64 + 29?", "opts": ["83", "91", "93", "95"], "a": 2},
-  {"c": "Quick Math", "q": "What is 81 - 35?", "opts": ["44", "46", "54", "56"], "a": 1},
-  {"c": "Quick Math", "q": "What is 9 × 12?", "opts": ["96", "104", "108", "112"], "a": 2},
-  {"c": "Quick Math", "q": "What is 96 ÷ 8?", "opts": ["11", "12", "13", "14"], "a": 1},
-  {"c": "Quick Math", "q": "What is 58 + 34?", "opts": ["82", "90", "92", "94"], "a": 2},
-  {"c": "Quick Math", "q": "What is 72 - 27?", "opts": ["45", "55", "43", "53"], "a": 0},
-  {"c": "Quick Math", "q": "What is 11 × 11?", "opts": ["111", "121", "122", "131"], "a": 1},
-  {"c": "Quick Math", "q": "What is 84 ÷ 7?", "opts": ["11", "12", "13", "14"], "a": 1},
-  {"c": "Stranger Things", "q": "What is the name of the dark, eerie parallel dimension in 'Stranger Things'?", "opts": ["The Shadow Realm", "The Upside Down", "The Underworld", "The Void"], "a": 1},
-  {"c": "Periodic Table", "q": "What is the chemical symbol for Iron on the periodic table?", "opts": ["Ir", "In", "Fe", "Io"], "a": 2},
-  {"c": "Periodic Table", "q": "Which noble gas has atomic number 2 and is commonly used to inflate party balloons?", "opts": ["Neon", "Helium", "Argon", "Krypton"], "a": 1},
-  {"c": "Periodic Table", "q": "What is the chemical symbol for Sodium?", "opts": ["So", "Sd", "Na", "Sm"], "a": 2},
-  {"c": "Periodic Table", "q": "Which element has the symbol 'O' and atomic number 8?", "opts": ["Osmium", "Oxygen", "Oganesson", "Gold"], "a": 1},
-  {"c": "Periodic Table", "q": "What is the chemical symbol for Silver?", "opts": ["Si", "Sv", "Ag", "Sr"], "a": 2},
-  {"c": "Psychology", "q": "Which Russian physiologist is famous for his classical conditioning experiments with salivating dogs?", "opts": ["B.F. Skinner", "Ivan Pavlov", "Carl Jung", "Albert Bandura"], "a": 1},
-  {"c": "Psychology", "q": "In Abraham Maslow's hierarchy of needs, what sits at the very top of the pyramid?", "opts": ["Safety needs", "Esteem needs", "Self-actualization", "Love and belonging"], "a": 2},
-  {"c": "Psychology", "q": "What psychological effect explains why people remember the first and last items on a list best?", "opts": ["Halo effect", "Serial position effect", "Placebo effect", "Dunning-Kruger effect"], "a": 1},
-  {"c": "Psychology", "q": "Who founded psychoanalysis and divided the psyche into the id, ego, and superego?", "opts": ["Sigmund Freud", "Jean Piaget", "Erik Erikson", "Wilhelm Wundt"], "a": 0},
-  {"c": "Psychology", "q": "What term describes the mental discomfort felt when holding two contradictory beliefs at once?", "opts": ["Confirmation bias", "Cognitive dissonance", "Groupthink", "Learned helplessness"], "a": 1},
-  {"c": "Psychology", "q": "Which controversial 1961 Yale study by Stanley Milgram measured willingness to obey authority figures?", "opts": ["Stanford Prison Experiment", "Milgram obedience study", "Bobo Doll experiment", "Little Albert experiment"], "a": 1},
-  {"c": "Psychology", "q": "What social psychology phenomenon occurs when individuals are less likely to help a victim if others are watching?", "opts": ["Social loafing", "Bystander effect", "Spotlight effect", "Fundamental attribution error"], "a": 1},
-  {"c": "Pokémon", "q": "What is Pikachu's official National Pokédex number?", "opts": ["#001", "#007", "#025", "#150"], "a": 2},
-  {"c": "Pokémon", "q": "Which Legendary Psychic-type Pokémon was genetically cloned from Mew?", "opts": ["Lugia", "Mewtwo", "Celebi", "Deoxys"], "a": 1},
-  {"c": "Human Anatomy", "q": "What is the longest and strongest bone in the human body?", "opts": ["Humerus", "Tibia", "Femur", "Fibula"], "a": 2},
-  {"c": "Human Anatomy", "q": "How many chambers make up the human heart?", "opts": ["2", "3", "4", "6"], "a": 2},
-  {"c": "Human Anatomy", "q": "What is the largest organ of the human body?", "opts": ["Liver", "Brain", "Skin", "Lungs"], "a": 2},
-  {"c": "Human Anatomy", "q": "Where in the human body are the three smallest bones (the ossicles) located?", "opts": ["Middle ear", "Pinky toe", "Nose", "Wrist"], "a": 0},
-  {"c": "Human Anatomy", "q": "Which dome-shaped muscle beneath the lungs contracts to draw air into the chest?", "opts": ["Trapezius", "Diaphragm", "Deltoid", "Sternum"], "a": 1},
-  {"c": "Video Games", "q": "In what year was Supercell's mobile game 'Brawl Stars' released globally?", "opts": ["2016", "2017", "2018", "2020"], "a": 2},
-  {"c": "World History", "q": "In what year did the French Revolution begin with the storming of the Bastille?", "opts": ["1776", "1789", "1799", "1815"], "a": 1},
-  {"c": "World History", "q": "Which English document signed by King John in 1215 limited the power of the monarchy?", "opts": ["The Bill of Rights", "The Magna Carta", "The Domesday Book", "The Edict of Nantes"], "a": 1},
-  {"c": "World History", "q": "Which German inventor introduced movable-type mechanical printing to Europe around 1440?", "opts": ["Martin Luther", "Johannes Gutenberg", "Nicolaus Copernicus", "Galileo Galilei"], "a": 1},
-  {"c": "World History", "q": "Which conquistador led the Spanish expedition that caused the fall of the Aztec Empire in 1521?", "opts": ["Francisco Pizarro", "Hernán Cortés", "Ferdinand Magellan", "Vasco da Gama"], "a": 1},
-  {"c": "World History", "q": "In which city was Archduke Franz Ferdinand assassinated in 1914, sparking World War I?", "opts": ["Vienna", "Belgrade", "Sarajevo", "Budapest"], "a": 2},
-  {"c": "World History", "q": "Which South African anti-apartheid leader served as the country's first Black president from 1994 to 1999?", "opts": ["Desmond Tutu", "Nelson Mandela", "Thabo Mbeki", "Oliver Tambo"], "a": 1},
-  {"c": "Broadway Musicals", "q": "Which Andrew Lloyd Webber musical holds the record as the longest-running show in Broadway history with 13,981 performances?", "opts": ["Cats", "The Phantom of the Opera", "Les Misérables", "Chicago"], "a": 1},
-  {"c": "Broadway Musicals", "q": "Who wrote the music, lyrics, and book for the hit Broadway hip-hop musical 'Hamilton'?", "opts": ["Stephen Sondheim", "Lin-Manuel Miranda", "Jonathan Larson", "Alan Menken"], "a": 1},
-  {"c": "Broadway Musicals", "q": "Which hit Broadway musical tells the untold backstory of Elphaba and Glinda, the witches of Oz?", "opts": ["Into the Woods", "Wicked", "Hadestown", "Matilda"], "a": 1},
-  {"c": "Broadway Musicals", "q": "In 'Les Misérables', what is the name of the former convict who is relentlessly pursued by Inspector Javert?", "opts": ["Marius Pontmercy", "Jean Valjean", "Enjolras", "Thénardier"], "a": 1},
-  {"c": "Minecraft", "q": "Who is the Swedish game programmer who originally created 'Minecraft' in 2009?", "opts": ["Jens Bergensten (Jeb)", "Markus Persson (Notch)", "Daniel Rosenfeld (C418)", "Nathan Adams (Dinnerbone)"], "a": 1},
-  {"c": "Minecraft", "q": "Which block is required to construct the frame of a Nether Portal in 'Minecraft'?", "opts": ["Bedrock", "Obsidian", "Crying Obsidian", "Deepslate"], "a": 1},
-  {"c": "Minecraft", "q": "What is the name of the final boss dragon defeated in The End dimension of 'Minecraft'?", "opts": ["The Wither", "The Ender Dragon", "The Warden", "The Elder Guardian"], "a": 1},
-  {"c": "Minecraft", "q": "Which mining tool tier is required to successfully harvest Diamond Ore in 'Minecraft'?", "opts": ["Stone Pickaxe or better", "Iron Pickaxe or better", "Gold Pickaxe or better", "Wooden Pickaxe or better"], "a": 1},
-  {"c": "Supercell", "q": "In 'Clash of Clans', what is the central building that players must upgrade to unlock new defenses, troops, and higher building levels?", "opts": ["Clan Castle", "Town Hall", "Barracks", "Builder's Hut"], "a": 1},
-  {"c": "Supercell", "q": "Which melee troop in 'Clash of Clans' and 'Clash Royale' wears heavy purple-and-black armor and wields a massive sword?", "opts": ["Valkyrie", "P.E.K.K.A", "Mega Knight", "Dark Prince"], "a": 1},
-  {"c": "Supercell", "q": "How many cards make up a standard battle deck in 'Clash Royale'?", "opts": ["6 cards", "8 cards", "10 cards", "12 cards"], "a": 1},
-  {"c": "Supercell", "q": "What is the maximum amount of Elixir a player can store at one time during a standard 'Clash Royale' battle?", "opts": ["8 Elixir", "10 Elixir", "12 Elixir", "15 Elixir"], "a": 1},
-  {"c": "Supercell", "q": "Who is the shotgun-wielding Starting Brawler unlocked at the very beginning of 'Brawl Stars'?", "opts": ["Colt", "Shelly", "Nita", "Poco"], "a": 1},
-  {"c": "Supercell", "q": "In 'Brawl Stars' Gem Grab mode, how many gems must a team collect and hold until the countdown ends to win?", "opts": ["5 gems", "10 gems", "15 gems", "20 gems"], "a": 1},
-  {"c": "Medieval Europe", "q": "Which deadly 14th-century pandemic swept across Europe, killing an estimated one-third to one-half of the continent's population?", "opts": ["The Spanish Flu", "The Black Death", "The Justinian Fever", "The Sweating Sickness"], "a": 1},
-  {"c": "Medieval Europe", "q": "In medieval European feudalism, what was the name of the land estate granted by a lord to a vassal in exchange for military service?", "opts": ["A fief", "A guild", "A tithe", "A serfdom"], "a": 0},
-  {"c": "Medieval Europe", "q": "Which Frankish king was crowned 'Emperor of the Romans' by Pope Leo III on Christmas Day in the year 800?", "opts": ["Clovis I", "Charles Martel", "Charlemagne", "Pepin the Short"], "a": 2},
-  {"c": "Medieval Europe", "q": "Which young French heroine helped lift the siege of Orléans during the Hundred Years' War before being captured and executed in 1431?", "opts": ["Eleanor of Aquitaine", "Catherine de' Medici", "Marie Antoinette", "Joan of Arc"], "a": 3},
-  {"c": "Medieval Europe", "q": "Which medieval battle in 1066 saw William, Duke of Normandy defeat King Harold II to conquer England?", "opts": ["Battle of Agincourt", "Battle of Hastings", "Battle of Tours", "Battle of Crécy"], "a": 1}
-];
-
 // ==================== BOT DIFFICULTIES & NAMES ====================
 const DIFFICULTIES = [
   { key: "Very Very Easy", accuracy: 0.22, minTime: 11.0, maxTime: 19.2 },
@@ -1426,6 +1139,59 @@ const POWERUP_ITEMS = [
   { id: "heartBargain", name: "💝 Heart Bargain", cost: 1000, desc: "Activate on the VS screen: answer the next question right and before your opponent to gain back 1 ❤️." },
   { id: "doubleJeopardy", name: "⚡ Double Jeopardy", cost: 750, desc: "Activate on the VS screen: raises stakes so whoever loses (or both if both miss) loses 2 ❤️ instead of 1!" },
   { id: "juggernaut", name: "🦾 Juggernaut", cost: 3000, desc: "Activate ONLY on the Round 1 VS screen before the first question to start the match with 5 ❤️ instead of 3 ❤️." }
+];
+
+const PASSIVE_ITEMS = [
+  {
+    id: "luckyDraw",
+    name: "🍀 Lucky Draw",
+    shortName: "Lucky Draw",
+    cost: 2000,
+    desc: "If you and your opponent both answer a question correctly at the exact same time, you gain +1 ❤️ (works even at 3 hearts)."
+  },
+  {
+    id: "buzzerBeater",
+    name: "⏱️ Buzzer Beater",
+    shortName: "Buzzer Beater",
+    cost: 2500,
+    desc: "Answering correctly with under 3.0 seconds left on the 20s clock deals 2 ❤️ of damage if your opponent misses."
+  },
+  {
+    id: "lastStand",
+    name: "🔥 Last Stand",
+    shortName: "Last Stand",
+    cost: 5000,
+    desc: "Win 5 consecutive duels in a single match while on 1 heart to restore +1 ❤️."
+  },
+  {
+    id: "goldDigger",
+    name: "💰 Gold Digger",
+    shortName: "Gold Digger",
+    cost: 5000,
+    desc: "Earn +20% bonus coins from match placement payouts."
+  },
+  {
+    id: "bountyHunter",
+    name: "🎯 Bounty Hunter",
+    shortName: "Bounty Hunter",
+    cost: 5000,
+    desc: "Earn +2 coins and +2 XP every time you land the eliminating blow on an opponent."
+  },
+  {
+    id: "ironclad",
+    name: "🛡️ Ironclad",
+    shortName: "Ironclad",
+    cost: 7000,
+    desc: "On Question 2 of every match, 50% chance to receive a free automatic Aegis Life Shield for that question."
+  },
+  {
+    id: "dualWielding",
+    name: "⚔️ Dual Wielding",
+    shortName: "Dual Wielding",
+    cost: 15000,
+    isSlotUpgrade: true,
+    desc: "Permanent upgrade that lets you equip 2 passive abilities at once."
+  }
 ];
 
 const SKIN_THEMES = [
@@ -1521,11 +1287,43 @@ let profile = {
   xp: 0,
   level: 0,
   inventory: { revive: 0, fiftyFifty: 0, freeze: 0, shield: 0, heartBargain: 0, doubleJeopardy: 0, juggernaut: 0 },
+  unlockedPassives: [],
+  equippedPassives: [],
   unlockedSkins: ["default"],
   equippedSkin: "default",
   currentStreak: 0,
   longestStreak: 0
 };
+
+// XP requirement curve:
+// Level 0 -> 1: 250 XP
+// Levels 1 -> 5: 500 XP each
+// Levels 5 -> 10: 750 XP each
+// Levels 10+: 1000 XP each
+function getXpForNextLevel(level) {
+  const lvl = Math.max(0, Number(level) || 0);
+  if (lvl === 0) return 250;
+  if (lvl < 5) return 500;
+  if (lvl < 10) return 750;
+  return 1000;
+}
+
+function hasPassive(player, passiveId) {
+  return !!(player && Array.isArray(player.passives) && player.passives.includes(passiveId));
+}
+
+function getDisplayPassives(passivesArr) {
+  if (!Array.isArray(passivesArr)) return [];
+  return passivesArr
+    .filter(id => id !== "dualWielding")
+    .map(id => PASSIVE_ITEMS.find(p => p.id === id))
+    .filter(Boolean);
+}
+
+function formatPassivesText(passivesArr) {
+  const list = getDisplayPassives(passivesArr);
+  return list.map(p => p.name).join(" • ");
+}
 
 function syncLevelUnlockedSkins() {
   if (!Array.isArray(profile.unlockedSkins)) profile.unlockedSkins = ["default"];
@@ -1568,13 +1366,22 @@ function loadProfile() {
         xp: Math.max(0, Number(parsed.xp) || 0),
         level: Math.max(0, Number(parsed.level) || 0),
         inventory: { ...profile.inventory, ...(parsed.inventory || {}) },
+        unlockedPassives: Array.isArray(parsed.unlockedPassives) ? parsed.unlockedPassives : [],
+        equippedPassives: Array.isArray(parsed.equippedPassives) ? parsed.equippedPassives : [],
         currentStreak: Number(parsed.currentStreak) || 0,
         longestStreak: Number(parsed.longestStreak) || 0
       };
     }
   } catch (e) {}
-  while (profile.xp >= 1000) {
-    profile.xp -= 1000;
+
+  // Sanitize equipped passives against max slots (1 default, 2 with Dual Wielding)
+  const maxSlots = profile.unlockedPassives.includes("dualWielding") ? 2 : 1;
+  profile.equippedPassives = profile.equippedPassives
+    .filter(id => id !== "dualWielding" && profile.unlockedPassives.includes(id))
+    .slice(0, maxSlots);
+
+  while (profile.xp >= getXpForNextLevel(profile.level)) {
+    profile.xp -= getXpForNextLevel(profile.level);
     profile.level += 1;
   }
   syncLevelUnlockedSkins();
@@ -1598,8 +1405,12 @@ function updateHeaderHUD() {
   document.getElementById("coinCount").textContent = profile.coins.toLocaleString();
   const lvlEl = document.getElementById("levelCount");
   const xpEl = document.getElementById("xpCount");
-  if (lvlEl) lvlEl.textContent = (profile.level || 0).toLocaleString();
+  const xpNeededEl = document.getElementById("xpNeededCount");
+  const currentLvl = profile.level || 0;
+  if (lvlEl) lvlEl.textContent = currentLvl.toLocaleString();
   if (xpEl) xpEl.textContent = (profile.xp || 0).toLocaleString();
+  if (xpNeededEl) xpNeededEl.textContent = getXpForNextLevel(currentLvl).toLocaleString();
+
   const skin = SKIN_ITEMS.find(s => s.id === profile.equippedSkin) || SKIN_ITEMS[0];
   const badge = document.getElementById("activeSkinDisplay");
   badge.className = `skin-badge ${skin.css}`;
@@ -1623,7 +1434,16 @@ function showToast(msg) {
 }
 
 // ==================== SHOP LOGIC ====================
+function switchShopSubTab(subTabId, btnEl) {
+  document.querySelectorAll(".shop-subtab").forEach(el => el.style.display = "none");
+  document.getElementById(subTabId).style.display = "block";
+  document.querySelectorAll(".shop-subtab-btn").forEach(b => b.classList.remove("active"));
+  if (btnEl) btnEl.classList.add("active");
+  renderShop();
+}
+
 function renderShop() {
+  // 1. Consumable Power-Ups
   const puGrid = document.getElementById("powerupShopGrid");
   puGrid.innerHTML = "";
   POWERUP_ITEMS.forEach(item => {
@@ -1645,6 +1465,65 @@ function renderShop() {
     puGrid.appendChild(div);
   });
 
+  // 2. Passive Abilities
+  const passiveGrid = document.getElementById("passiveShopGrid");
+  if (passiveGrid) {
+    passiveGrid.innerHTML = "";
+    const hasDual = profile.unlockedPassives.includes("dualWielding");
+    const maxSlots = hasDual ? 2 : 1;
+    const statusBadge = document.getElementById("equippedPassiveStatusBadge");
+    if (statusBadge) {
+      const eqNames = formatPassivesText(profile.equippedPassives);
+      statusBadge.textContent = `Equipped (${profile.equippedPassives.length}/${maxSlots}): ${eqNames || "None"}`;
+    }
+
+    PASSIVE_ITEMS.forEach(item => {
+      const unlocked = profile.unlockedPassives.includes(item.id);
+      const equipped = profile.equippedPassives.includes(item.id);
+      const isHighlighted = item.isSlotUpgrade ? unlocked : equipped;
+
+      const div = document.createElement("div");
+      div.className = `card ${isHighlighted ? "highlight" : ""}`;
+
+      let statePill = "";
+      if (item.isSlotUpgrade) {
+        statePill = unlocked
+          ? `<span class="pill" style="color:var(--green); border-color:var(--green);">Active (2 Slots)</span>`
+          : `<span class="pill">Slot Upgrade</span>`;
+      } else if (equipped) {
+        statePill = `<span class="pill" style="color:var(--green); border-color:var(--green);">Equipped ✓</span>`;
+      } else if (unlocked) {
+        statePill = `<span class="pill" style="color:var(--accent); border-color:var(--accent);">Owned</span>`;
+      } else {
+        statePill = `<span class="pill">Permanent</span>`;
+      }
+
+      let actionBtn = "";
+      if (!unlocked) {
+        actionBtn = `<button class="btn gold" ${profile.coins < item.cost ? "disabled" : ""} onclick="buyPassive('${item.id}', ${item.cost})">Buy for ${item.cost.toLocaleString()} 🪙</button>`;
+      } else if (item.isSlotUpgrade) {
+        actionBtn = `<button class="btn secondary" disabled>2 Passive Slots Unlocked ✓</button>`;
+      } else if (equipped) {
+        actionBtn = `<button class="btn secondary" onclick="toggleEquipPassive('${item.id}')">Unequip</button>`;
+      } else {
+        actionBtn = `<button class="btn" onclick="toggleEquipPassive('${item.id}')">Equip Passive</button>`;
+      }
+
+      div.innerHTML = `
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+            <h4>${item.name}</h4>
+            ${statePill}
+          </div>
+          <p class="sub" style="margin-top:6px; margin-bottom:0;">${item.desc}</p>
+        </div>
+        ${actionBtn}
+      `;
+      passiveGrid.appendChild(div);
+    });
+  }
+
+  // 3. Prestige Skins
   const filterBar = document.getElementById("skinThemeFilters");
   if (filterBar) {
     filterBar.innerHTML = "";
@@ -1726,6 +1605,52 @@ function buyPowerup(id, cost) {
   showToast("Purchased power-up!");
 }
 
+function buyPassive(id, cost) {
+  if (profile.coins < cost || profile.unlockedPassives.includes(id)) return;
+  profile.coins -= cost;
+  profile.unlockedPassives.push(id);
+
+  if (id === "dualWielding") {
+    showToast("⚔️ Dual Wielding unlocked! You can now equip 2 passive abilities!");
+  } else {
+    const maxSlots = profile.unlockedPassives.includes("dualWielding") ? 2 : 1;
+    if (profile.equippedPassives.length < maxSlots) {
+      profile.equippedPassives.push(id);
+      showToast("Purchased & equipped passive ability!");
+    } else {
+      showToast("Purchased passive ability! Equip it anytime in the shop.");
+    }
+  }
+  saveProfile();
+  renderShop();
+}
+
+function toggleEquipPassive(id) {
+  if (!profile.unlockedPassives.includes(id) || id === "dualWielding") return;
+  const maxSlots = profile.unlockedPassives.includes("dualWielding") ? 2 : 1;
+
+  if (profile.equippedPassives.includes(id)) {
+    profile.equippedPassives = profile.equippedPassives.filter(p => p !== id);
+    saveProfile();
+    renderShop();
+    showToast("Passive unequipped.");
+    return;
+  }
+
+  if (maxSlots === 1) {
+    profile.equippedPassives = [id];
+  } else {
+    if (profile.equippedPassives.length >= 2) {
+      showToast("You already have 2 passives equipped! Unequip one first.");
+      return;
+    }
+    profile.equippedPassives.push(id);
+  }
+  saveProfile();
+  renderShop();
+  showToast("Passive equipped!");
+}
+
 function equipSkin(id) {
   const skin = SKIN_ITEMS.find(s => s.id === id);
   if (!skin) return;
@@ -1769,7 +1694,7 @@ let gameState = {
   mode: "single", // "single" | "superhard" | "online_host" | "online_client"
   superHard: false,
   round: 0,
-  players: [], // { id, name, isBot, difficulty, lives, eliminatedRound, skin, streak, isMe }
+  players: [],
   usedQuestionIndices: new Set(),
   currentQuestion: null,
   currentPairings: [],
@@ -1815,6 +1740,9 @@ function generateBots(count, modeType) {
       lives: 3,
       maxLives: 3,
       hasJuggernaut: false,
+      passives: [],
+      lastStandStreak: 0,
+      bountyElims: 0,
       eliminatedRound: null,
       skin: "default",
       streak: 0,
@@ -1823,13 +1751,29 @@ function generateBots(count, modeType) {
       isMe: false
     });
   }
-  // Each game, there is a 3% chance that a random bot starts with Juggernaut (5 hearts)
+
+  // 3% chance that a random bot starts with Juggernaut (5 hearts)
   if (bots.length > 0 && Math.random() < 0.03) {
     const jugBot = bots[Math.floor(Math.random() * bots.length)];
     jugBot.lives = 5;
     jugBot.maxLives = 5;
     jugBot.hasJuggernaut = true;
   }
+
+  // Independent 2% chance each for a bot to spawn with Ironclad, Buzzer Beater, Last Stand, or Lucky Draw
+  // (at most 1 bot can receive each specific ability)
+  const BOT_PASSIVE_POOL = ["ironclad", "buzzerBeater", "lastStand", "luckyDraw"];
+  if (bots.length > 0) {
+    BOT_PASSIVE_POOL.forEach(passiveId => {
+      if (Math.random() < 0.02) {
+        const chosenBot = bots[Math.floor(Math.random() * bots.length)];
+        if (!chosenBot.passives.includes(passiveId)) {
+          chosenBot.passives.push(passiveId);
+        }
+      }
+    });
+  }
+
   return bots;
 }
 
@@ -1843,6 +1787,9 @@ function startSinglePlayer(isSuperHard) {
     lives: 3,
     maxLives: 3,
     hasJuggernaut: false,
+    passives: [...(profile.equippedPassives || [])],
+    lastStandStreak: 0,
+    bountyElims: 0,
     eliminatedRound: null,
     skin: profile.equippedSkin,
     streak: profile.currentStreak || 0,
@@ -1876,6 +1823,9 @@ function startSinglePlayer(isSuperHard) {
 }
 
 function pickRandomQuestion() {
+  if (typeof QUESTIONS === "undefined" || !Array.isArray(QUESTIONS) || QUESTIONS.length === 0) {
+    return { c: "Error", q: "questions.js not loaded! Make sure questions.js is in the same folder as index.html.", opts: ["OK", "OK", "OK", "OK"], a: 0 };
+  }
   if (gameState.usedQuestionIndices.size >= QUESTIONS.length) {
     gameState.usedQuestionIndices.clear();
   }
@@ -1917,13 +1867,24 @@ function startNextRound() {
   gameState.currentQuestion = pickRandomQuestion();
   gameState.currentPairings = buildPairings(alive);
 
-  // Broadcast 6-second VS matchup screen first (without leaking question yet)
+  // Ironclad passive: On Question 2 of every match, 50% chance for a free automatic Aegis Life Shield
+  if (gameState.round === 2) {
+    alive.forEach(p => {
+      if (hasPassive(p, "ironclad") && Math.random() < 0.5) {
+        if (!gameState.preRoundBuffs[p.id]) gameState.preRoundBuffs[p.id] = {};
+        gameState.preRoundBuffs[p.id].shield = true;
+        gameState.preRoundBuffs[p.id].ironcladTriggered = true;
+      }
+    });
+  }
+
   if (gameState.mode === "online_host") {
     broadcastOnline({
       type: "PRE_ROUND_VS",
       round: gameState.round,
       players: gameState.players,
-      pairings: gameState.currentPairings
+      pairings: gameState.currentPairings,
+      preRoundBuffs: gameState.preRoundBuffs
     });
   }
 
@@ -1935,7 +1896,7 @@ function formatBuffLabels(buffObj) {
   const tags = [];
   if (buffObj.fiftyFiftyUsed) tags.push("✂️ 50/50");
   if (buffObj.freeze) tags.push("❄️ Cryo +3s");
-  if (buffObj.shield) tags.push("🛡️ Life Shield");
+  if (buffObj.shield) tags.push(buffObj.ironcladTriggered ? "🛡️ Ironclad Shield" : "🛡️ Life Shield");
   if (buffObj.heartBargain) tags.push("💝 Heart Bargain");
   if (buffObj.doubleJeopardy) tags.push("⚡ Double Jeopardy");
   if (buffObj.juggernaut) tags.push("🦾 Juggernaut (5 ❤️)");
@@ -1949,6 +1910,7 @@ function triggerOpponentPowerupNotification(oppName, powerupType) {
     heartBargain: "💝 Heart Bargain (Gains +1 ❤️ if they beat you!)",
     freeze: "❄️ Cryo Delay (+3.0s added to your answer time!)",
     shield: "🛡️ Aegis Life Shield (Protected from losing a heart!)",
+    ironclad: "🛡️ Ironclad (50% proc triggered a free Aegis Life Shield for Question 2!)",
     fiftyFifty: "✂️ 50/50 Sabotage (Eliminated 2 wrong choices for themselves!)",
     juggernaut: "🦾 Juggernaut (Started the match with 5 ❤️!)"
   };
@@ -1969,6 +1931,12 @@ function showPreRoundVSScreen() {
   const me = gameState.players.find(p => p.id === myId);
   const alive = gameState.players.filter(p => p.lives > 0);
   const isSpectating = !me || me.lives <= 0;
+
+  // Apply local Ironclad proc if host/singleplayer rolled it for us on Round 2
+  if (!isSpectating && gameState.preRoundBuffs?.[myId]?.ironcladTriggered) {
+    gameState.roundBuffs.shield = true;
+    showToast("🛡️ Ironclad triggered! Free Aegis Life Shield active for Question 2!");
+  }
 
   document.getElementById("vsRoundBadge").textContent = `ROUND ${gameState.round} MATCHUP`;
   document.getElementById("vsAliveBadge").textContent = `${alive.length} / 20 Remaining`;
@@ -2004,8 +1972,17 @@ function showPreRoundVSScreen() {
   }
 
   // Populate Left Card
+  const leftPassiveEl = document.getElementById("vsLeftPassiveBadge");
   if (leftPlayer) {
     document.getElementById("vsLeftName").innerHTML = formatPlayerNameHTML(leftPlayer);
+    const leftPassivesText = formatPassivesText(leftPlayer.passives);
+    if (leftPassivesText) {
+      leftPassiveEl.textContent = `🔮 ${leftPassivesText}`;
+      leftPassiveEl.style.display = "inline-flex";
+    } else {
+      leftPassiveEl.style.display = "none";
+    }
+
     const skinObj = SKIN_ITEMS.find(s => s.id === leftPlayer.skin) || SKIN_ITEMS[0];
     const leftSkinEl = document.getElementById("vsLeftSkin");
     leftSkinEl.className = `skin-badge ${skinObj.css}`;
@@ -2015,15 +1992,25 @@ function showPreRoundVSScreen() {
   }
 
   // Populate Right Card
+  const rightPassiveEl = document.getElementById("vsRightPassiveBadge");
   if (rightPlayer) {
     document.getElementById("vsRightTag").textContent = isSpectating ? "SURVIVOR 2" : "OPPONENT";
     document.getElementById("vsRightName").innerHTML = formatPlayerNameHTML(rightPlayer);
+    const rightPassivesText = formatPassivesText(rightPlayer.passives);
+    if (rightPassivesText) {
+      rightPassiveEl.textContent = `🔮 ${rightPassivesText}`;
+      rightPassiveEl.style.display = "inline-flex";
+    } else {
+      rightPassiveEl.style.display = "none";
+    }
+
     document.getElementById("vsRightDiff").textContent = rightPlayer.isBot ? `Bot • ${rightPlayer.difficulty}` : "Human Player";
     document.getElementById("vsRightHearts").textContent = renderHearts(rightPlayer.lives, rightPlayer.maxLives || 3);
     document.getElementById("vsRightLivesText").textContent = `${rightPlayer.lives} ${rightPlayer.lives === 1 ? "Life" : "Lives"} Left`;
   } else {
     document.getElementById("vsRightTag").textContent = "BYE ROUND";
     document.getElementById("vsRightName").textContent = "No Opponent";
+    rightPassiveEl.style.display = "none";
     document.getElementById("vsRightDiff").textContent = "Safe This Round";
     document.getElementById("vsRightHearts").textContent = "🛡️";
     document.getElementById("vsRightLivesText").textContent = "Automatic Pass";
@@ -2038,20 +2025,29 @@ function showPreRoundVSScreen() {
     updateVSPowerupButtonsUI(me, rightPlayer);
   }
 
-  // Notify if facing a Juggernaut bot in Round 1, or 3% chance for bot opponent to use Double Jeopardy / Heart Bargain
-  if (!isSpectating && rightPlayer && rightPlayer.isBot) {
-    if (gameState.round === 1 && rightPlayer.hasJuggernaut) {
+  // Notify if facing an Ironclad Round 2 shield, Juggernaut Round 1 bot, or 3% bot power-up (Double Jeopardy, Heart Bargain, or Aegis Life Shield)
+  if (!isSpectating && rightPlayer) {
+    if (gameState.preRoundBuffs?.[rightPlayer.id]?.ironcladTriggered) {
       gameState.botPuTimeout = setTimeout(() => {
-        triggerOpponentPowerupNotification(rightPlayer.name, "juggernaut");
-      }, 700);
-    } else if (Math.random() < 0.03) {
-      const maxBotLives = rightPlayer.maxLives || 3;
-      const botPu = (rightPlayer.lives < maxBotLives && Math.random() < 0.5) ? "heartBargain" : "doubleJeopardy";
-      if (!gameState.preRoundBuffs[rightPlayer.id]) gameState.preRoundBuffs[rightPlayer.id] = {};
-      gameState.preRoundBuffs[rightPlayer.id][botPu] = true;
-      gameState.botPuTimeout = setTimeout(() => {
-        triggerOpponentPowerupNotification(rightPlayer.name, botPu);
-      }, 1100);
+        triggerOpponentPowerupNotification(rightPlayer.name, "ironclad");
+      }, 650);
+    } else if (rightPlayer.isBot) {
+      if (gameState.round === 1 && rightPlayer.hasJuggernaut) {
+        gameState.botPuTimeout = setTimeout(() => {
+          triggerOpponentPowerupNotification(rightPlayer.name, "juggernaut");
+        }, 700);
+      } else if (Math.random() < 0.03) {
+        const maxBotLives = rightPlayer.maxLives || 3;
+        const botOptions = ["doubleJeopardy", "shield"];
+        if (rightPlayer.lives < maxBotLives) botOptions.push("heartBargain");
+        const botPu = botOptions[Math.floor(Math.random() * botOptions.length)];
+
+        if (!gameState.preRoundBuffs[rightPlayer.id]) gameState.preRoundBuffs[rightPlayer.id] = {};
+        gameState.preRoundBuffs[rightPlayer.id][botPu] = true;
+        gameState.botPuTimeout = setTimeout(() => {
+          triggerOpponentPowerupNotification(rightPlayer.name, botPu);
+        }, 1100);
+      }
     }
   }
 
@@ -2119,7 +2115,6 @@ function updateVSPowerupButtonsUI(me, rightPlayer) {
   btnHB.disabled = !hasOpp || isFullLives || gameState.roundBuffs.heartBargain || (profile.inventory.heartBargain || 0) <= 0;
   btnDJ.disabled = !hasOpp || gameState.roundBuffs.doubleJeopardy || (profile.inventory.doubleJeopardy || 0) <= 0;
 
-  // Juggernaut can ONLY be used before the very first question (Round 1 VS screen)
   btnJug.style.display = isRoundOne ? "" : "none";
   btnJug.disabled = !isRoundOne || !!gameState.roundBuffs.juggernaut || (profile.inventory.juggernaut || 0) <= 0;
 
@@ -2138,7 +2133,6 @@ function updateVSPowerupButtonsUI(me, rightPlayer) {
 }
 
 function usePowerup(type) {
-  // Power-ups can ONLY be used during the 6-second pre-question VS screen
   if (!document.getElementById("vsScreen").classList.contains("active")) return;
   if ((profile.inventory[type] || 0) <= 0) return;
 
@@ -2196,7 +2190,6 @@ function usePowerup(type) {
   saveProfile();
   updateVSPowerupButtonsUI(me, rightPlayer);
 
-  // Notify opponent / host in online multiplayer
   if (gameState.mode === "online_client") {
     sendToHost({
       type: "USE_VS_POWERUP",
@@ -2298,7 +2291,6 @@ function setupRoundUI() {
     optGrid.appendChild(btn);
   });
 
-  // Apply pre-armed 50/50 Sabotage & show read-only active buffs for both fighters
   if (!isSpectating) {
     if (gameState.roundBuffs.fiftyFiftyUsed) {
       const correctIdx = q.a;
@@ -2318,7 +2310,6 @@ function setupRoundUI() {
     document.getElementById("activeBuffNotice").textContent = "";
   }
 
-  // Host or single-player simulates all bots for this round
   if (gameState.mode !== "online_client") {
     simulateBotsForRound();
     if (gameState.mode === "online_host") {
@@ -2326,7 +2317,6 @@ function setupRoundUI() {
     }
   }
 
-  // Start 20.0s countdown
   gameState.roundStartTime = performance.now();
   gameState.timerInterval = setInterval(() => {
     const elapsed = (performance.now() - gameState.roundStartTime) / 1000;
@@ -2431,11 +2421,20 @@ function resolveRound() {
     const timeA = Math.round((subA.timeSec + (buffsB.freeze ? 3.0 : 0)) * 100) / 100;
     const timeB = Math.round((subB.timeSec + (buffsA.freeze ? 3.0 : 0)) * 100) / 100;
 
+    // Buzzer Beater check: under 3.0s left on the 20s clock (elapsed > 17.0s) and opponent misses
+    const timeLeftA = 20.0 - subA.timeSec;
+    const timeLeftB = 20.0 - subB.timeSec;
+    const buzzerA = hasPassive(pA, "buzzerBeater") && rightA && !rightB && timeLeftA < 3.0 && timeLeftA >= 0;
+    const buzzerB = hasPassive(pB, "buzzerBeater") && rightB && !rightA && timeLeftB < 3.0 && timeLeftB >= 0;
+
     const isDoubleJeopardy = !!(buffsA.doubleJeopardy || buffsB.doubleJeopardy);
-    const heartPenalty = isDoubleJeopardy ? 2 : 1;
+    const basePenalty = isDoubleJeopardy ? 2 : 1;
+    const damageToA = Math.max(basePenalty, buzzerB ? 2 : 1);
+    const damageToB = Math.max(basePenalty, buzzerA ? 2 : 1);
 
     let loseA = false;
     let loseB = false;
+    let isExactTie = false;
     let reason = "";
 
     if (!rightA && !rightB) {
@@ -2446,10 +2445,20 @@ function resolveRound() {
         : `Both <b>${pA.name}</b> and <b>${pB.name}</b> missed! Both lose 1 life.`;
     } else if (rightA && !rightB) {
       loseB = true;
-      reason = `<b>${pA.name}</b> answered correctly (${timeA.toFixed(2)}s) while <b>${pB.name}</b> missed!${isDoubleJeopardy ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
+      reason = `<b>${pA.name}</b> answered correctly (${timeA.toFixed(2)}s) while <b>${pB.name}</b> missed!`;
+      if (buzzerA) {
+        reason += ` ⏱️ <b>Buzzer Beater!</b> (${timeLeftA.toFixed(2)}s left) deals 2 ❤️ damage!`;
+      } else if (isDoubleJeopardy) {
+        reason += " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!";
+      }
     } else if (!rightA && rightB) {
       loseA = true;
-      reason = `<b>${pB.name}</b> answered correctly (${timeB.toFixed(2)}s) while <b>${pA.name}</b> missed!${isDoubleJeopardy ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
+      reason = `<b>${pB.name}</b> answered correctly (${timeB.toFixed(2)}s) while <b>${pA.name}</b> missed!`;
+      if (buzzerB) {
+        reason += ` ⏱️ <b>Buzzer Beater!</b> (${timeLeftB.toFixed(2)}s left) deals 2 ❤️ damage!`;
+      } else if (isDoubleJeopardy) {
+        reason += " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!";
+      }
     } else {
       if (timeA < timeB) {
         loseB = true;
@@ -2458,15 +2467,19 @@ function resolveRound() {
         loseA = true;
         reason = `Both got it right, but <b>${pB.name}</b> was faster (${timeB.toFixed(2)}s vs ${timeA.toFixed(2)}s)!${isDoubleJeopardy ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
       } else {
+        isExactTie = true;
         reason = `Exact tie! Both answered correctly in <b>${timeA.toFixed(2)}s</b> — neither loses a life!`;
       }
     }
+
+    const prevLivesA = pA.lives;
+    const prevLivesB = pB.lives;
 
     if (loseA) {
       if (buffsA.shield) {
         reason += ` (<b>${pA.name}</b>'s Life Shield blocked the damage!)`;
       } else {
-        pA.lives = Math.max(0, pA.lives - heartPenalty);
+        pA.lives = Math.max(0, pA.lives - damageToA);
         pA.lostAnyHeart = true;
         if (pA.lives === 0 && pA.eliminatedRound === null) pA.eliminatedRound = gameState.round;
       }
@@ -2475,15 +2488,68 @@ function resolveRound() {
       if (buffsB.shield) {
         reason += ` (<b>${pB.name}</b>'s Life Shield blocked the damage!)`;
       } else {
-        pB.lives = Math.max(0, pB.lives - heartPenalty);
+        pB.lives = Math.max(0, pB.lives - damageToB);
         pB.lostAnyHeart = true;
         if (pB.lives === 0 && pB.eliminatedRound === null) pB.eliminatedRound = gameState.round;
+      }
+    }
+
+    // Lucky Draw passive: exact tie -> gain +1 heart (works even at 3 hearts)
+    if (isExactTie) {
+      if (hasPassive(pA, "luckyDraw")) {
+        pA.lives += 1;
+        pA.maxLives = Math.max(pA.maxLives || 3, pA.lives);
+        reason += ` 🍀 <b>${pA.name}</b>'s <b>Lucky Draw</b> triggered (+1 ❤️ gained)!`;
+      }
+      if (hasPassive(pB, "luckyDraw")) {
+        pB.lives += 1;
+        pB.maxLives = Math.max(pB.maxLives || 3, pB.lives);
+        reason += ` 🍀 <b>${pB.name}</b>'s <b>Lucky Draw</b> triggered (+1 ❤️ gained)!`;
       }
     }
 
     // Did player answer right and before their opponent?
     const beatOppA = rightA && (!rightB || timeA < timeB);
     const beatOppB = rightB && (!rightA || timeB < timeA);
+
+    // Bounty Hunter passive: track eliminating blows
+    if (beatOppA && prevLivesB > 0 && pB.lives === 0) {
+      pA.bountyElims = (pA.bountyElims || 0) + 1;
+      if (hasPassive(pA, "bountyHunter")) {
+        reason += ` 🎯 <b>${pA.name}</b>'s <b>Bounty Hunter</b> triggered (+2 🪙, +2 XP)!`;
+      }
+    }
+    if (beatOppB && prevLivesA > 0 && pA.lives === 0) {
+      pB.bountyElims = (pB.bountyElims || 0) + 1;
+      if (hasPassive(pB, "bountyHunter")) {
+        reason += ` 🎯 <b>${pB.name}</b>'s <b>Bounty Hunter</b> triggered (+2 🪙, +2 XP)!`;
+      }
+    }
+
+    // Last Stand passive: 5 consecutive duel wins in a single match while on 1 heart -> restore 1 heart
+    if (beatOppA && pA.lives === 1) {
+      pA.lastStandStreak = (pA.lastStandStreak || 0) + 1;
+      if (hasPassive(pA, "lastStand") && pA.lastStandStreak >= 5) {
+        pA.lives += 1;
+        pA.maxLives = Math.max(pA.maxLives || 3, pA.lives);
+        pA.lastStandStreak = 0;
+        reason += ` 🔥 <b>${pA.name}</b>'s <b>Last Stand</b> activated after 5 straight 1-heart wins (+1 ❤️ restored)!`;
+      }
+    } else {
+      pA.lastStandStreak = 0;
+    }
+
+    if (beatOppB && pB.lives === 1) {
+      pB.lastStandStreak = (pB.lastStandStreak || 0) + 1;
+      if (hasPassive(pB, "lastStand") && pB.lastStandStreak >= 5) {
+        pB.lives += 1;
+        pB.maxLives = Math.max(pB.maxLives || 3, pB.lives);
+        pB.lastStandStreak = 0;
+        reason += ` 🔥 <b>${pB.name}</b>'s <b>Last Stand</b> activated after 5 straight 1-heart wins (+1 ❤️ restored)!`;
+      }
+    } else {
+      pB.lastStandStreak = 0;
+    }
 
     // Update Answer Streak for real players only (bots excluded)
     if (!pA.isBot) {
@@ -2523,7 +2589,6 @@ function resolveRound() {
 
   duelLogs["_spectator"] = generalLog;
 
-  // Persist local player's streak & longest streak
   const myId = myPeerOrLocalId();
   const me = gameState.players.find(p => p.id === myId);
   if (me && !me.isBot) {
@@ -2569,7 +2634,6 @@ function renderScoreboard(duelLogs) {
   clientExitBtn.style.display = "none";
   autoText.textContent = "";
 
-  // Case A: Player just hit 0 lives and hasn't had placement finalized yet
   if (me && me.lives === 0 && gameState.myPlacement === null) {
     if ((profile.inventory.revive || 0) > 0 && alive.length >= 1) {
       reviveBox.style.display = "block";
@@ -2580,25 +2644,20 @@ function renderScoreboard(duelLogs) {
     }
   }
 
-  // Case B: Player is eliminated (myPlacement is set)
   if (me && me.lives === 0 && gameState.myPlacement !== null) {
     if (!isOnline) {
-      // Single-player: match ends for player
       nextBtn.disabled = false;
       nextBtn.textContent = "View Final Results ➔";
     } else if (alive.length <= 1) {
-      // Online match is completely over for everyone
       nextBtn.disabled = false;
       nextBtn.textContent = "View Final Results ➔";
     } else if (gameState.mode === "online_host") {
-      // Host was eliminated, but online match continues for surviving players
       specBanner.style.display = "flex";
       document.getElementById("sbSpecPlacement").textContent = gameState.myPlacement;
       nextBtn.disabled = false;
       nextBtn.textContent = "Continue Match (Spectate) ➔";
       startOnlineScoreboardAutoAdvance(6);
     } else {
-      // Eliminated online client: can spectate next round OR claim coins & exit early
       specBanner.style.display = "flex";
       document.getElementById("sbSpecPlacement").textContent = gameState.myPlacement;
       clientExitBtn.style.display = "inline-block";
@@ -2606,7 +2665,6 @@ function renderScoreboard(duelLogs) {
       nextBtn.textContent = "Spectating Next Round...";
     }
   } else {
-    // Player is still alive!
     if (alive.length <= 1) {
       nextBtn.disabled = false;
       nextBtn.textContent = "Claim Victory Rewards ➔";
@@ -2626,7 +2684,6 @@ function renderScoreboard(duelLogs) {
     }
   }
 
-  // Sort standings: alive by lives desc, then eliminated by eliminatedRound desc
   const sorted = [...gameState.players].sort((a, b) => {
     if (a.lives !== b.lives) return b.lives - a.lives;
     return (b.eliminatedRound || 999) - (a.eliminatedRound || 999);
@@ -2638,9 +2695,14 @@ function renderScoreboard(duelLogs) {
     const item = document.createElement("div");
     item.className = `sb-item ${p.id === myId ? "me" : ""} ${p.lives === 0 ? "dead" : ""}`;
     const diffLabel = p.isBot ? `<span class="diff-tag">${p.difficulty}</span>` : `<span class="diff-tag" style="color:var(--accent);">Human</span>`;
+    const passiveLabel = formatPassivesText(p.passives);
+    const passiveSubHtml = passiveLabel ? `<div class="sb-passive-sub">🔮 ${escapeHtml(passiveLabel)}</div>` : "";
     item.innerHTML = `
-      <div style="display:flex; align-items:center; gap:5px; min-width:0; flex:1;">
-        <b style="min-width:0; display:inline-flex; max-width:100%;">${formatPlayerNameHTML(p)}</b> ${diffLabel}
+      <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
+        <div style="display:flex; align-items:center; gap:5px; min-width:0;">
+          <b style="min-width:0; display:inline-flex; max-width:100%;">${formatPlayerNameHTML(p)}</b> ${diffLabel}
+        </div>
+        ${passiveSubHtml}
       </div>
       <div style="flex-shrink:0;">${p.lives > 0 ? renderHearts(p.lives, p.maxLives || 3) : "💀"}</div>
     `;
@@ -2654,7 +2716,6 @@ function startOnlineScoreboardAutoAdvance(seconds) {
   let rem = seconds;
   autoText.textContent = `Auto-advancing in ${rem}s...`;
   gameState.sbInterval = setInterval(() => {
-    // Pause auto-advance if host still has an unanswered Revive modal open
     if (document.getElementById("reviveOfferBox").style.display === "block") {
       autoText.textContent = "Waiting for Revive decision...";
       return;
@@ -2705,7 +2766,6 @@ function proceedAfterScoreboard() {
   const me = gameState.players.find(p => p.id === myId);
   const alive = gameState.players.filter(p => p.lives > 0);
 
-  // Single-player ends as soon as player is eliminated or <= 1 player left
   if (gameState.mode === "single" || gameState.mode === "superhard") {
     if (!me || me.lives === 0 || alive.length <= 1) {
       concludeMatch();
@@ -2715,7 +2775,6 @@ function proceedAfterScoreboard() {
     return;
   }
 
-  // Online Host: ONLY ends the match when <= 1 player remains alive!
   if (gameState.mode === "online_host") {
     if (alive.length <= 1) {
       broadcastOnline({ type: "MATCH_OVER", players: gameState.players });
@@ -2748,9 +2807,23 @@ function concludeMatch() {
   else if (placement <= 10) baseCoins = 10;
 
   const multiplier = gameState.superHard ? 2 : 1;
-  const earned = baseCoins * multiplier;
+  let placementCoins = baseCoins * multiplier;
 
-  // XP Calculation: +1 XP per correct answer + placement bonus
+  // Gold Digger passive: +20% bonus coins from match placement payouts
+  const hasGoldDigger = hasPassive(me, "goldDigger");
+  if (hasGoldDigger && placementCoins > 0) {
+    placementCoins = Math.round(placementCoins * 1.2);
+  }
+
+  // Bounty Hunter passive: +2 coins and +2 XP per eliminating blow
+  const hasBountyHunter = hasPassive(me, "bountyHunter");
+  const bountyCount = me ? (me.bountyElims || 0) : 0;
+  const bountyCoins = hasBountyHunter ? (bountyCount * 2) : 0;
+  const bountyXp = hasBountyHunter ? (bountyCount * 2) : 0;
+
+  const earned = placementCoins + bountyCoins;
+
+  // XP Calculation: +1 XP per correct answer + placement bonus + Bounty Hunter bonus
   const correctCount = me ? (me.correctAnswers || 0) : 0;
   const questionXp = correctCount * 1;
   let placementXp = 0;
@@ -2779,7 +2852,7 @@ function concludeMatch() {
     placementXp = 5;
     placementXpLabel = "Top 10 (+5 XP)";
   }
-  const totalXpEarned = questionXp + placementXp;
+  const totalXpEarned = questionXp + placementXp + bountyXp;
 
   let levelsGained = 0;
   let unlockedThisMatch = [];
@@ -2788,8 +2861,8 @@ function concludeMatch() {
     const startLevel = profile.level || 0;
     profile.coins += earned;
     profile.xp = (profile.xp || 0) + totalXpEarned;
-    while (profile.xp >= 1000) {
-      profile.xp -= 1000;
+    while (profile.xp >= getXpForNextLevel(profile.level || 0)) {
+      profile.xp -= getXpForNextLevel(profile.level || 0);
       profile.level = (profile.level || 0) + 1;
     }
     levelsGained = (profile.level || 0) - startLevel;
@@ -2807,6 +2880,8 @@ function concludeMatch() {
 
   const breakdownParts = [`${correctCount} correct ${correctCount === 1 ? "answer" : "answers"} (+${questionXp} XP)`];
   if (placementXp > 0) breakdownParts.push(placementXpLabel);
+  if (hasGoldDigger && baseCoins > 0) breakdownParts.push("Gold Digger (+20% 🪙)");
+  if (hasBountyHunter && bountyCount > 0) breakdownParts.push(`Bounty Hunter: ${bountyCount} KO${bountyCount === 1 ? "" : "s"} (+${bountyCoins} 🪙, +${bountyXp} XP)`);
   document.getElementById("xpBreakdownText").textContent = breakdownParts.join("  •  ");
 
   const lvlBanner = document.getElementById("levelUpBanner");
@@ -2820,18 +2895,22 @@ function concludeMatch() {
     lvlBanner.style.display = "none";
   }
 
-  document.getElementById("endLevelNum").textContent = (profile.level || 0).toLocaleString();
+  const currentLvl = profile.level || 0;
+  const reqXp = getXpForNextLevel(currentLvl);
+  document.getElementById("endLevelNum").textContent = currentLvl.toLocaleString();
   document.getElementById("endXpNum").textContent = (profile.xp || 0).toLocaleString();
-  document.getElementById("endXpBarFill").style.width = Math.min(100, ((profile.xp || 0) / 1000) * 100) + "%";
+  document.getElementById("endXpNeededNum").textContent = reqXp.toLocaleString();
+  document.getElementById("endXpBarFill").style.width = Math.min(100, ((profile.xp || 0) / reqXp) * 100) + "%";
 
   const nextLockedSkin = [...SKIN_ITEMS]
-    .filter(s => (s.unlockLevel || 0) > (profile.level || 0))
+    .filter(s => (s.unlockLevel || 0) > currentLvl)
     .sort((a, b) => a.unlockLevel - b.unlockLevel)[0];
   const nextUnlockEl = document.getElementById("endNextUnlockText");
+  const xpLeft = Math.max(0, reqXp - (profile.xp || 0));
   if (nextLockedSkin) {
-    nextUnlockEl.textContent = `${(1000 - (profile.xp || 0)).toLocaleString()} XP to Level ${(profile.level || 0) + 1} • Next skin unlock at Level ${nextLockedSkin.unlockLevel}: ${nextLockedSkin.name}`;
+    nextUnlockEl.textContent = `${xpLeft.toLocaleString()} XP to Level ${currentLvl + 1} • Next skin unlock at Level ${nextLockedSkin.unlockLevel}: ${nextLockedSkin.name}`;
   } else {
-    nextUnlockEl.textContent = `${(1000 - (profile.xp || 0)).toLocaleString()} XP to Level ${(profile.level || 0) + 1} • All Prestige Skins unlocked!`;
+    nextUnlockEl.textContent = `${xpLeft.toLocaleString()} XP to Level ${currentLvl + 1} • All Prestige Skins unlocked!`;
   }
 }
 
@@ -2858,7 +2937,6 @@ let clientConns = [];
 let onlineRoomCode = null;
 let isRoomHost = false;
 
-// Public Quick Match (Zero-Backend Lobby Slot Queue) state
 const MAX_PUBLIC_SLOTS = 15;
 const PUBLIC_LOBBY_SECONDS = 60;
 let isPublicLobby = false;
@@ -2904,7 +2982,6 @@ function cancelQuickMatchSearch() {
   }
 }
 
-// Step 1: Start scanning TR20_PUB_1, TR20_PUB_2, ...
 function startQuickMatch() {
   if (typeof Peer === "undefined") {
     showToast("PeerJS library failed to load. Check internet connection.");
@@ -2920,7 +2997,6 @@ function startQuickMatch() {
   });
   probePeer.on("error", err => {
     if (!quickMatchSearching) return;
-    // PeerJS emits 'peer-unavailable' when target slot ID does not exist yet
     if (err.type === "peer-unavailable" && typeof window._currentProbeSlot === "number") {
       const freeSlot = window._currentProbeSlot;
       window._currentProbeSlot = null;
@@ -2940,7 +3016,6 @@ function startQuickMatch() {
 function probePublicSlot(slotNum) {
   if (!quickMatchSearching || !probePeer) return;
   if (slotNum > MAX_PUBLIC_SLOTS) {
-    // Fallback if all 15 slots are somehow busy simultaneously
     if (probePeer) {
       try { probePeer.destroy(); } catch (e) {}
       probePeer = null;
@@ -2975,6 +3050,7 @@ function probePublicSlot(slotNum) {
       id: probePeer.id,
       name: profile.name || "Player",
       skin: profile.equippedSkin,
+      passives: [...(profile.equippedPassives || [])],
       streak: profile.currentStreak || 0
     });
   });
@@ -2996,7 +3072,6 @@ function probePublicSlot(slotNum) {
       window._currentProbeSlot = null;
       clearTimeout(window._probeTimeout);
 
-      // Promote probePeer to active game peer
       peer = probePeer;
       probePeer = null;
       hostConn = conn;
@@ -3006,7 +3081,6 @@ function probePublicSlot(slotNum) {
       onlineRoomCode = "PUBLIC #" + data.slotNum;
       setQuickMatchSearchingUI(false);
 
-      // Rebind peer error handler for active session
       peer.removeAllListeners("error");
       peer.on("error", err => {
         showToast("Connection warning: " + err.type);
@@ -3029,7 +3103,6 @@ function probePublicSlot(slotNum) {
   });
 }
 
-// Step 2: Claim an open public slot as the 60-second automatic host
 function claimPublicHostSlot(slotNum) {
   if (!quickMatchSearching) return;
   setQuickMatchSearchingUI(true, `Creating Public Lobby #${slotNum}...`);
@@ -3066,7 +3139,6 @@ function claimPublicHostSlot(slotNum) {
   candidatePeer.on("error", err => {
     try { candidatePeer.destroy(); } catch (e) {}
     if (!quickMatchSearching) return;
-    // Race condition: another player claimed this exact slot milliseconds earlier!
     if (err.type === "unavailable-id") {
       setQuickMatchSearchingUI(true, `Lobby #${slotNum} just opened! Joining...`);
       probePeer = new Peer();
@@ -3127,7 +3199,6 @@ function updatePublicLobbyTimerDisplay() {
   if (barEl) barEl.style.width = pct + "%";
 }
 
-// Private Room Host
 function createOnlineRoom() {
   if (typeof Peer === "undefined") {
     showToast("PeerJS library failed to load. Check internet connection.");
@@ -3170,7 +3241,6 @@ function createOnlineRoom() {
   });
 }
 
-// Private Room Join
 function joinOnlineRoom() {
   const code = document.getElementById("joinCodeInput").value.trim().toUpperCase();
   if (!code) { showToast("Enter a valid Room Code."); return; }
@@ -3196,6 +3266,7 @@ function joinOnlineRoom() {
         id: peer.id,
         name: profile.name || "Player",
         skin: profile.equippedSkin,
+        passives: [...(profile.equippedPassives || [])],
         streak: profile.currentStreak || 0
       });
     });
@@ -3217,13 +3288,19 @@ function joinOnlineRoom() {
 
 function handleHostReceive(conn, data) {
   if (data.type === "JOIN_PUBLIC_HELLO") {
-    // Reject late joiners if 60s expired, match started, or 20/20 humans full
     if (publicRoomLocked || gameState.mode === "online_host" || clientConns.length >= 19) {
       conn.send({ type: "ROOM_LOCKED" });
       setTimeout(() => { try { conn.close(); } catch (e) {} }, 250);
       return;
     }
-    clientConns.push({ conn, id: data.id, name: data.name, skin: data.skin, streak: Number(data.streak) || 0 });
+    clientConns.push({
+      conn,
+      id: data.id,
+      name: data.name,
+      skin: data.skin,
+      passives: Array.isArray(data.passives) ? data.passives : [],
+      streak: Number(data.streak) || 0
+    });
     updateOnlineWaitingList();
     const remSec = Math.max(1, (publicLobbyEndsAt - performance.now()) / 1000);
     conn.send({
@@ -3234,7 +3311,6 @@ function handleHostReceive(conn, data) {
     });
     broadcastLobbyState();
 
-    // Auto-start immediately if all 20 human seats are filled!
     if (clientConns.length >= 19) {
       publicRoomLocked = true;
       clearInterval(publicLobbyInterval);
@@ -3243,7 +3319,14 @@ function handleHostReceive(conn, data) {
     }
   } else if (data.type === "JOIN_HELLO") {
     if (gameState.mode === "online_host" || clientConns.length >= 19) return;
-    clientConns.push({ conn, id: data.id, name: data.name, skin: data.skin, streak: Number(data.streak) || 0 });
+    clientConns.push({
+      conn,
+      id: data.id,
+      name: data.name,
+      skin: data.skin,
+      passives: Array.isArray(data.passives) ? data.passives : [],
+      streak: Number(data.streak) || 0
+    });
     updateOnlineWaitingList();
     broadcastLobbyState();
   } else if (data.type === "USE_VS_POWERUP") {
@@ -3312,7 +3395,7 @@ function handleClientReceive(data) {
     gameState.currentPairings = data.pairings;
     gameState.myAnswer = null;
     gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false };
-    gameState.preRoundBuffs = {};
+    gameState.preRoundBuffs = data.preRoundBuffs || {};
     showPreRoundVSScreen();
   } else if (data.type === "OPPONENT_USED_POWERUP") {
     if (data.fromId) {
@@ -3344,7 +3427,6 @@ function handleClientReceive(data) {
     clearAllTimers();
     gameState.players = data.players;
 
-    // Sync local client's persistent streak stats from host round resolution
     const myId = myPeerOrLocalId();
     const me = (data.players || []).find(p => p.id === myId);
     if (me && !me.isBot && typeof me.streak === "number") {
@@ -3374,8 +3456,20 @@ function sendToHost(payload) {
 }
 
 function getLobbyHumansList() {
-  const list = [{ id: peer.id, name: profile.name || "Host", skin: profile.equippedSkin, streak: profile.currentStreak || 0 }];
-  clientConns.forEach(c => list.push({ id: c.id, name: c.name, skin: c.skin, streak: c.streak || 0 }));
+  const list = [{
+    id: peer.id,
+    name: profile.name || "Host",
+    skin: profile.equippedSkin,
+    passives: [...(profile.equippedPassives || [])],
+    streak: profile.currentStreak || 0
+  }];
+  clientConns.forEach(c => list.push({
+    id: c.id,
+    name: c.name,
+    skin: c.skin,
+    passives: Array.isArray(c.passives) ? c.passives : [],
+    streak: c.streak || 0
+  }));
   return list;
 }
 
@@ -3399,7 +3493,15 @@ function renderLobbyHumans(humans) {
     const div = document.createElement("div");
     div.className = "sb-item me";
     const nameHtml = formatPlayerNameHTML({ name: h.name, isBot: false, streak: h.streak || 0 });
-    div.innerHTML = `<b style="min-width:0; display:inline-flex; max-width:100%;">${nameHtml}</b> <span class="diff-tag">${idx === 0 ? "HOST" : "PLAYER"}</span>`;
+    const passiveLabel = formatPassivesText(h.passives);
+    const passiveHtml = passiveLabel ? `<div class="sb-passive-sub">🔮 ${escapeHtml(passiveLabel)}</div>` : "";
+    div.innerHTML = `
+      <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
+        <b style="min-width:0; display:inline-flex; max-width:100%;">${nameHtml}</b>
+        ${passiveHtml}
+      </div>
+      <span class="diff-tag">${idx === 0 ? "HOST" : "PLAYER"}</span>
+    `;
     box.appendChild(div);
   });
 }
@@ -3418,6 +3520,9 @@ function hostStartOnlineMatch() {
     lives: 3,
     maxLives: 3,
     hasJuggernaut: false,
+    passives: Array.isArray(h.passives) ? [...h.passives] : [],
+    lastStandStreak: 0,
+    bountyElims: 0,
     eliminatedRound: null,
     skin: h.skin,
     streak: i === 0 ? (profile.currentStreak || 0) : (h.streak || 0),
@@ -3444,7 +3549,7 @@ function hostStartOnlineMatch() {
     sbInterval: null,
     myAnswer: null,
     botPuTimeout: null,
-    roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false },
+    roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false },
     preRoundBuffs: {},
     roundSubmissions: {},
     myPlacement: null,
