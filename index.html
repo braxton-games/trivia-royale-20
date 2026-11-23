@@ -849,11 +849,11 @@
             <li><b>6-Second Matchup &amp; Power-Up Preview:</b> Before every question, a 6-second VS screen reveals your opponent, equipped passive abilities, both players' remaining lives, and lets you activate Consumable Power-Ups for the upcoming duel.</li>
             <li><b>1v1 Pairings:</b> Each round, surviving players face off with a <b>20-second timer</b>. (If an odd number remain, one player receives a Bye).</li>
             <li><b>Winning a Duel:</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives with <b>Double Jeopardy</b> or <b>Buzzer Beater</b>).</li>
-            <li><b>Passive Abilities (🔮):</b> Permanent non-consumable perks bought in the Shop. Equip 1 at a time (or 2 with <b>Dual Wielding</b>). Bots also have a 5% independent chance each to spawn with <i>Ironclad</i>, <i>Buzzer Beater</i>, <i>Last Stand</i>, or <i>Lucky Draw</i> (max 1 bot per ability).</li>
+            <li><b>Passive Abilities (🔮):</b> Permanent non-consumable perks bought in the Shop. Equip 1 at a time (or 2 with <b>Dual Wielding</b>). Bots also have a 7% independent chance each to spawn with <i>Ironclad</i>, <i>Buzzer Beater</i>, <i>Last Stand</i>, or <i>Lucky Draw</i> (max 1 bot per ability).</li>
             <li><b>Answer Streaks (🔥):</b> Real players who answer 4+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
             <li><b>Ties &amp; Double Misses:</b> If both answer wrong (or time out), <b>both lose 1 life</b>. If both answer right in the exact same time, <b>neither loses a life</b> (and <b>Lucky Draw</b> grants +1 ❤️!).</li>
             <li><b>XP, Levels &amp; Skin Unlocks:</b> Everyone starts at <b>Level 0 (0 XP)</b>. Earn <b>+1 XP</b> per correct answer plus placement bonuses: <b>Top 10 (+5 XP)</b>, <b>Top 7 (+10 XP)</b>, <b>Top 5 (+20 XP)</b>, <b>Top 3 (+40 XP)</b>, <b>2nd (+60 XP)</b>, <b>1st (+80 XP)</b>, or <b>Undefeated 1st (+150 XP)</b>. Leveling requires <b>250 XP</b> (Lv 0→1), <b>500 XP</b> per level (Lv 1–5), <b>750 XP</b> per level (Lv 5–10), and <b>1,000 XP</b> per level from Lv 10 onward.</li>
-            <li><b>Juggernaut &amp; Bot Power-Ups:</b> <b>Juggernaut</b> (3,000 🪙) can only be activated on the Round 1 VS screen to start with <b>5 ❤️</b> (4% chance a bot spawns with it). Bots also have a 3% chance per duel to activate <i>Double Jeopardy</i>, <i>Heart Bargain</i>, or <i>Aegis Life Shield</i>.</li>
+            <li><b>Juggernaut &amp; Bot Power-Ups:</b> <b>Juggernaut</b> (3,000 🪙) can only be activated on the Round 1 VS screen to start with <b>5 ❤️</b> (5% chance a bot spawns with it). Bots also have a 3% chance per duel to activate <i>Double Jeopardy</i>, <i>Heart Bargain</i>, or <i>Aegis Life Shield</i>.</li>
           </ul>
         </div>
       </div>
@@ -1752,20 +1752,20 @@ function generateBots(count, modeType) {
     });
   }
 
-  // 4% chance that a random bot starts with Juggernaut (5 hearts)
-  if (bots.length > 0 && Math.random() < 0.04) {
+  // 5% chance that a random bot starts with Juggernaut (5 hearts)
+  if (bots.length > 0 && Math.random() < 0.05) {
     const jugBot = bots[Math.floor(Math.random() * bots.length)];
     jugBot.lives = 5;
     jugBot.maxLives = 5;
     jugBot.hasJuggernaut = true;
   }
 
-  // Independent 5% chance each for a bot to spawn with Ironclad, Buzzer Beater, Last Stand, or Lucky Draw
+  // Independent 7% chance each for a bot to spawn with Ironclad, Buzzer Beater, Last Stand, or Lucky Draw
   // (at most 1 bot can receive each specific ability)
   const BOT_PASSIVE_POOL = ["ironclad", "buzzerBeater", "lastStand", "luckyDraw"];
   if (bots.length > 0) {
     BOT_PASSIVE_POOL.forEach(passiveId => {
-      if (Math.random() < 0.05) {
+      if (Math.random() < 0.07) {
         const chosenBot = bots[Math.floor(Math.random() * bots.length)];
         if (!chosenBot.passives.includes(passiveId)) {
           chosenBot.passives.push(passiveId);
