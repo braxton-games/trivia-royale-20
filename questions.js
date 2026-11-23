@@ -771,5 +771,16 @@ const QUESTIONS = [
   {"c": "Chess", "q": "Which Norwegian chess grandmaster won five World Chess Championship titles between 2013 and 2021?", "opts": ["Garry Kasparov", "Magnus Carlsen", "Hikaru Nakamura", "Fabiano Caruana"], "a": 1},
   {"c": "Chess", "q": "How many pawns does each player start with at the beginning of a standard chess game?", "opts": ["6", "8", "10", "12"], "a": 1},
   {"c": "Chess", "q": "What happens when a pawn reaches the eighth rank on the opposite side of the board?", "opts": ["It is removed from play", "It must promote to a Queen, Rook, Bishop, or Knight", "It becomes a second King", "The game immediately ends in a draw"], "a": 1},
-  {"c": "Chess", "q": "What tactical motif occurs when a single piece attacks two or more enemy pieces simultaneously?", "opts": ["Pin", "Skewer", "Fork", "Discovered attack"], "a": 2}
+  {"c": "Chess", "q": "What tactical motif occurs when a single piece attacks two or more enemy pieces simultaneously?", "opts": ["Pin", "Skewer", "Fork", "Discovered attack"], "a": 2},
+  {"c": "Olympics", "q": "In which city were the first modern Olympic Games held in 1896?", "opts": ["Athens", "Paris", "London", "Rome"], "a": 0},
+  {"c": "Olympics", "q": "Which Jamaican sprinter won eight Olympic gold medals and set world records in the 100m and 200m?", "opts": ["Asafa Powell", "Yohan Blake", "Usain Bolt", "Carl Lewis"], "a": 2},
+  {"c": "Olympics", "q": "Which American artistic gymnast is the most decorated gymnast in Olympic history?", "opts": ["Nadia Comăneci", "Simone Biles", "Gabby Douglas", "Aly Raisman"], "a": 1},
+  {"c": "Olympics", "q": "In which Winter Olympic sport did the U.S. men's team defeat the Soviet Union in the 1980 'Miracle on Ice'?", "opts": ["Speed skating", "Bobsled", "Ice hockey", "Curling"], "a": 2},
+  {"c": "Olympics", "q": "What do the five interlocking rings on the Olympic flag represent?", "opts": ["The five original Olympic sports", "The five inhabited continents", "The first five host nations", "The five Olympic values"], "a": 1},
+  {"c": "Olympics", "q": "How many years separate consecutive Summer Olympic Games under the standard Olympic cycle?", "opts": ["2 years", "3 years", "4 years", "5 years"], "a": 2},
+  {"c": "Olympics", "q": "Which American track and field athlete won four gold medals at the 1936 Berlin Summer Olympics?", "opts": ["Jim Thorpe", "Jesse Owens", "Bob Beamon", "Wilma Rudolph"], "a": 1},
+  {"c": "Olympics", "q": "Which Romanian gymnast scored the first perfect 10.0 in Olympic history at the 1976 Montreal Games?", "opts": ["Olga Korbut", "Nadia Comăneci", "Larisa Latynina", "Mary Lou Retton"], "a": 1},
+  {"c": "Olympics", "q": "In which ancient Greek sanctuary is the Olympic flame traditionally lit using a parabolic mirror before each Games?", "opts": ["Delphi", "Olympia", "Sparta", "Corinth"], "a": 1},
+  {"c": "Olympics", "q": "Which city became the second city—after London—to host the Summer Olympic Games three times in 2024?", "opts": ["Tokyo", "Los Angeles", "Paris", "Athens"], "a": 2},
+  {"c": "Olympics", "q": "The modern Olympic marathon distance of 26.2 miles (42.195 km) was standardized after the 1908 Summer Games in which city?", "opts": ["Athens", "Paris", "London", "Stockholm"], "a": 2}
 ];
