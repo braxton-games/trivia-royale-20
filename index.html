@@ -2361,12 +2361,16 @@ function simulateBotsForRound() {
       const wrongs = [0, 1, 2, 3].filter(i => i !== q.a);
       choice = wrongs[Math.floor(Math.random() * wrongs.length)];
     }
-    const rawTime = spec.minTime + Math.random() * (spec.maxTime - spec.minTime);
+    let rawTime = spec.minTime + Math.random() * (spec.maxTime - spec.minTime);
+    if (hasPassive(p, "buzzerBeater") && isCorrect && rawTime <= 17.0 && Math.random() < 0.25) {
+      rawTime = 17.2 + Math.random() * 2.2; // 17.20s - 19.40s (0.60s - 2.80s remaining)
+    }
     const timeSec = Math.round(rawTime * 100) / 100;
     const botBuffs = { ...(gameState.preRoundBuffs?.[p.id] || {}) };
     gameState.roundSubmissions[p.id] = { choice, timeSec, buffs: botBuffs };
   });
 }
+
 
 function submitPlayerAnswer(choiceIdx) {
   if (gameState.myAnswer !== null) return;
