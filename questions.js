@@ -1,3 +1,4 @@
+const QUESTIONS = [
 {"c": "Science", "q": "What is the chemical symbol for gold?", "opts": ["Au", "Ag", "Gd", "Go"], "a": 0},
   {"c": "Science", "q": "Which planet has the most moons in our solar system?", "opts": ["Jupiter", "Saturn", "Uranus", "Neptune"], "a": 1},
   {"c": "Science", "q": "What is the powerhouse of the cell?", "opts": ["Ribosome", "Nucleus", "Mitochondria", "Golgi apparatus"], "a": 2},
@@ -359,3 +360,4 @@
   {"c": "Medieval Europe", "q": "Which Frankish king was crowned 'Emperor of the Romans' by Pope Leo III on Christmas Day in the year 800?", "opts": ["Clovis I", "Charles Martel", "Charlemagne", "Pepin the Short"], "a": 2},
   {"c": "Medieval Europe", "q": "Which young French heroine helped lift the siege of Orléans during the Hundred Years' War before being captured and executed in 1431?", "opts": ["Eleanor of Aquitaine", "Catherine de' Medici", "Marie Antoinette", "Joan of Arc"], "a": 3},
   {"c": "Medieval Europe", "q": "Which medieval battle in 1066 saw William, Duke of Normandy defeat King Harold II to conquer England?", "opts": ["Battle of Agincourt", "Battle of Hastings", "Battle of Tours", "Battle of Crécy"], "a": 1}
+];
