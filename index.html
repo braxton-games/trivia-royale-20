@@ -1161,7 +1161,7 @@ const PASSIVE_ITEMS = [
     name: "🔥 Last Stand",
     shortName: "Last Stand",
     cost: 5000,
-    desc: "Win 5 consecutive duels in a single match while on 1 heart to restore +1 ❤️."
+    desc: "Win 3 consecutive duels in a single match while on 1 heart to restore +1 ❤️."
   },
   {
     id: "goldDigger",
@@ -2526,14 +2526,14 @@ function resolveRound() {
       }
     }
 
-    // Last Stand passive: 5 consecutive duel wins in a single match while on 1 heart -> restore 1 heart
+    // Last Stand passive: 3 consecutive duel wins in a single match while on 1 heart -> restore 1 heart
     if (beatOppA && pA.lives === 1) {
       pA.lastStandStreak = (pA.lastStandStreak || 0) + 1;
-      if (hasPassive(pA, "lastStand") && pA.lastStandStreak >= 5) {
+      if (hasPassive(pA, "lastStand") && pA.lastStandStreak >= 3) {
         pA.lives += 1;
         pA.maxLives = Math.max(pA.maxLives || 3, pA.lives);
         pA.lastStandStreak = 0;
-        reason += ` 🔥 <b>${pA.name}</b>'s <b>Last Stand</b> activated after 5 straight 1-heart wins (+1 ❤️ restored)!`;
+        reason += ` 🔥 <b>${pA.name}</b>'s <b>Last Stand</b> activated after 3 straight 1-heart wins (+1 ❤️ restored)!`;
       }
     } else {
       pA.lastStandStreak = 0;
@@ -2541,11 +2541,11 @@ function resolveRound() {
 
     if (beatOppB && pB.lives === 1) {
       pB.lastStandStreak = (pB.lastStandStreak || 0) + 1;
-      if (hasPassive(pB, "lastStand") && pB.lastStandStreak >= 5) {
+      if (hasPassive(pB, "lastStand") && pB.lastStandStreak >= 3) {
         pB.lives += 1;
         pB.maxLives = Math.max(pB.maxLives || 3, pB.lives);
         pB.lastStandStreak = 0;
-        reason += ` 🔥 <b>${pB.name}</b>'s <b>Last Stand</b> activated after 5 straight 1-heart wins (+1 ❤️ restored)!`;
+        reason += ` 🔥 <b>${pB.name}</b>'s <b>Last Stand</b> activated after 3 straight 1-heart wins (+1 ❤️ restored)!`;
       }
     } else {
       pB.lastStandStreak = 0;
