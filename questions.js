@@ -1831,5 +1831,6 @@ const QUESTIONS = [
   {"c": "Dr. Seuss", "q": "What is the name of the Grinch's loyal pet dog in 'How the Grinch Stole Christmas!'?", "opts": ["Rex", "Max", "Spot", "Toby"], "a": 1},
   {"c": "Dr. Seuss", "q": "In 'The Cat in the Hat', what are the names of the two blue-haired troublemakers the Cat lets out of a big red box?", "opts": ["Tweedledum and Tweedledee", "Chip and Dale", "Thing One and Thing Two", "Huey and Dewey"], "a": 2},
   {"c": "Dr. Seuss", "q": "In 'Horton Hears a Who!', what is the name of the microscopic town that Horton the Elephant protects on a speck of dust?", "opts": ["Mulberry Street", "Solla Sollew", "Middletown", "Whoville"], "a": 3},
-  {"c": "Dr. Seuss", "q": "Which Dr. Seuss book, famously given as a graduation gift, was the final book published during Theodor Geisel's lifetime?", "opts": ["Oh, the Places You'll Go!", "The Lorax", "Fox in Socks", "The Sneetches"], "a": 0}
+  {"c": "Dr. Seuss", "q": "Which Dr. Seuss book, famously given as a graduation gift, was the final book published during Theodor Geisel's lifetime?", "opts": ["Oh, the Places You'll Go!", "The Lorax", "Fox in Socks", "The Sneetches"], "a": 0},
+    {"c": "Literature", "q": "In William Golding's novel 'Lord of the Flies', which object do the stranded boys use to call assemblies and grant the right to speak?", "opts": ["A wooden spear", "A conch shell", "Piggy's glasses", "A signal flare"], "a": 1}
 ];
