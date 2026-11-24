@@ -847,7 +847,7 @@
             <div>
               <h3>🛡️ Survival Mode</h3>
               <p class="sub" style="margin-top:6px;">Outlast 19 bots where speed won't cost you a heart—you <b>only lose a ❤️ if you answer wrong or run out of time</b>.</p>
-              <p style="font-size:0.84rem; color:var(--gold);">Rewards: 1st = 100 🪙 | Top 3 = 50 🪙 | Top 10 = 10 🪙</p>
+              <p style="font-size:0.84rem; color:var(--gold);">Rewards: 1st = 100 🪙 | Top 3 = 50 🪙 | Top 10 = 10 🪙 + <b>2 🪙</b> per faster correct answer</p>
             </div>
             <button class="btn survival" onclick="startSurvivalMode()">Play Survival Mode</button>
           </div>
@@ -911,7 +911,7 @@
             <li><b>6-Second Matchup &amp; Category Preview:</b> Before every question, a 6-second VS screen reveals your opponent, the <b>next question's category</b>, equipped passive abilities, both players' remaining lives, and lets you arm Consumable Power-Ups.</li>
             <li><b>1v1 Pairings:</b> Each round, surviving players face off with a <b>20-second timer</b> (or <b>10 seconds</b> if either player activates <b>Sudden Death</b>). If an odd number remain, one player receives a Bye.</li>
             <li><b>Winning a Duel (Standard):</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives with <b>Double Jeopardy</b> or <b>Buzzer Beater</b>).</li>
-            <li><b>Survival Mode (🛡️):</b> Available in Single Player and Private Online Rooms. Players and bots <b>only lose a heart if they get the question wrong or run out of time</b>—if both answer right, neither loses a life!</li>
+            <li><b>Survival Mode (🛡️):</b> Available in Single Player and Private Online Rooms. Players and bots <b>only lose a heart if they get the question wrong or run out of time</b>—if both answer right, neither loses a life! Plus, answering correctly <b>before your opponent</b> awards <b>+2 🪙</b> per question.</li>
             <li><b>Passive Abilities (🔮):</b> Permanent non-consumable perks bought in the Shop. Equip 1 at a time (or 2 with <b>Dual Wielding</b>). Bots also have a 7% independent chance each to spawn with <i>Ironclad</i>, <i>Buzzer Beater</i>, <i>Last Stand</i>, <i>Lucky Draw</i>, <i>Buffer</i>, <i>Vampire</i>, or <i>Mulligan</i> (max 1 bot per ability).</li>
             <li><b>Bot Prestige Skins:</b> Bots have a chance to spawn wearing random Prestige Skins based on difficulty: <b>Very Hard (10%)</b>, <b>Hard (5%)</b>, and <b>Medium (2%)</b>.</li>
             <li><b>Answer Streaks (🔥):</b> Real players who answer 4+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
@@ -1914,6 +1914,7 @@ function generateBots(count, modeType) {
       passives: [],
       lastStandStreak: 0,
       bountyElims: 0,
+      survivalFastWins: 0,
       eliminatedRound: null,
       skin: botSkin,
       streak: 0,
@@ -1962,6 +1963,7 @@ function startSinglePlayer(isSuperHard) {
     passives: [...(profile.equippedPassives || [])],
     lastStandStreak: 0,
     bountyElims: 0,
+    survivalFastWins: 0,
     eliminatedRound: null,
     skin: profile.equippedSkin,
     streak: profile.currentStreak || 0,
@@ -2020,6 +2022,7 @@ function startSurvivalMode() {
     passives: [...(profile.equippedPassives || [])],
     lastStandStreak: 0,
     bountyElims: 0,
+    survivalFastWins: 0,
     eliminatedRound: null,
     skin: profile.equippedSkin,
     streak: profile.currentStreak || 0,
@@ -2206,7 +2209,7 @@ function showPreRoundVSScreen() {
   const vsSubtitleEl = document.getElementById("vsSubtitleText");
   if (vsSubtitleEl) {
     vsSubtitleEl.textContent = gameState.survivalMode
-      ? "Survival Mode: You only lose a ❤️ if you get the question wrong or run out of time!"
+      ? "Survival Mode: Only lose a ❤️ on wrong answers/timeouts — answer correctly before your opponent for +2 🪙!"
       : "Activate Power-Ups now before the question starts!";
   }
 
@@ -2642,7 +2645,7 @@ function setupRoundUI() {
     document.getElementById("arenaOppBuffsList").textContent = oppTags.length ? oppTags.join(", ") : "None";
 
     const modeNotices = [];
-    if (gameState.survivalMode) modeNotices.push("🛡️ SURVIVAL MODE");
+    if (gameState.survivalMode) modeNotices.push("🛡️ SURVIVAL MODE (+2 🪙 faster correct)");
     if (isMySuddenDeath) modeNotices.push("⏱️ SUDDEN DEATH: 10s CLOCK!");
     const noticeEl = document.getElementById("activeBuffNotice");
     noticeEl.textContent = modeNotices.join(" • ");
@@ -2963,6 +2966,16 @@ function resolveRound() {
     // Did player answer right and before their opponent?
     const beatOppA = rightA && (!rightB || timeA < timeB);
     const beatOppB = rightB && (!rightA || timeB < timeA);
+
+    // Survival Mode bonus: +2 coins per question answered correctly and before your opponent
+    if (gameState.survivalMode && beatOppA) {
+      pA.survivalFastWins = (pA.survivalFastWins || 0) + 1;
+      reason += ` 🪙 <b>${pA.name}</b> answered correctly first (+2 🪙)!`;
+    }
+    if (gameState.survivalMode && beatOppB) {
+      pB.survivalFastWins = (pB.survivalFastWins || 0) + 1;
+      reason += ` 🪙 <b>${pB.name}</b> answered correctly first (+2 🪙)!`;
+    }
 
     // Eliminating blow passives: Bounty Hunter & Vampire (30% chance to recover 1 heart)
     if (beatOppA && prevLivesB > 0 && pB.lives === 0) {
@@ -3286,7 +3299,11 @@ function concludeMatch() {
   const bountyCoins = hasBountyHunter ? (bountyCount * 2) : 0;
   const bountyXp = hasBountyHunter ? (bountyCount * 2) : 0;
 
-  const earned = placementCoins + bountyCoins;
+  // Survival Mode bonus: +2 coins per question answered correctly and before your opponent
+  const survivalFastCount = (gameState.survivalMode && me) ? (me.survivalFastWins || 0) : 0;
+  const survivalSpeedCoins = survivalFastCount * 2;
+
+  const earned = placementCoins + bountyCoins + survivalSpeedCoins;
 
   // XP Calculation: +1 XP per correct answer + placement bonus + Bounty Hunter bonus
   const correctCount = me ? (me.correctAnswers || 0) : 0;
@@ -3349,6 +3366,9 @@ function concludeMatch() {
   const breakdownParts = [`${correctCount} correct ${correctCount === 1 ? "answer" : "answers"} (+${questionXp} XP)`];
   if (placementXp > 0) breakdownParts.push(placementXpLabel);
   if (hasGoldDigger && baseCoins > 0) breakdownParts.push("Gold Digger (+20% 🪙)");
+  if (gameState.survivalMode && survivalFastCount > 0) {
+    breakdownParts.push(`Survival Speed Bonus: ${survivalFastCount} ${survivalFastCount === 1 ? "duel" : "duels"} (+${survivalSpeedCoins} 🪙)`);
+  }
   if (hasBountyHunter && bountyCount > 0) breakdownParts.push(`Bounty Hunter: ${bountyCount} KO${bountyCount === 1 ? "" : "s"} (+${bountyCoins} 🪙, +${bountyXp} XP)`);
   document.getElementById("xpBreakdownText").textContent = breakdownParts.join("  •  ");
 
@@ -3686,7 +3706,7 @@ function updatePrivateRoomModeUI() {
   if (survBtn) survBtn.classList.toggle("active-survival", privateRoomSurvivalMode);
   if (descEl) {
     descEl.textContent = privateRoomSurvivalMode
-      ? "Survival Mode: Players & bots only lose a ❤️ if they answer wrong or run out of time."
+      ? "Survival Mode: Only lose a ❤️ on wrong answers/timeouts, plus +2 🪙 per faster correct answer!"
       : "Standard Royale: Slower correct answer loses 1 ❤️.";
   }
 }
@@ -3701,7 +3721,7 @@ function updateClientPrivateModeBanner(isSurvival) {
   }
   banner.style.display = "flex";
   if (isSurvival) {
-    textEl.textContent = "🛡️ Survival Mode (Only lose a ❤️ on wrong answers or timeouts)";
+    textEl.textContent = "🛡️ Survival Mode (Only lose a ❤️ on wrong answers/timeouts + 2 🪙 per faster correct answer)";
     textEl.style.color = "#4ade80";
   } else {
     textEl.textContent = "⚔️ Standard Royale";
@@ -4072,6 +4092,7 @@ function hostStartOnlineMatch() {
     passives: Array.isArray(h.passives) ? [...h.passives] : [],
     lastStandStreak: 0,
     bountyElims: 0,
+    survivalFastWins: 0,
     eliminatedRound: null,
     skin: h.skin,
     streak: i === 0 ? (profile.currentStreak || 0) : (h.streak || 0),
