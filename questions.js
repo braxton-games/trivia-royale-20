@@ -408,7 +408,7 @@ const QUESTIONS = [
   {"c": "Human Anatomy", "q": "What is the common everyday name for the clavicle bone?", "opts": ["Collarbone", "Shoulder blade", "Breastbone", "Shinbone"], "a": 0},
   {"c": "Human Anatomy", "q": "Which part of the human brain regulates balance, posture, and motor coordination?", "opts": ["Hypothalamus", "Amygdala", "Cerebellum", "Medulla"], "a": 2},
   {"c": "Human Anatomy", "q": "How many pairs of ribs are in a typical human rib cage?", "opts": ["10", "12", "14", "16"], "a": 1},
-  {"c": "Human Anatomy", "q": "What is the largest artery in the human body?", "opts": ["Aorta", "Pulmonary artery", "Carotid artery", "Femoral artery"], "a": 0},
+  {"c": "Human Anatomy", "q": "What is the largest artery in the human body?", "opts": ["Aorta artery", "Pulmonary artery", "Carotid artery", "Femoral artery"], "a": 0},
   {"c": "Human Anatomy", "q": "Which pair of bean-shaped organs filters waste from the blood to produce urine?", "opts": ["Lungs", "Adrenal glands", "Kidneys", "Pancreas"], "a": 2},
   {"c": "Human Anatomy", "q": "What is the medical name for the human kneecap?", "opts": ["Tibia", "Patella", "Fibula", "Scapula"], "a": 1},
   {"c": "Human Anatomy", "q": "Which type of blood cell is primarily responsible for fighting infections?", "opts": ["Red blood cells", "White blood cells", "Platelets", "Plasma cells"], "a": 1},
