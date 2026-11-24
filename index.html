@@ -1182,7 +1182,7 @@ const PASSIVE_ITEMS = [
     name: "🛡️ Ironclad",
     shortName: "Ironclad",
     cost: 7000,
-    desc: "On Question 2 of every match, 50% chance to receive a free automatic Aegis Life Shield for that question."
+    desc: "6% chance at the start of every question to automatically gain a free Aegis Life Shield."
   },
   {
     id: "dualWielding",
@@ -1867,16 +1867,14 @@ function startNextRound() {
   gameState.currentQuestion = pickRandomQuestion();
   gameState.currentPairings = buildPairings(alive);
 
-  // Ironclad passive: On Question 2 of every match, 50% chance for a free automatic Aegis Life Shield
-  if (gameState.round === 2) {
-    alive.forEach(p => {
-      if (hasPassive(p, "ironclad") && Math.random() < 0.5) {
-        if (!gameState.preRoundBuffs[p.id]) gameState.preRoundBuffs[p.id] = {};
-        gameState.preRoundBuffs[p.id].shield = true;
-        gameState.preRoundBuffs[p.id].ironcladTriggered = true;
-      }
-    });
-  }
+ // Ironclad passive: On every question, 6% chance for a free automatic Aegis Life Shield
+  alive.forEach(p => {
+    if (hasPassive(p, "ironclad") && Math.random() < 0.06) {
+      if (!gameState.preRoundBuffs[p.id]) gameState.preRoundBuffs[p.id] = {};
+      gameState.preRoundBuffs[p.id].shield = true;
+      gameState.preRoundBuffs[p.id].ironcladTriggered = true;
+    }
+  });
 
   if (gameState.mode === "online_host") {
     broadcastOnline({
@@ -1910,7 +1908,7 @@ function triggerOpponentPowerupNotification(oppName, powerupType) {
     heartBargain: "💝 Heart Bargain (Gains +1 ❤️ if they beat you!)",
     freeze: "❄️ Cryo Delay (+3.0s added to your answer time!)",
     shield: "🛡️ Aegis Life Shield (Protected from losing a heart!)",
-    ironclad: "🛡️ Ironclad (50% proc triggered a free Aegis Life Shield for Question 2!)",
+    ironclad: "🛡️ Ironclad (6% proc triggered a free Aegis Life Shield for this question!)",
     fiftyFifty: "✂️ 50/50 Sabotage (Eliminated 2 wrong choices for themselves!)",
     juggernaut: "🦾 Juggernaut (Started the match with 5 ❤️!)"
   };
@@ -1935,7 +1933,7 @@ function showPreRoundVSScreen() {
   // Apply local Ironclad proc if host/singleplayer rolled it for us on Round 2
   if (!isSpectating && gameState.preRoundBuffs?.[myId]?.ironcladTriggered) {
     gameState.roundBuffs.shield = true;
-    showToast("🛡️ Ironclad triggered! Free Aegis Life Shield active for Question 2!");
+    showToast("🛡️ Ironclad triggered! Free Aegis Life Shield active for this question!");
   }
 
   document.getElementById("vsRoundBadge").textContent = `ROUND ${gameState.round} MATCHUP`;
@@ -2025,7 +2023,7 @@ function showPreRoundVSScreen() {
     updateVSPowerupButtonsUI(me, rightPlayer);
   }
 
-  // Notify if facing an Ironclad Round 2 shield, Juggernaut Round 1 bot, or 3% bot power-up (Double Jeopardy, Heart Bargain, or Aegis Life Shield)
+  // Notify if facing an Ironclad shield, Juggernaut Round 1 bot, or 3% bot power-up (Double Jeopardy, Heart Bargain, or Aegis Life Shield)
   if (!isSpectating && rightPlayer) {
     if (gameState.preRoundBuffs?.[rightPlayer.id]?.ironcladTriggered) {
       gameState.botPuTimeout = setTimeout(() => {
