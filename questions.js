@@ -1287,5 +1287,16 @@ const QUESTIONS = [
   {"c": "Harry Potter", "q": "What position does Harry Potter play on the Gryffindor Quidditch team?", "opts": ["Keeper", "Beater", "Seeker", "Chaser"], "a": 2},
   {"c": "Harry Potter", "q": "Which spell is used to disarm an opponent by knocking their wand out of their hand?", "opts": ["Lumos", "Expelliarmus", "Alohomora", "Wingardium Leviosa"], "a": 1},
   {"c": "Harry Potter", "q": "What is the name of the hidden London shopping street where Hogwarts students buy wands and spellbooks?", "opts": ["Knockturn Alley", "Hogsmeade", "Diagon Alley", "Godric's Hollow"], "a": 2},
-  {"c": "Harry Potter", "q": "Who serves as Hogwarts' Potions Master and Head of Slytherin House during Harry's first five years at school?", "opts": ["Horace Slughorn", "Remus Lupin", "Alastor Moody", "Severus Snape"], "a": 3}
+  {"c": "Harry Potter", "q": "Who serves as Hogwarts' Potions Master and Head of Slytherin House during Harry's first five years at school?", "opts": ["Horace Slughorn", "Remus Lupin", "Alastor Moody", "Severus Snape"], "a": 3},
+  {"c": "Cars", "q": "Which country is the automotive manufacturer BMW headquartered in?", "opts": ["Germany", "Italy", "Sweden", "United Kingdom"], "a": 0},
+  {"c": "Cars", "q": "What does the 'ABS' safety feature stand for in modern automobiles?", "opts": ["Automatic Braking System", "Anti-lock Braking System", "Assisted Brake Support", "Active Balance Sensor"], "a": 1},
+  {"c": "Cars", "q": "Which American automaker produced the iconic Model T starting in 1908?", "opts": ["Chevrolet", "Dodge", "Chrysler", "Ford"], "a": 3},
+  {"c": "Cars", "q": "Which Italian luxury sports car brand features a charging bull on its emblem?", "opts": ["Ferrari", "Maserati", "Lamborghini", "Alfa Romeo"], "a": 2},
+  {"c": "Cars", "q": "Acura is the luxury vehicle division of which Japanese automaker?", "opts": ["Honda", "Toyota", "Nissan", "Mazda"], "a": 0},
+  {"c": "Cars", "q": "Which component ignites the air-fuel mixture inside a gasoline engine's cylinders?", "opts": ["Alternator", "Spark plug", "Radiator", "Carburetor"], "a": 1},
+  {"c": "Cars", "q": "Which iconic American sports car was first introduced by Chevrolet in 1953?", "opts": ["Mustang", "Camaro", "Corvette", "Charger"], "a": 2},
+  {"c": "Cars", "q": "In a standard manual transmission vehicle, which pedal is located on the far left?", "opts": ["Accelerator", "Brake", "Parking brake", "Clutch"], "a": 3},
+  {"c": "Cars", "q": "Which exhaust system component converts toxic pollutants into less harmful gases?", "opts": ["Muffler", "Catalytic converter", "Turbocharger", "Headers"], "a": 1},
+  {"c": "Cars", "q": "Which Japanese automaker produces the long-running hybrid vehicle known as the Prius?", "opts": ["Honda", "Subaru", "Toyota", "Mazda"], "a": 2},
+  {"c": "NFL", "q": "Which NFL team drafted quarterback Drew Brees in the second round of the 2001 NFL Draft?", "opts": ["New Orleans Saints", "San Diego Chargers", "Miami Dolphins", "Indianapolis Colts"], "a": 1}
 ];
