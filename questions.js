@@ -1825,6 +1825,6 @@ const QUESTIONS = [
     {"c": "Minecraft", "q": "In Minecraft, how many sticks can be crafted from a single log?", "opts": ["4", "8", "12", "16"], "a": 1},
   {"c": "Minecraft", "q": "In Minecraft, what terrifying mob is encountered when players venture into ancient cities?", "opts": ["The ravager", "The wither", "The warden", "The enderman"], "a": 2},
   {"c": "Minecraft", "q": "In Minecraft, what mob can players ride using a saddle and a carrot on a stick?", "opts": ["Pig", "Horse", "Strider", "Mule"], "a": 0},
-  {"c": "Tech & Math", "q": "What historic stock market crash began after the Nasdaq Composite peaked on March 10, 2000, bankrupting high-profile startups like Pets.com and Webvan?", "opts": ["Black Monday", "The Great Recession", "The crypto winter", "The dot-com crash"], "a": 3}
-
+  {"c": "Tech & Math", "q": "What historic stock market crash began after the Nasdaq Composite peaked on March 10, 2000, bankrupting high-profile startups like Pets.com and Webvan?", "opts": ["Black Monday", "The Great Recession", "The crypto winter", "The dot-com crash"], "a": 3},
+  {"c": "2000-2010 Kids", "q": "Who is the villain in the movie 'The Lorax' who attempts to monetize air?", "opts": ["The Once-ler", "Aloysius O'Hare", "Ted Wiggins", "Grammy Norma"], "a": 1}
 ];
