@@ -371,7 +371,7 @@
   .skin-med-lord { background: linear-gradient(90deg, #581c87, #b91c1c); border: 1px solid #fbbf24; color: #fef3c7; box-shadow: 0 0 15px rgba(168,85,247,0.55); }
   .skin-med-king { background: linear-gradient(90deg, #991b1b, #d97706, #fde047); border: 1px solid #fef08a; color: #111827; box-shadow: 0 0 18px rgba(251,191,36,0.8); }
   
-    /* Star Wars */
+  /* Star Wars */
   .skin-sw-rex { background: linear-gradient(90deg, #1e3a8a, #2563eb, #cbd5e1); border: 1px solid #93c5fd; color: #ffffff; box-shadow: 0 0 12px rgba(59,130,246,0.5); }
   .skin-sw-anakin { background: linear-gradient(90deg, #0f172a, #1d4ed8, #38bdf8); border: 1px solid #38bdf8; color: #e0f2fe; box-shadow: 0 0 14px rgba(37,99,235,0.6); }
   .skin-sw-ahsoka { background: linear-gradient(90deg, #1e293b, #475569, #e2e8f0); border: 1px solid #f8fafc; color: #ffffff; box-shadow: 0 0 14px rgba(226,232,240,0.55); }
@@ -381,7 +381,6 @@
   .skin-sw-windu { background: linear-gradient(90deg, #1e1b4b, #581c87, #a855f7); border: 1px solid #c084fc; color: #f3e8ff; box-shadow: 0 0 18px rgba(168,85,247,0.7); }
   .skin-sw-sidious { background: linear-gradient(90deg, #09090b, #311042, #4338ca); border: 1px solid #818cf8; color: #e0e7ff; box-shadow: 0 0 19px rgba(99,102,241,0.8); }
   .skin-sw-yoda { background: linear-gradient(90deg, #052e16, #15803d, #4ade80); border: 1px solid #86efac; color: #ecfdf5; box-shadow: 0 0 20px rgba(34,197,94,0.8); }
-
 
   .theme-filter-bar {
     display: flex;
@@ -861,7 +860,7 @@
             <li><b>6-Second Matchup &amp; Power-Up Preview:</b> Before every question, a 6-second VS screen reveals your opponent, equipped passive abilities, both players' remaining lives, and lets you activate Consumable Power-Ups for the upcoming duel.</li>
             <li><b>1v1 Pairings:</b> Each round, surviving players face off with a <b>20-second timer</b>. (If an odd number remain, one player receives a Bye).</li>
             <li><b>Winning a Duel:</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives with <b>Double Jeopardy</b> or <b>Buzzer Beater</b>).</li>
-            <li><b>Passive Abilities (🔮):</b> Permanent non-consumable perks bought in the Shop. Equip 1 at a time (or 2 with <b>Dual Wielding</b>). Bots also have a 7% independent chance each to spawn with <i>Ironclad</i>, <i>Buzzer Beater</i>, <i>Last Stand</i>, or <i>Lucky Draw</i> (max 1 bot per ability).</li>
+            <li><b>Passive Abilities (🔮):</b> Permanent non-consumable perks bought in the Shop. Equip 1 at a time (or 2 with <b>Dual Wielding</b>). Bots also have a 7% independent chance each to spawn with <i>Ironclad</i>, <i>Buzzer Beater</i>, <i>Last Stand</i>, <i>Lucky Draw</i>, <i>Buffer</i>, or <i>Vampire</i> (max 1 bot per ability).</li>
             <li><b>Answer Streaks (🔥):</b> Real players who answer 4+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
             <li><b>Ties &amp; Double Misses:</b> If both answer wrong (or time out), <b>both lose 1 life</b>. If both answer right in the exact same time, <b>neither loses a life</b> (and <b>Lucky Draw</b> grants +1 ❤️!).</li>
             <li><b>XP, Levels &amp; Skin Unlocks:</b> Everyone starts at <b>Level 0 (0 XP)</b>. Earn <b>+1 XP</b> per correct answer plus placement bonuses: <b>Top 10 (+5 XP)</b>, <b>Top 7 (+10 XP)</b>, <b>Top 5 (+20 XP)</b>, <b>Top 3 (+40 XP)</b>, <b>2nd (+60 XP)</b>, <b>1st (+80 XP)</b>, or <b>Undefeated 1st (+150 XP)</b>. Leveling requires <b>250 XP</b> (Lv 0→1), <b>500 XP</b> per level (Lv 1–5), <b>750 XP</b> per level (Lv 5–10), and <b>1,000 XP</b> per level from Lv 10 onward.</li>
@@ -1169,6 +1168,13 @@ const PASSIVE_ITEMS = [
     desc: "Answering correctly with under 3.0 seconds left on the 20s clock deals 2 ❤️ of damage if your opponent misses."
   },
   {
+    id: "buffer",
+    name: "⏳ Buffer",
+    shortName: "Buffer",
+    cost: 4000,
+    desc: "If you answer correctly less than 1.0 second after your opponent answers correctly, you won't lose a life."
+  },
+  {
     id: "lastStand",
     name: "🔥 Last Stand",
     shortName: "Last Stand",
@@ -1197,6 +1203,13 @@ const PASSIVE_ITEMS = [
     desc: "6% chance at the start of every question to automatically gain a free Aegis Life Shield."
   },
   {
+    id: "vampire",
+    name: "🧛 Vampire",
+    shortName: "Vampire",
+    cost: 8000,
+    desc: "30% chance to recover +1 ❤️ whenever you deal the eliminating blow on an opponent."
+  },
+  {
     id: "dualWielding",
     name: "⚔️ Dual Wielding",
     shortName: "Dual Wielding",
@@ -1216,7 +1229,7 @@ const SKIN_THEMES = [
   { id: "Animals", label: "🦖 Animals" },
   { id: "Space", label: "🪐 Space" },
   { id: "Medieval Ranks", label: "🏰 Medieval Ranks" },
-    { id: "Star Wars", label: "⭐ Star Wars" }
+  { id: "Star Wars", label: "⭐ Star Wars" }
 ];
 
 const SKIN_ITEMS = [
@@ -1290,8 +1303,8 @@ const SKIN_ITEMS = [
   { id: "med_knight", theme: "Medieval Ranks", name: "🛡️ Knight", css: "skin-med-knight", unlockLevel: 11, desc: "Sworn steel-armored chivalric warrior." },
   { id: "med_lord", theme: "Medieval Ranks", name: "⚜️ Lord", css: "skin-med-lord", unlockLevel: 20, desc: "Noble manor ruler and feudal barony crest." },
   { id: "med_king", theme: "Medieval Ranks", name: "👑 King", css: "skin-med-king", unlockLevel: 35, desc: "Sovereign monarch of the medieval realm." },
-  
-    // Star Wars
+
+  // Star Wars
   { id: "sw_rex", theme: "Star Wars", name: "🪖 Captain Rex", css: "skin-sw-rex", unlockLevel: 16, desc: "501st Legion clone captain battle tag." },
   { id: "sw_anakin", theme: "Star Wars", name: "⚔️ Anakin Skywalker", css: "skin-sw-anakin", unlockLevel: 22, desc: "Chosen One Jedi Knight blue-blade crest." },
   { id: "sw_ahsoka", theme: "Star Wars", name: "🗡️ Ahsoka Tano", css: "skin-sw-ahsoka", unlockLevel: 26, desc: "Dual-wielding Fulcrum white-saber badge." },
@@ -1301,7 +1314,6 @@ const SKIN_ITEMS = [
   { id: "sw_windu", theme: "Star Wars", name: "🟣 Mace Windu", css: "skin-sw-windu", unlockLevel: 55, desc: "Amethyst-blade Jedi Council champion badge." },
   { id: "sw_sidious", theme: "Star Wars", name: "⚡ Darth Sidious", css: "skin-sw-sidious", unlockLevel: 60, desc: "Galactic Emperor Force-lightning prestige." },
   { id: "sw_yoda", theme: "Star Wars", name: "🟢 Grandmaster Yoda", css: "skin-sw-yoda", unlockLevel: 70, desc: "900-year-old Jedi Grand Master emerald aura." }
-
 ];
 
 let selectedSkinThemeFilter = "ALL";
@@ -1785,9 +1797,9 @@ function generateBots(count, modeType) {
     jugBot.hasJuggernaut = true;
   }
 
-  // Independent 7% chance each for a bot to spawn with Ironclad, Buzzer Beater, Last Stand, or Lucky Draw
+  // Independent 7% chance each for a bot to spawn with Ironclad, Buzzer Beater, Last Stand, Lucky Draw, Buffer, or Vampire
   // (at most 1 bot can receive each specific ability)
-  const BOT_PASSIVE_POOL = ["ironclad", "buzzerBeater", "lastStand", "luckyDraw"];
+  const BOT_PASSIVE_POOL = ["ironclad", "buzzerBeater", "lastStand", "luckyDraw", "buffer", "vampire"];
   if (bots.length > 0) {
     BOT_PASSIVE_POOL.forEach(passiveId => {
       if (Math.random() < 0.07) {
@@ -1892,7 +1904,7 @@ function startNextRound() {
   gameState.currentQuestion = pickRandomQuestion();
   gameState.currentPairings = buildPairings(alive);
 
- // Ironclad passive: On every question, 6% chance for a free automatic Aegis Life Shield
+  // Ironclad passive: On every question, 6% chance for a free automatic Aegis Life Shield
   alive.forEach(p => {
     if (hasPassive(p, "ironclad") && Math.random() < 0.06) {
       if (!gameState.preRoundBuffs[p.id]) gameState.preRoundBuffs[p.id] = {};
@@ -1955,7 +1967,7 @@ function showPreRoundVSScreen() {
   const alive = gameState.players.filter(p => p.lives > 0);
   const isSpectating = !me || me.lives <= 0;
 
-  // Apply local Ironclad proc if host/singleplayer rolled it for us on Round 2
+  // Apply local Ironclad proc if host/singleplayer rolled it for us
   if (!isSpectating && gameState.preRoundBuffs?.[myId]?.ironcladTriggered) {
     gameState.roundBuffs.shield = true;
     showToast("🛡️ Ironclad triggered! Free Aegis Life Shield active for this question!");
@@ -2406,7 +2418,6 @@ function simulateBotsForRound() {
   });
 }
 
-
 function submitPlayerAnswer(choiceIdx) {
   if (gameState.myAnswer !== null) return;
   const elapsed = Math.min(20.0, Math.round(((performance.now() - gameState.roundStartTime) / 1000) * 100) / 100);
@@ -2466,6 +2477,12 @@ function resolveRound() {
     const buzzerA = hasPassive(pA, "buzzerBeater") && rightA && !rightB && timeLeftA < 3.0 && timeLeftA >= 0;
     const buzzerB = hasPassive(pB, "buzzerBeater") && rightB && !rightA && timeLeftB < 3.0 && timeLeftB >= 0;
 
+    // Buffer check: answered correctly < 1.0s after opponent also answered correctly
+    const diffA = Math.round((timeA - timeB) * 100) / 100;
+    const diffB = Math.round((timeB - timeA) * 100) / 100;
+    const bufferA = rightA && rightB && timeB < timeA && hasPassive(pA, "buffer") && diffA < 1.0;
+    const bufferB = rightA && rightB && timeA < timeB && hasPassive(pB, "buffer") && diffB < 1.0;
+
     const isDoubleJeopardy = !!(buffsA.doubleJeopardy || buffsB.doubleJeopardy);
     const basePenalty = isDoubleJeopardy ? 2 : 1;
     const damageToA = Math.max(basePenalty, buzzerB ? 2 : 1);
@@ -2501,10 +2518,10 @@ function resolveRound() {
     } else {
       if (timeA < timeB) {
         loseB = true;
-        reason = `Both got it right, but <b>${pA.name}</b> was faster (${timeA.toFixed(2)}s vs ${timeB.toFixed(2)}s)!${isDoubleJeopardy ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
+        reason = `Both got it right, but <b>${pA.name}</b> was faster (${timeA.toFixed(2)}s vs ${timeB.toFixed(2)}s)!${isDoubleJeopardy && !bufferB ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
       } else if (timeB < timeA) {
         loseA = true;
-        reason = `Both got it right, but <b>${pB.name}</b> was faster (${timeB.toFixed(2)}s vs ${timeA.toFixed(2)}s)!${isDoubleJeopardy ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
+        reason = `Both got it right, but <b>${pB.name}</b> was faster (${timeB.toFixed(2)}s vs ${timeA.toFixed(2)}s)!${isDoubleJeopardy && !bufferA ? " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!" : ""}`;
       } else {
         isExactTie = true;
         reason = `Exact tie! Both answered correctly in <b>${timeA.toFixed(2)}s</b> — neither loses a life!`;
@@ -2515,7 +2532,9 @@ function resolveRound() {
     const prevLivesB = pB.lives;
 
     if (loseA) {
-      if (buffsA.shield) {
+      if (bufferA) {
+        reason += ` (⏳ <b>${pA.name}</b>'s <b>Buffer</b> triggered within ${diffA.toFixed(2)}s — no life lost!)`;
+      } else if (buffsA.shield) {
         reason += ` (<b>${pA.name}</b>'s Life Shield blocked the damage!)`;
       } else {
         pA.lives = Math.max(0, pA.lives - damageToA);
@@ -2524,7 +2543,9 @@ function resolveRound() {
       }
     }
     if (loseB) {
-      if (buffsB.shield) {
+      if (bufferB) {
+        reason += ` (⏳ <b>${pB.name}</b>'s <b>Buffer</b> triggered within ${diffB.toFixed(2)}s — no life lost!)`;
+      } else if (buffsB.shield) {
         reason += ` (<b>${pB.name}</b>'s Life Shield blocked the damage!)`;
       } else {
         pB.lives = Math.max(0, pB.lives - damageToB);
@@ -2551,17 +2572,25 @@ function resolveRound() {
     const beatOppA = rightA && (!rightB || timeA < timeB);
     const beatOppB = rightB && (!rightA || timeB < timeA);
 
-    // Bounty Hunter passive: track eliminating blows
+    // Eliminating blow passives: Bounty Hunter & Vampire (30% chance to recover 1 heart)
     if (beatOppA && prevLivesB > 0 && pB.lives === 0) {
       pA.bountyElims = (pA.bountyElims || 0) + 1;
       if (hasPassive(pA, "bountyHunter")) {
         reason += ` 🎯 <b>${pA.name}</b>'s <b>Bounty Hunter</b> triggered (+2 🪙, +2 XP)!`;
+      }
+      if (hasPassive(pA, "vampire") && pA.lives < (pA.maxLives || 3) && Math.random() < 0.30) {
+        pA.lives += 1;
+        reason += ` 🧛 <b>${pA.name}</b>'s <b>Vampire</b> drained a life (+1 ❤️ recovered)!`;
       }
     }
     if (beatOppB && prevLivesA > 0 && pA.lives === 0) {
       pB.bountyElims = (pB.bountyElims || 0) + 1;
       if (hasPassive(pB, "bountyHunter")) {
         reason += ` 🎯 <b>${pB.name}</b>'s <b>Bounty Hunter</b> triggered (+2 🪙, +2 XP)!`;
+      }
+      if (hasPassive(pB, "vampire") && pB.lives < (pB.maxLives || 3) && Math.random() < 0.30) {
+        pB.lives += 1;
+        reason += ` 🧛 <b>${pB.name}</b>'s <b>Vampire</b> drained a life (+1 ❤️ recovered)!`;
       }
     }
 
