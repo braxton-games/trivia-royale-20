@@ -92,6 +92,7 @@
   }
   .pill.coins { color: var(--gold); border-color: rgba(251, 191, 36, 0.4); }
   .pill.xp { color: #c084fc; border-color: rgba(192, 132, 252, 0.45); }
+  .pill.survival { color: #4ade80; border-color: rgba(34, 197, 94, 0.55); background: rgba(20, 83, 45, 0.35); }
   .xp-progress-wrap {
     width: 100%;
     max-width: 420px;
@@ -149,6 +150,7 @@
     gap: 12px;
   }
   .card.highlight { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.2); }
+  .card.survival { border-color: rgba(34, 197, 94, 0.55); box-shadow: 0 0 0 1px rgba(34,197,94,0.16); }
   .card.danger { border-color: rgba(239,68,68,0.5); }
 
   .btn {
@@ -167,9 +169,49 @@
   .btn:hover:not(:disabled) { transform: translateY(-1px); opacity: 0.94; }
   .btn:disabled { opacity: 0.45; cursor: not-allowed; }
   .btn.secondary { background: #263352; color: var(--text); border: 1px solid var(--border); }
+  .btn.survival { background: linear-gradient(135deg, #4ade80, #16a34a); color: #052e16; }
   .btn.danger { background: linear-gradient(135deg, #f87171, #dc2626); color: #fff; }
   .btn.gold { background: linear-gradient(135deg, #fde047, #f59e0b); color: #111827; }
   .btn.small { padding: 6px 11px; font-size: 0.82rem; }
+
+  .private-mode-box {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .mode-toggle-group {
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .mode-option-btn {
+    background: #182238;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 13px;
+    border-radius: 9px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.12s;
+    touch-action: manipulation;
+  }
+  .mode-option-btn.active-standard {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: var(--accent);
+    color: #e0f2fe;
+  }
+  .mode-option-btn.active-survival {
+    background: rgba(34, 197, 94, 0.22);
+    border-color: var(--green);
+    color: #bbf7d0;
+  }
 
   input[type="text"] {
     background: #0d1322;
@@ -791,7 +833,7 @@
 
       <!-- PLAY TAB -->
       <div id="playTab" class="home-tab">
-        <div class="grid-3">
+        <div class="grid-2">
           <div class="card highlight">
             <div>
               <h3>🤖 Single Player Royale</h3>
@@ -799,6 +841,15 @@
               <p style="font-size:0.84rem; color:var(--gold);">Rewards: 1st = 100 🪙 | Top 3 = 50 🪙 | Top 10 = 10 🪙</p>
             </div>
             <button class="btn" onclick="startSinglePlayer(false)">Play Standard Match</button>
+          </div>
+
+          <div class="card survival">
+            <div>
+              <h3>🛡️ Survival Mode</h3>
+              <p class="sub" style="margin-top:6px;">Outlast 19 bots where speed won't cost you a heart—you <b>only lose a ❤️ if you answer wrong or run out of time</b>.</p>
+              <p style="font-size:0.84rem; color:var(--gold);">Rewards: 1st = 100 🪙 | Top 3 = 50 🪙 | Top 10 = 10 🪙</p>
+            </div>
+            <button class="btn survival" onclick="startSurvivalMode()">Play Survival Mode</button>
           </div>
 
           <div class="card danger">
@@ -813,7 +864,7 @@
           <div class="card">
             <div>
               <h3>🌐 Online Room (20 Players)</h3>
-              <p class="sub" style="margin-top:6px;">Create or join a live lobby with a room code. Empty slots auto-fill with bots (capped below Very Hard).</p>
+              <p class="sub" style="margin-top:6px;">Join Quick Match or host a private room (Standard or Survival Mode). Empty slots auto-fill with bots.</p>
               <p style="font-size:0.84rem; color:var(--accent);">Peer-to-peer live multiplayer via Room Code</p>
             </div>
             <button class="btn secondary" onclick="showScreen('onlineLobbyScreen')">Open Online Lobby</button>
@@ -859,7 +910,8 @@
             <li><b>20-Player Lobby:</b> Every match has 20 total combatants. Every player/bot starts with <b>3 lives (❤️❤️❤️)</b>.</li>
             <li><b>6-Second Matchup &amp; Category Preview:</b> Before every question, a 6-second VS screen reveals your opponent, the <b>next question's category</b>, equipped passive abilities, both players' remaining lives, and lets you arm Consumable Power-Ups.</li>
             <li><b>1v1 Pairings:</b> Each round, surviving players face off with a <b>20-second timer</b> (or <b>10 seconds</b> if either player activates <b>Sudden Death</b>). If an odd number remain, one player receives a Bye.</li>
-            <li><b>Winning a Duel:</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives with <b>Double Jeopardy</b> or <b>Buzzer Beater</b>).</li>
+            <li><b>Winning a Duel (Standard):</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives with <b>Double Jeopardy</b> or <b>Buzzer Beater</b>).</li>
+            <li><b>Survival Mode (🛡️):</b> Available in Single Player and Private Online Rooms. Players and bots <b>only lose a heart if they get the question wrong or run out of time</b>—if both answer right, neither loses a life!</li>
             <li><b>Passive Abilities (🔮):</b> Permanent non-consumable perks bought in the Shop. Equip 1 at a time (or 2 with <b>Dual Wielding</b>). Bots also have a 7% independent chance each to spawn with <i>Ironclad</i>, <i>Buzzer Beater</i>, <i>Last Stand</i>, <i>Lucky Draw</i>, <i>Buffer</i>, <i>Vampire</i>, or <i>Mulligan</i> (max 1 bot per ability).</li>
             <li><b>Bot Prestige Skins:</b> Bots have a chance to spawn wearing random Prestige Skins based on difficulty: <b>Very Hard (10%)</b>, <b>Hard (5%)</b>, and <b>Medium (2%)</b>.</li>
             <li><b>Answer Streaks (🔥):</b> Real players who answer 4+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
@@ -895,7 +947,7 @@
         <div class="grid-2">
           <div class="card">
             <h3>🔑 Host Private Room</h3>
-            <p class="sub">Generate a private 5-character room code for friends and start whenever you're ready.</p>
+            <p class="sub">Generate a private 5-character room code for friends, choose Standard or Survival Mode, and start whenever you're ready.</p>
             <button class="btn secondary" onclick="createOnlineRoom()">Create Private Room</button>
           </div>
           <div class="card">
@@ -929,6 +981,25 @@
               <button class="btn secondary small" onclick="leaveOnlineRoom()">Leave Room</button>
             </div>
           </div>
+
+          <!-- Private Room Mode Selector (Host) -->
+          <div id="privateModeSelectorBox" class="private-mode-box" style="display:none;">
+            <div>
+              <div style="font-size:0.82rem; font-weight:800; color:var(--accent);">🎮 PRIVATE ROOM GAME MODE</div>
+              <div id="privateModeDescText" style="font-size:0.82rem; color:var(--muted); margin-top:2px;">Standard Royale: Slower correct answer loses 1 ❤️.</div>
+            </div>
+            <div class="mode-toggle-group">
+              <button id="privModeStandardBtn" class="mode-option-btn active-standard" onclick="setPrivateRoomMode(false)">⚔️ Standard Royale</button>
+              <button id="privModeSurvivalBtn" class="mode-option-btn" onclick="setPrivateRoomMode(true)">🛡️ Survival Mode</button>
+            </div>
+          </div>
+
+          <!-- Private Room Mode Indicator (Joined Client) -->
+          <div id="privateModeClientBanner" class="private-mode-box" style="display:none;">
+            <span style="font-size:0.85rem; font-weight:800; color:var(--accent);">🎮 HOST SELECTED MODE:</span>
+            <span id="privateModeClientText" style="font-size:0.86rem; font-weight:700; color:var(--text);">⚔️ Standard Royale</span>
+          </div>
+
           <hr style="border-color:var(--border); margin:6px 0;">
           <h4>Connected Human Players (<span id="humanCount">1</span>/20)</h4>
           <div id="connectedHumansList" class="sb-list"></div>
@@ -940,7 +1011,10 @@
     <section id="vsScreen" class="screen">
       <div class="vs-showcase">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-          <span id="vsRoundBadge" class="pill" style="color:var(--accent); border-color:var(--accent);">ROUND 1 MATCHUP</span>
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span id="vsRoundBadge" class="pill" style="color:var(--accent); border-color:var(--accent);">ROUND 1 MATCHUP</span>
+            <span id="vsSurvivalBadge" class="pill survival" style="display:none;">🛡️ SURVIVAL MODE</span>
+          </div>
           <span id="vsAliveBadge" class="pill">20 / 20 Remaining</span>
         </div>
 
@@ -956,7 +1030,7 @@
             📚 Next Category: <b id="vsNextCategoryText" style="color: #fff; margin-left: 4px;">Trivia</b>
           </span>
         </div>
-        <p class="sub" style="margin-bottom:8px;">Activate Power-Ups now before the question starts!</p>
+        <p id="vsSubtitleText" class="sub" style="margin-bottom:8px;">Activate Power-Ups now before the question starts!</p>
 
         <div class="vs-cards-row">
           <div class="vs-fighter-card me-card">
@@ -1060,7 +1134,10 @@
     <!-- ROUND SCOREBOARD SCREEN -->
     <section id="scoreboardScreen" class="screen">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
-        <h2 id="sbTitle">Round 1 Results</h2>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <h2 id="sbTitle" style="margin-bottom:0;">Round 1 Results</h2>
+          <span id="sbSurvivalBadge" class="pill survival" style="display:none;">🛡️ SURVIVAL MODE</span>
+        </div>
         <div id="sbAliveBadge" class="pill">18 / 20 Remaining</div>
       </div>
 
@@ -1757,8 +1834,9 @@ function switchHomeTab(tabId, btnEl) {
 
 // ==================== GAME ENGINE STATE ====================
 let gameState = {
-  mode: "single", // "single" | "superhard" | "online_host" | "online_client"
+  mode: "single", // "single" | "superhard" | "survival" | "online_host" | "online_client"
   superHard: false,
+  survivalMode: false,
   round: 0,
   players: [],
   usedQuestionIndices: new Set(),
@@ -1895,6 +1973,65 @@ function startSinglePlayer(isSuperHard) {
   gameState = {
     mode: isSuperHard ? "superhard" : "single",
     superHard: isSuperHard,
+    survivalMode: false,
+    round: 0,
+    players: [me, ...bots],
+    usedQuestionIndices: new Set(),
+    currentQuestion: null,
+    nextQuestionCategory: "",
+    currentPairings: [],
+    myOpponentId: null,
+    roundStartTime: 0,
+    timerInterval: null,
+    vsInterval: null,
+    sbInterval: null,
+    myAnswer: null,
+    mulliganUsedThisRound: false,
+    botPuTimeout: null,
+    roundBuffs: {
+      freeze: false,
+      shield: false,
+      fiftyFiftyUsed: false,
+      heartBargain: false,
+      doubleJeopardy: false,
+      juggernaut: false,
+      suddenDeath: false,
+      speedBlitz: false
+    },
+    preRoundBuffs: {},
+    roundSubmissions: {},
+    myPlacement: null,
+    rewardsAwarded: false
+  };
+  startNextRound();
+}
+
+function startSurvivalMode() {
+  clearAllTimers();
+  const me = {
+    id: "human_me",
+    name: profile.name || "Player",
+    isBot: false,
+    difficulty: "Human",
+    lives: 3,
+    maxLives: 3,
+    hasJuggernaut: false,
+    hasSpeedBlitz: false,
+    passives: [...(profile.equippedPassives || [])],
+    lastStandStreak: 0,
+    bountyElims: 0,
+    eliminatedRound: null,
+    skin: profile.equippedSkin,
+    streak: profile.currentStreak || 0,
+    correctAnswers: 0,
+    lostAnyHeart: false,
+    isMe: true
+  };
+  const bots = generateBots(19, "normal");
+  gameState = {
+    mode: "survival",
+    superHard: false,
+    survivalMode: true,
     round: 0,
     players: [me, ...bots],
     usedQuestionIndices: new Set(),
@@ -1996,6 +2133,7 @@ function startNextRound() {
     broadcastOnline({
       type: "PRE_ROUND_VS",
       round: gameState.round,
+      survivalMode: !!gameState.survivalMode,
       category: gameState.nextQuestionCategory,
       players: gameState.players,
       pairings: gameState.currentPairings,
@@ -2061,7 +2199,16 @@ function showPreRoundVSScreen() {
   }
 
   document.getElementById("vsRoundBadge").textContent = `ROUND ${gameState.round} MATCHUP`;
+  const vsSurvBadge = document.getElementById("vsSurvivalBadge");
+  if (vsSurvBadge) vsSurvBadge.style.display = gameState.survivalMode ? "inline-flex" : "none";
   document.getElementById("vsAliveBadge").textContent = `${alive.length} / 20 Remaining`;
+
+  const vsSubtitleEl = document.getElementById("vsSubtitleText");
+  if (vsSubtitleEl) {
+    vsSubtitleEl.textContent = gameState.survivalMode
+      ? "Survival Mode: You only lose a ❤️ if you get the question wrong or run out of time!"
+      : "Activate Power-Ups now before the question starts!";
+  }
 
   // Display upcoming question's category
   const nextCat = (gameState.currentQuestion && gameState.currentQuestion.c)
@@ -2226,6 +2373,7 @@ function showPreRoundVSScreen() {
         broadcastOnline({
           type: "ROUND_START",
           round: gameState.round,
+          survivalMode: !!gameState.survivalMode,
           players: gameState.players,
           question: gameState.currentQuestion,
           pairings: gameState.currentPairings,
@@ -2399,7 +2547,7 @@ function setupRoundUI() {
   const alive = gameState.players.filter(p => p.lives > 0);
   const isSpectating = !me || me.lives <= 0;
 
-  if (isSpectating && (gameState.mode === "single" || gameState.mode === "superhard")) {
+  if (isSpectating && (gameState.mode === "single" || gameState.mode === "superhard" || gameState.mode === "survival")) {
     concludeMatch();
     return;
   }
@@ -2492,7 +2640,13 @@ function setupRoundUI() {
 
     document.getElementById("arenaMyBuffsList").textContent = myTags.length ? myTags.join(", ") : "None";
     document.getElementById("arenaOppBuffsList").textContent = oppTags.length ? oppTags.join(", ") : "None";
-    document.getElementById("activeBuffNotice").textContent = isMySuddenDeath ? "⏱️ SUDDEN DEATH: 10s CLOCK!" : "";
+
+    const modeNotices = [];
+    if (gameState.survivalMode) modeNotices.push("🛡️ SURVIVAL MODE");
+    if (isMySuddenDeath) modeNotices.push("⏱️ SUDDEN DEATH: 10s CLOCK!");
+    const noticeEl = document.getElementById("activeBuffNotice");
+    noticeEl.textContent = modeNotices.join(" • ");
+    noticeEl.style.color = gameState.survivalMode && !isMySuddenDeath ? "var(--green)" : "var(--accent)";
   }
 
   if (gameState.mode !== "online_client") {
@@ -2512,7 +2666,7 @@ function setupRoundUI() {
     document.getElementById("timerText").textContent = remaining.toFixed(1) + "s";
     document.getElementById("timerBar").style.width = ((remaining / duelDuration) * 100) + "%";
 
-    if ((gameState.mode === "single" || gameState.mode === "superhard") && gameState.myAnswer !== null) {
+    if ((gameState.mode === "single" || gameState.mode === "superhard" || gameState.mode === "survival") && gameState.myAnswer !== null) {
       const oppSub = gameState.myOpponentId ? gameState.roundSubmissions[gameState.myOpponentId] : { timeSec: 0 };
       if (!oppSub || elapsed >= Math.min(oppSub.timeSec, 4.0)) {
         clearInterval(gameState.timerInterval);
@@ -2537,7 +2691,7 @@ function setupRoundUI() {
           }
         }
       }
-      if (gameState.mode === "single" || gameState.mode === "superhard") {
+      if (gameState.mode === "single" || gameState.mode === "superhard" || gameState.mode === "survival") {
         clearInterval(gameState.timerInterval);
         resolveRound();
       } else if (gameState.mode === "online_host" && elapsed >= 20.0) {
@@ -2705,11 +2859,11 @@ function resolveRound() {
     const buzzerA = hasPassive(pA, "buzzerBeater") && rightA && !rightB && timeLeftA < 3.0 && timeLeftA >= 0;
     const buzzerB = hasPassive(pB, "buzzerBeater") && rightB && !rightA && timeLeftB < 3.0 && timeLeftB >= 0;
 
-    // Buffer check: answered correctly < 1.0s after opponent also answered correctly
+    // Buffer check: answered correctly < 1.0s after opponent also answered correctly (Standard modes)
     const diffA = Math.round((timeA - timeB) * 100) / 100;
     const diffB = Math.round((timeB - timeA) * 100) / 100;
-    const bufferA = rightA && rightB && timeB < timeA && hasPassive(pA, "buffer") && diffA < 1.0;
-    const bufferB = rightA && rightB && timeA < timeB && hasPassive(pB, "buffer") && diffB < 1.0;
+    const bufferA = !gameState.survivalMode && rightA && rightB && timeB < timeA && hasPassive(pA, "buffer") && diffA < 1.0;
+    const bufferB = !gameState.survivalMode && rightA && rightB && timeA < timeB && hasPassive(pB, "buffer") && diffB < 1.0;
 
     const isDoubleJeopardy = !!(buffsA.doubleJeopardy || buffsB.doubleJeopardy);
     const basePenalty = isDoubleJeopardy ? 2 : 1;
@@ -2742,6 +2896,16 @@ function resolveRound() {
         reason += ` ⏱️ <b>Buzzer Beater!</b> (${timeLeftB.toFixed(2)}s left) deals 2 ❤️ damage!`;
       } else if (isDoubleJeopardy) {
         reason += " ⚡ <b>Double Jeopardy</b> raises the loss to 2 lives!";
+      }
+    } else if (gameState.survivalMode) {
+      // Survival Mode: both answered correctly -> neither loses a heart
+      if (timeA === timeB) {
+        isExactTie = true;
+        reason = `Exact tie! Both answered correctly in <b>${timeA.toFixed(2)}s</b> — neither loses a life!`;
+      } else if (timeA < timeB) {
+        reason = `🛡️ <b>Survival Mode:</b> Both got it right (<b>${pA.name}</b>: ${timeA.toFixed(2)}s vs <b>${pB.name}</b>: ${timeB.toFixed(2)}s) — neither loses a life!`;
+      } else {
+        reason = `🛡️ <b>Survival Mode:</b> Both got it right (<b>${pB.name}</b>: ${timeB.toFixed(2)}s vs <b>${pA.name}</b>: ${timeA.toFixed(2)}s) — neither loses a life!`;
       }
     } else {
       if (timeA < timeB) {
@@ -2899,6 +3063,7 @@ function resolveRound() {
     broadcastOnline({
       type: "ROUND_RESULT",
       round: gameState.round,
+      survivalMode: !!gameState.survivalMode,
       players: gameState.players,
       duelLogs
     });
@@ -2916,6 +3081,8 @@ function renderScoreboard(duelLogs) {
   const isOnline = (gameState.mode === "online_host" || gameState.mode === "online_client");
 
   document.getElementById("sbTitle").textContent = `Round ${gameState.round} Scoreboard`;
+  const sbSurvBadge = document.getElementById("sbSurvivalBadge");
+  if (sbSurvBadge) sbSurvBadge.style.display = gameState.survivalMode ? "inline-flex" : "none";
   document.getElementById("sbAliveBadge").textContent = `${alive.length} / 20 Players Left`;
   document.getElementById("duelSummaryBox").innerHTML = duelLogs[myId] || duelLogs["_spectator"] || "Round completed.";
 
@@ -3051,7 +3218,7 @@ function declineRevive() {
   const alive = gameState.players.filter(p => p.lives > 0);
   gameState.myPlacement = alive.length + 1;
   document.getElementById("reviveOfferBox").style.display = "none";
-  if (gameState.mode === "single" || gameState.mode === "superhard") {
+  if (gameState.mode === "single" || gameState.mode === "superhard" || gameState.mode === "survival") {
     concludeMatch();
   } else {
     renderScoreboard({ [myPeerOrLocalId()]: `You accepted elimination at <b>#${gameState.myPlacement}</b>. Spectating remaining players!` });
@@ -3064,7 +3231,7 @@ function proceedAfterScoreboard() {
   const me = gameState.players.find(p => p.id === myId);
   const alive = gameState.players.filter(p => p.lives > 0);
 
-  if (gameState.mode === "single" || gameState.mode === "superhard") {
+  if (gameState.mode === "single" || gameState.mode === "superhard" || gameState.mode === "survival") {
     if (!me || me.lives === 0 || alive.length <= 1) {
       concludeMatch();
       return;
@@ -3075,7 +3242,7 @@ function proceedAfterScoreboard() {
 
   if (gameState.mode === "online_host") {
     if (alive.length <= 1) {
-      broadcastOnline({ type: "MATCH_OVER", players: gameState.players });
+      broadcastOnline({ type: "MATCH_OVER", players: gameState.players, survivalMode: !!gameState.survivalMode });
       concludeMatch();
     } else {
       startNextRound();
@@ -3172,7 +3339,10 @@ function concludeMatch() {
   showScreen("gameOverScreen");
   document.getElementById("endTrophy").textContent = placement === 1 ? "👑" : (placement <= 3 ? "🥈" : (placement <= 10 ? "🎖️" : "💀"));
   document.getElementById("endHeadline").textContent = placement === 1 ? "VICTORY ROYALE!" : `Finished #${placement}`;
-  document.getElementById("endPlacementText").textContent = `You placed #${placement} out of 20 players${gameState.superHard ? " (Super Hard 2x Mode)" : ""}.`;
+  const modeSuffix = gameState.superHard
+    ? " (Super Hard 2x Mode)"
+    : (gameState.survivalMode ? " (Survival Mode)" : "");
+  document.getElementById("endPlacementText").textContent = `You placed #${placement} out of 20 players${modeSuffix}.`;
   document.getElementById("coinsEarnedText").textContent = earned.toLocaleString();
   document.getElementById("xpEarnedText").textContent = totalXpEarned.toLocaleString();
 
@@ -3238,6 +3408,7 @@ let isRoomHost = false;
 const MAX_PUBLIC_SLOTS = 15;
 const PUBLIC_LOBBY_SECONDS = 60;
 let isPublicLobby = false;
+let privateRoomSurvivalMode = false;
 let publicSlotNum = null;
 let publicRoomLocked = false;
 let publicLobbyEndsAt = 0;
@@ -3407,6 +3578,7 @@ function claimPublicHostSlot(slotNum) {
 
   isRoomHost = true;
   isPublicLobby = true;
+  privateRoomSurvivalMode = false;
   publicSlotNum = slotNum;
   publicRoomLocked = false;
   onlineRoomCode = "PUBLIC #" + slotNum;
@@ -3456,6 +3628,8 @@ function enterPublicWaitingRoom(amHost, slotNum, initialSeconds) {
   document.getElementById("roomCodeLabel").textContent = "MATCHMAKING CHANNEL";
   document.getElementById("displayRoomCode").textContent = `PUBLIC #${slotNum}`;
   document.getElementById("publicLobbyCountdownBox").style.display = "block";
+  document.getElementById("privateModeSelectorBox").style.display = "none";
+  document.getElementById("privateModeClientBanner").style.display = "none";
 
   const startBtn = document.getElementById("hostStartOnlineBtn");
   if (amHost) {
@@ -3497,6 +3671,44 @@ function updatePublicLobbyTimerDisplay() {
   if (barEl) barEl.style.width = pct + "%";
 }
 
+function setPrivateRoomMode(isSurvival) {
+  if (!isRoomHost || isPublicLobby) return;
+  privateRoomSurvivalMode = !!isSurvival;
+  updatePrivateRoomModeUI();
+  broadcastLobbyState();
+}
+
+function updatePrivateRoomModeUI() {
+  const stdBtn = document.getElementById("privModeStandardBtn");
+  const survBtn = document.getElementById("privModeSurvivalBtn");
+  const descEl = document.getElementById("privateModeDescText");
+  if (stdBtn) stdBtn.classList.toggle("active-standard", !privateRoomSurvivalMode);
+  if (survBtn) survBtn.classList.toggle("active-survival", privateRoomSurvivalMode);
+  if (descEl) {
+    descEl.textContent = privateRoomSurvivalMode
+      ? "Survival Mode: Players & bots only lose a ❤️ if they answer wrong or run out of time."
+      : "Standard Royale: Slower correct answer loses 1 ❤️.";
+  }
+}
+
+function updateClientPrivateModeBanner(isSurvival) {
+  const banner = document.getElementById("privateModeClientBanner");
+  const textEl = document.getElementById("privateModeClientText");
+  if (!banner || !textEl) return;
+  if (isPublicLobby) {
+    banner.style.display = "none";
+    return;
+  }
+  banner.style.display = "flex";
+  if (isSurvival) {
+    textEl.textContent = "🛡️ Survival Mode (Only lose a ❤️ on wrong answers or timeouts)";
+    textEl.style.color = "#4ade80";
+  } else {
+    textEl.textContent = "⚔️ Standard Royale";
+    textEl.style.color = "var(--text)";
+  }
+}
+
 function createOnlineRoom() {
   if (typeof Peer === "undefined") {
     showToast("PeerJS library failed to load. Check internet connection.");
@@ -3507,6 +3719,7 @@ function createOnlineRoom() {
   onlineRoomCode = code;
   isRoomHost = true;
   isPublicLobby = false;
+  privateRoomSurvivalMode = false;
   publicSlotNum = null;
   publicRoomLocked = false;
   clientConns = [];
@@ -3516,6 +3729,9 @@ function createOnlineRoom() {
     document.getElementById("onlineSetupView").style.display = "none";
     document.getElementById("onlineWaitingView").style.display = "block";
     document.getElementById("publicLobbyCountdownBox").style.display = "none";
+    document.getElementById("privateModeSelectorBox").style.display = "flex";
+    document.getElementById("privateModeClientBanner").style.display = "none";
+    updatePrivateRoomModeUI();
     document.getElementById("roomCodeLabel").textContent = "SHARE THIS ROOM CODE";
     document.getElementById("displayRoomCode").textContent = code;
     const startBtn = document.getElementById("hostStartOnlineBtn");
@@ -3546,6 +3762,7 @@ function joinOnlineRoom() {
   onlineRoomCode = code;
   isRoomHost = false;
   isPublicLobby = false;
+  privateRoomSurvivalMode = false;
   publicSlotNum = null;
 
   peer = new Peer();
@@ -3555,6 +3772,8 @@ function joinOnlineRoom() {
       document.getElementById("onlineSetupView").style.display = "none";
       document.getElementById("onlineWaitingView").style.display = "block";
       document.getElementById("publicLobbyCountdownBox").style.display = "none";
+      document.getElementById("privateModeSelectorBox").style.display = "none";
+      updateClientPrivateModeBanner(false);
       document.getElementById("roomCodeLabel").textContent = "PRIVATE ROOM CODE";
       document.getElementById("displayRoomCode").textContent = code;
       document.getElementById("hostStartOnlineBtn").style.display = "none";
@@ -3686,11 +3905,15 @@ function handleClientReceive(data) {
     if (isPublicLobby && typeof data.remainingSec === "number") {
       publicLobbyEndsAt = performance.now() + data.remainingSec * 1000;
       updatePublicLobbyTimerDisplay();
+    } else if (!isPublicLobby && typeof data.survivalMode === "boolean") {
+      privateRoomSurvivalMode = data.survivalMode;
+      updateClientPrivateModeBanner(data.survivalMode);
     }
   } else if (data.type === "PRE_ROUND_VS") {
     clearInterval(publicLobbyInterval);
     gameState.mode = "online_client";
     gameState.superHard = false;
+    gameState.survivalMode = !!data.survivalMode;
     gameState.round = data.round;
     gameState.nextQuestionCategory = data.category || "Trivia";
     gameState.players = data.players;
@@ -3729,6 +3952,7 @@ function handleClientReceive(data) {
     triggerOpponentPowerupNotification(data.fromName || "Opponent", data.powerup);
   } else if (data.type === "ROUND_START") {
     gameState.mode = "online_client";
+    gameState.survivalMode = !!data.survivalMode;
     gameState.round = data.round;
     gameState.players = data.players;
     gameState.currentQuestion = data.question;
@@ -3739,6 +3963,9 @@ function handleClientReceive(data) {
     setupRoundUI();
   } else if (data.type === "ROUND_RESULT") {
     clearAllTimers();
+    if (typeof data.survivalMode === "boolean") {
+      gameState.survivalMode = data.survivalMode;
+    }
     gameState.players = data.players;
 
     const myId = myPeerOrLocalId();
@@ -3754,6 +3981,9 @@ function handleClientReceive(data) {
     renderScoreboard(data.duelLogs);
   } else if (data.type === "MATCH_OVER") {
     clearAllTimers();
+    if (typeof data.survivalMode === "boolean") {
+      gameState.survivalMode = data.survivalMode;
+    }
     gameState.players = data.players;
     concludeMatch();
   }
@@ -3788,7 +4018,11 @@ function getLobbyHumansList() {
 }
 
 function broadcastLobbyState() {
-  const payload = { type: "LOBBY_STATE", humans: getLobbyHumansList() };
+  const payload = {
+    type: "LOBBY_STATE",
+    humans: getLobbyHumansList(),
+    survivalMode: !isPublicLobby && privateRoomSurvivalMode
+  };
   if (isPublicLobby) {
     payload.remainingSec = Math.max(0, (publicLobbyEndsAt - performance.now()) / 1000);
   }
@@ -3852,6 +4086,7 @@ function hostStartOnlineMatch() {
   gameState = {
     mode: "online_host",
     superHard: false,
+    survivalMode: !isPublicLobby && privateRoomSurvivalMode,
     round: 0,
     players: [...humans, ...bots],
     usedQuestionIndices: new Set(),
@@ -3897,12 +4132,16 @@ function leaveOnlineRoom() {
   clientConns = [];
   isRoomHost = false;
   isPublicLobby = false;
+  privateRoomSurvivalMode = false;
   publicSlotNum = null;
   publicRoomLocked = false;
   gameState.mode = "single";
+  gameState.survivalMode = false;
   document.getElementById("onlineSetupView").style.display = "block";
   document.getElementById("onlineWaitingView").style.display = "none";
   document.getElementById("publicLobbyCountdownBox").style.display = "none";
+  document.getElementById("privateModeSelectorBox").style.display = "none";
+  document.getElementById("privateModeClientBanner").style.display = "none";
   showScreen("menuScreen");
 }
 
