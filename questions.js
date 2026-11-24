@@ -1821,5 +1821,10 @@ const QUESTIONS = [
   {"c": "1960s", "q": "Which British rock band released the landmark 1967 album 'Sgt. Pepper's Lonely Hearts Club Band'?", "opts": ["The Rolling Stones", "The Who", "The Kinks", "The Beatles"], "a": 3},
   {"c": "1960s", "q": "What was the name of President Johnson’s ambitious 1960s initiative aimed at reducing poverty and expanding social welfare?", "opts": ["The New Frontier", "The Fair Deal", "The Great Society", "The Square Deal"], "a": 2},
   {"c": "Television", "q": "Who co-created the animated sitcom 'South Park' and voice Stan, Kyle, Cartman, and Kenny?", "opts": ["Matt Groening and James L. Brooks", "Seth MacFarlane and Mike Judge", "Trey Parker and Matt Stone", "Dan Harmon and Justin Roiland"], "a": 2},
-  {"c": "Television", "q": "In 'South Park', what is the full name of the polite, easily grounded fourth-grader who briefly replaces Kenny in Season 6?", "opts": ["Tweek Tweak", "Leopold 'Butters' Stotch", "Clyde Donovan", "Craig Tucker"], "a": 1}
+  {"c": "Television", "q": "In 'South Park', what is the full name of the polite, easily grounded fourth-grader who briefly replaces Kenny in Season 6?", "opts": ["Tweek Tweak", "Leopold 'Butters' Stotch", "Clyde Donovan", "Craig Tucker"], "a": 1},
+    {"c": "Minecraft", "q": "In Minecraft, how many sticks can be crafted from a single log?", "opts": ["4", "8", "12", "16"], "a": 1},
+  {"c": "Minecraft", "q": "In Minecraft, what terrifying mob is encountered when players venture into ancient cities?", "opts": ["The ravager", "The wither", "The warden", "The enderman"], "a": 2},
+  {"c": "Minecraft", "q": "In Minecraft, what mob can players ride using a saddle and a carrot on a stick?", "opts": ["Pig", "Horse", "Strider", "Mule"], "a": 0},
+  {"c": "Tech & Math", "q": "What historic stock market crash began after the Nasdaq Composite peaked on March 10, 2000, bankrupting high-profile startups like Pets.com and Webvan?", "opts": ["Black Monday", "The Great Recession", "The crypto winter", "The dot-com crash"], "a": 3}
+
 ];
