@@ -1826,5 +1826,10 @@ const QUESTIONS = [
   {"c": "Minecraft", "q": "In Minecraft, what terrifying mob is encountered when players venture into ancient cities?", "opts": ["The ravager", "The wither", "The warden", "The enderman"], "a": 2},
   {"c": "Minecraft", "q": "In Minecraft, what mob can players ride using a saddle and a carrot on a stick?", "opts": ["Pig", "Horse", "Strider", "Mule"], "a": 0},
   {"c": "Tech & Math", "q": "What historic stock market crash began after the Nasdaq Composite peaked on March 10, 2000, bankrupting high-profile startups like Pets.com and Webvan?", "opts": ["Black Monday", "The Great Recession", "The crypto winter", "The dot-com crash"], "a": 3},
-  {"c": "2000-2010 Kids", "q": "Who is the villain in the movie 'The Lorax' who attempts to monetize air?", "opts": ["The Once-ler", "Aloysius O'Hare", "Ted Wiggins", "Grammy Norma"], "a": 1}
+  {"c": "2000-2010 Kids", "q": "Who is the villain in the movie 'The Lorax' who attempts to monetize air?", "opts": ["The Once-ler", "Aloysius O'Hare", "Ted Wiggins", "Grammy Norma"], "a": 1},
+    {"c": "Dr. Seuss", "q": "In Dr. Seuss's 'Green Eggs and Ham', what is the name of the persistent character who tries to convince the narrator to try the dish?", "opts": ["Sam-I-Am", "The Once-ler", "Horton", "Bartholomew Cubbins"], "a": 0},
+  {"c": "Dr. Seuss", "q": "What is the name of the Grinch's loyal pet dog in 'How the Grinch Stole Christmas!'?", "opts": ["Rex", "Max", "Spot", "Toby"], "a": 1},
+  {"c": "Dr. Seuss", "q": "In 'The Cat in the Hat', what are the names of the two blue-haired troublemakers the Cat lets out of a big red box?", "opts": ["Tweedledum and Tweedledee", "Chip and Dale", "Thing One and Thing Two", "Huey and Dewey"], "a": 2},
+  {"c": "Dr. Seuss", "q": "In 'Horton Hears a Who!', what is the name of the microscopic town that Horton the Elephant protects on a speck of dust?", "opts": ["Mulberry Street", "Solla Sollew", "Middletown", "Whoville"], "a": 3},
+  {"c": "Dr. Seuss", "q": "Which Dr. Seuss book, famously given as a graduation gift, was the final book published during Theodor Geisel's lifetime?", "opts": ["Oh, the Places You'll Go!", "The Lorax", "Fox in Socks", "The Sneetches"], "a": 0}
 ];
