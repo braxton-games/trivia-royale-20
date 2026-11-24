@@ -607,7 +607,7 @@
   .opt-btn:disabled { cursor: default; }
   .opt-btn.selected { border-color: var(--accent); background: rgba(56,189,248,0.18); }
   .opt-btn.correct { border-color: var(--green); background: rgba(34,197,94,0.22); }
-  .opt-btn.wrong { border-color: var(--red); background: rgba(239,68,68,0.22); }
+  .opt-btn.wrong { border-color: var(--red); background: rgba(239,68,68,0.25); color: #fecaca; }
   .opt-btn.eliminated-opt { opacity: 0.3; pointer-events: none; }
 
   .powerup-bar {
@@ -857,14 +857,15 @@
           <h3>How Trivia Royale 20 Works</h3>
           <ul style="padding-left:20px; line-height:1.65; color:var(--muted); font-size:0.92rem;">
             <li><b>20-Player Lobby:</b> Every match has 20 total combatants. Every player/bot starts with <b>3 lives (❤️❤️❤️)</b>.</li>
-            <li><b>6-Second Matchup &amp; Power-Up Preview:</b> Before every question, a 6-second VS screen reveals your opponent, equipped passive abilities, both players' remaining lives, and lets you activate Consumable Power-Ups for the upcoming duel.</li>
-            <li><b>1v1 Pairings:</b> Each round, surviving players face off with a <b>20-second timer</b>. (If an odd number remain, one player receives a Bye).</li>
+            <li><b>6-Second Matchup &amp; Category Preview:</b> Before every question, a 6-second VS screen reveals your opponent, the <b>next question's category</b>, equipped passive abilities, both players' remaining lives, and lets you arm Consumable Power-Ups.</li>
+            <li><b>1v1 Pairings:</b> Each round, surviving players face off with a <b>20-second timer</b> (or <b>10 seconds</b> if either player activates <b>Sudden Death</b>). If an odd number remain, one player receives a Bye.</li>
             <li><b>Winning a Duel:</b> Fastest <b>correct</b> answer wins. The loser loses 1 life (or 2 lives with <b>Double Jeopardy</b> or <b>Buzzer Beater</b>).</li>
-            <li><b>Passive Abilities (🔮):</b> Permanent non-consumable perks bought in the Shop. Equip 1 at a time (or 2 with <b>Dual Wielding</b>). Bots also have a 7% independent chance each to spawn with <i>Ironclad</i>, <i>Buzzer Beater</i>, <i>Last Stand</i>, <i>Lucky Draw</i>, <i>Buffer</i>, or <i>Vampire</i> (max 1 bot per ability).</li>
+            <li><b>Passive Abilities (🔮):</b> Permanent non-consumable perks bought in the Shop. Equip 1 at a time (or 2 with <b>Dual Wielding</b>). Bots also have a 7% independent chance each to spawn with <i>Ironclad</i>, <i>Buzzer Beater</i>, <i>Last Stand</i>, <i>Lucky Draw</i>, <i>Buffer</i>, <i>Vampire</i>, or <i>Mulligan</i> (max 1 bot per ability).</li>
+            <li><b>Bot Prestige Skins:</b> Bots have a chance to spawn wearing random Prestige Skins based on difficulty: <b>Very Hard (20%)</b>, <b>Hard (15%)</b>, and <b>Medium (2%)</b>.</li>
             <li><b>Answer Streaks (🔥):</b> Real players who answer 4+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
             <li><b>Ties &amp; Double Misses:</b> If both answer wrong (or time out), <b>both lose 1 life</b>. If both answer right in the exact same time, <b>neither loses a life</b> (and <b>Lucky Draw</b> grants +1 ❤️!).</li>
             <li><b>XP, Levels &amp; Skin Unlocks:</b> Everyone starts at <b>Level 0 (0 XP)</b>. Earn <b>+1 XP</b> per correct answer plus placement bonuses: <b>Top 10 (+5 XP)</b>, <b>Top 7 (+10 XP)</b>, <b>Top 5 (+20 XP)</b>, <b>Top 3 (+40 XP)</b>, <b>2nd (+60 XP)</b>, <b>1st (+80 XP)</b>, or <b>Undefeated 1st (+150 XP)</b>. Leveling requires <b>250 XP</b> (Lv 0→1), <b>500 XP</b> per level (Lv 1–5), <b>750 XP</b> per level (Lv 5–10), and <b>1,000 XP</b> per level from Lv 10 onward.</li>
-            <li><b>Juggernaut &amp; Bot Power-Ups:</b> <b>Juggernaut</b> (3,000 🪙) can only be activated on the Round 1 VS screen to start with <b>5 ❤️</b> (5% chance a bot spawns with it). Bots also have a 3% chance per duel to activate <i>Double Jeopardy</i>, <i>Heart Bargain</i>, or <i>Aegis Life Shield</i>.</li>
+            <li><b>Round 1 Exclusives &amp; Bot Power-Ups:</b> <b>Juggernaut</b> (1,000 🪙, start with 5 ❤️) and <b>Speed Blitz</b> (750 🪙, -0.5s on all answer times for the match) can only be activated on the Round 1 VS screen (5% chance a bot spawns with Juggernaut). Bots also have a 3% chance per duel to activate <i>Double Jeopardy</i>, <i>Heart Bargain</i>, <i>Aegis Life Shield</i>, or <i>Sudden Death</i>.</li>
           </ul>
         </div>
       </div>
@@ -950,6 +951,11 @@
         <div id="vsOpponentPowerupAlert" class="opp-pu-alert" style="display:none;"></div>
 
         <h2 id="vsHeaderTitle" style="margin-top:6px;">Your Next Opponent</h2>
+        <div id="vsCategoryBanner" style="margin: 6px auto 8px auto;">
+          <span class="pill" style="background: rgba(56, 189, 248, 0.14); border-color: var(--accent); color: var(--accent); font-size: 0.88rem; padding: 6px 14px;">
+            📚 Next Category: <b id="vsNextCategoryText" style="color: #fff; margin-left: 4px;">Trivia</b>
+          </span>
+        </div>
         <p class="sub" style="margin-bottom:8px;">Activate Power-Ups now before the question starts!</p>
 
         <div class="vs-cards-row">
@@ -960,6 +966,7 @@
               <span id="vsLeftPassiveBadge" class="passive-inline-badge" style="display:none;"></span>
             </div>
             <div id="vsLeftSkin" class="skin-badge skin-default">Rookie</div>
+            <div id="vsLeftDiff" class="diff-tag" style="font-size:0.78rem; display:none;">Medium</div>
             <div id="vsLeftHearts" class="vs-hearts-large">❤️❤️❤️</div>
             <div id="vsLeftLivesText" style="font-size:0.86rem; color:var(--muted); font-weight:700;">3 Lives Left</div>
           </div>
@@ -972,6 +979,7 @@
               <div id="vsRightName" style="font-size:1.25rem; font-weight:900; max-width:100%;">Bot</div>
               <span id="vsRightPassiveBadge" class="passive-inline-badge" style="display:none;"></span>
             </div>
+            <div id="vsRightSkin" class="skin-badge skin-default" style="display:none;">Rookie</div>
             <div id="vsRightDiff" class="diff-tag" style="font-size:0.8rem;">Medium</div>
             <div id="vsRightHearts" class="vs-hearts-large">❤️❤️❤️</div>
             <div id="vsRightLivesText" style="font-size:0.86rem; color:var(--muted); font-weight:700;">3 Lives Left</div>
@@ -984,11 +992,13 @@
             <span id="vsActiveBuffSummary" style="font-size:0.8rem; font-weight:700; color:var(--green);">None armed</span>
           </div>
           <div id="vsPowerupButtons" class="vs-powerup-buttons">
+            <button id="vsPuSuddenDeathBtn" class="vs-pu-btn" onclick="usePowerup('suddenDeath')">⏱️ Sudden Death (<span id="vsInvSuddenDeath">0</span>)</button>
             <button id="vsPu5050Btn" class="vs-pu-btn" onclick="usePowerup('fiftyFifty')">✂️ 50/50 (<span id="vsInv5050">0</span>)</button>
-            <button id="vsPuFreezeBtn" class="vs-pu-btn" onclick="usePowerup('freeze')">❄️ Cryo +3s (<span id="vsInvFreeze">0</span>)</button>
+            <button id="vsPuDoubleJeopardyBtn" class="vs-pu-btn" onclick="usePowerup('doubleJeopardy')">⚡ Double Jeopardy (<span id="vsInvDoubleJeopardy">0</span>)</button>
             <button id="vsPuShieldBtn" class="vs-pu-btn" onclick="usePowerup('shield')">🛡️ Shield (<span id="vsInvShield">0</span>)</button>
             <button id="vsPuHeartBargainBtn" class="vs-pu-btn" onclick="usePowerup('heartBargain')">💝 Heart Bargain (<span id="vsInvHeartBargain">0</span>)</button>
-            <button id="vsPuDoubleJeopardyBtn" class="vs-pu-btn" onclick="usePowerup('doubleJeopardy')">⚡ Double Jeopardy (<span id="vsInvDoubleJeopardy">0</span>)</button>
+            <button id="vsPuFreezeBtn" class="vs-pu-btn" onclick="usePowerup('freeze')">❄️ Cryo +3s (<span id="vsInvFreeze">0</span>)</button>
+            <button id="vsPuSpeedBlitzBtn" class="vs-pu-btn" onclick="usePowerup('speedBlitz')">💨 Speed Blitz (<span id="vsInvSpeedBlitz">0</span>)</button>
             <button id="vsPuJuggernautBtn" class="vs-pu-btn" onclick="usePowerup('juggernaut')">🦾 Juggernaut (<span id="vsInvJuggernaut">0</span>)</button>
           </div>
         </div>
@@ -1143,13 +1153,15 @@ const BOT_NAMES = [
 
 // ==================== SHOP CATALOG & PERSISTENT SAVE ====================
 const POWERUP_ITEMS = [
-  { id: "revive", name: "💖 Extra Life Revive", cost: 1500, desc: "Use upon elimination to restore 1 ❤️ and stay in the match." },
-  { id: "fiftyFifty", name: "✂️ 50/50 Sabotage", cost: 800, desc: "Activate on the VS screen to eliminate 2 wrong answers on the next question." },
-  { id: "freeze", name: "❄️ Cryo Delay (+3s)", cost: 1800, desc: "Activate on the VS screen to add +3.0 seconds to your opponent's answer time." },
-  { id: "shield", name: "🛡️ Aegis Life Shield", cost: 1500, desc: "Activate on the VS screen to block losing a life if you lose the next duel." },
-  { id: "heartBargain", name: "💝 Heart Bargain", cost: 1000, desc: "Activate on the VS screen: answer the next question right and before your opponent to gain back 1 ❤️." },
-  { id: "doubleJeopardy", name: "⚡ Double Jeopardy", cost: 750, desc: "Activate on the VS screen: raises stakes so whoever loses (or both if both miss) loses 2 ❤️ instead of 1!" },
-  { id: "juggernaut", name: "🦾 Juggernaut", cost: 3000, desc: "Activate ONLY on the Round 1 VS screen before the first question to start the match with 5 ❤️ instead of 3 ❤️." }
+  { id: "suddenDeath", name: "⏱️ Sudden Death", cost: 200, desc: "Activate on the VS screen: both players only get 10 seconds to answer the next question." },
+  { id: "fiftyFifty", name: "✂️ 50/50 Sabotage", cost: 250, desc: "Activate on the VS screen to eliminate 2 wrong answers on the next question." },
+  { id: "doubleJeopardy", name: "⚡ Double Jeopardy", cost: 300, desc: "Activate on the VS screen: raises stakes so whoever loses (or both if both miss) loses 2 ❤️ instead of 1!" },
+  { id: "shield", name: "🛡️ Aegis Life Shield", cost: 500, desc: "Activate on the VS screen to block losing a life if you lose the next duel." },
+  { id: "heartBargain", name: "💝 Heart Bargain", cost: 600, desc: "Activate on the VS screen: answer the next question right and before your opponent to gain back 1 ❤️." },
+  { id: "freeze", name: "❄️ Cryo Delay (+3s)", cost: 600, desc: "Activate on the VS screen to add +3.0 seconds to your opponent's answer time." },
+  { id: "revive", name: "💖 Extra Life Revive", cost: 750, desc: "Use upon elimination to restore 1 ❤️ and stay in the match." },
+  { id: "speedBlitz", name: "💨 Speed Blitz", cost: 750, desc: "Activate ONLY on the Round 1 VS screen before the first question to subtract 0.5s from your answer time on every question for the entire match." },
+  { id: "juggernaut", name: "🦾 Juggernaut", cost: 1000, desc: "Activate ONLY on the Round 1 VS screen before the first question to start the match with 5 ❤️ instead of 3 ❤️." }
 ];
 
 const PASSIVE_ITEMS = [
@@ -1165,7 +1177,14 @@ const PASSIVE_ITEMS = [
     name: "⏱️ Buzzer Beater",
     shortName: "Buzzer Beater",
     cost: 2500,
-    desc: "Answering correctly with under 3.0 seconds left on the 20s clock deals 2 ❤️ of damage if your opponent misses."
+    desc: "Answering correctly with under 3.0 seconds left on the clock deals 2 ❤️ of damage if your opponent misses."
+  },
+  {
+    id: "mulligan",
+    name: "🔄 Mulligan",
+    shortName: "Mulligan",
+    cost: 3000,
+    desc: "30% chance when you guess wrong that your incorrect answer turns red and you get to pick again."
   },
   {
     id: "buffer",
@@ -1323,7 +1342,17 @@ let profile = {
   coins: 250,
   xp: 0,
   level: 0,
-  inventory: { revive: 0, fiftyFifty: 0, freeze: 0, shield: 0, heartBargain: 0, doubleJeopardy: 0, juggernaut: 0 },
+  inventory: {
+    revive: 0,
+    fiftyFifty: 0,
+    freeze: 0,
+    shield: 0,
+    heartBargain: 0,
+    doubleJeopardy: 0,
+    juggernaut: 0,
+    suddenDeath: 0,
+    speedBlitz: 0
+  },
   unlockedPassives: [],
   equippedPassives: [],
   unlockedSkins: ["default"],
@@ -1734,6 +1763,7 @@ let gameState = {
   players: [],
   usedQuestionIndices: new Set(),
   currentQuestion: null,
+  nextQuestionCategory: "",
   currentPairings: [],
   myOpponentId: null,
   roundStartTime: 0,
@@ -1742,7 +1772,17 @@ let gameState = {
   sbInterval: null,
   botPuTimeout: null,
   myAnswer: null,
-  roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false },
+  mulliganUsedThisRound: false,
+  roundBuffs: {
+    freeze: false,
+    shield: false,
+    fiftyFiftyUsed: false,
+    heartBargain: false,
+    doubleJeopardy: false,
+    juggernaut: false,
+    suddenDeath: false,
+    speedBlitz: false
+  },
   preRoundBuffs: {},
   roundSubmissions: {},
   myPlacement: null,
@@ -1758,7 +1798,9 @@ function clearAllTimers() {
 
 function generateBots(count, modeType) {
   const shuffledNames = [...BOT_NAMES].sort(() => Math.random() - 0.5);
+  const nonDefaultSkins = SKIN_ITEMS.filter(s => s.id !== "default");
   const bots = [];
+
   for (let i = 0; i < count; i++) {
     let diffObj;
     if (modeType === "superhard") {
@@ -1768,6 +1810,19 @@ function generateBots(count, modeType) {
     } else {
       diffObj = DIFFICULTIES[Math.floor(Math.random() * 6)];
     }
+
+    // Chance for bots to spawn with a random Prestige Skin:
+    // Very Hard: 20%, Hard: 15%, Medium: 2%
+    let botSkin = "default";
+    let skinChance = 0;
+    if (diffObj.key === "Very Hard") skinChance = 0.20;
+    else if (diffObj.key === "Hard") skinChance = 0.15;
+    else if (diffObj.key === "Medium") skinChance = 0.02;
+
+    if (skinChance > 0 && nonDefaultSkins.length > 0 && Math.random() < skinChance) {
+      botSkin = nonDefaultSkins[Math.floor(Math.random() * nonDefaultSkins.length)].id;
+    }
+
     bots.push({
       id: "bot_" + i + "_" + Math.random().toString(36).slice(2, 6),
       name: shuffledNames[i % shuffledNames.length] + (i >= shuffledNames.length ? i : ""),
@@ -1777,11 +1832,12 @@ function generateBots(count, modeType) {
       lives: 3,
       maxLives: 3,
       hasJuggernaut: false,
+      hasSpeedBlitz: false,
       passives: [],
       lastStandStreak: 0,
       bountyElims: 0,
       eliminatedRound: null,
-      skin: "default",
+      skin: botSkin,
       streak: 0,
       correctAnswers: 0,
       lostAnyHeart: false,
@@ -1797,9 +1853,9 @@ function generateBots(count, modeType) {
     jugBot.hasJuggernaut = true;
   }
 
-  // Independent 7% chance each for a bot to spawn with Ironclad, Buzzer Beater, Last Stand, Lucky Draw, Buffer, or Vampire
+  // Independent 7% chance each for a bot to spawn with Ironclad, Buzzer Beater, Last Stand, Lucky Draw, Buffer, Vampire, or Mulligan
   // (at most 1 bot can receive each specific ability)
-  const BOT_PASSIVE_POOL = ["ironclad", "buzzerBeater", "lastStand", "luckyDraw", "buffer", "vampire"];
+  const BOT_PASSIVE_POOL = ["ironclad", "buzzerBeater", "lastStand", "luckyDraw", "buffer", "vampire", "mulligan"];
   if (bots.length > 0) {
     BOT_PASSIVE_POOL.forEach(passiveId => {
       if (Math.random() < 0.07) {
@@ -1824,6 +1880,7 @@ function startSinglePlayer(isSuperHard) {
     lives: 3,
     maxLives: 3,
     hasJuggernaut: false,
+    hasSpeedBlitz: false,
     passives: [...(profile.equippedPassives || [])],
     lastStandStreak: 0,
     bountyElims: 0,
@@ -1842,6 +1899,7 @@ function startSinglePlayer(isSuperHard) {
     players: [me, ...bots],
     usedQuestionIndices: new Set(),
     currentQuestion: null,
+    nextQuestionCategory: "",
     currentPairings: [],
     myOpponentId: null,
     roundStartTime: 0,
@@ -1849,8 +1907,18 @@ function startSinglePlayer(isSuperHard) {
     vsInterval: null,
     sbInterval: null,
     myAnswer: null,
+    mulliganUsedThisRound: false,
     botPuTimeout: null,
-    roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false },
+    roundBuffs: {
+      freeze: false,
+      shield: false,
+      fiftyFiftyUsed: false,
+      heartBargain: false,
+      doubleJeopardy: false,
+      juggernaut: false,
+      suddenDeath: false,
+      speedBlitz: false
+    },
     preRoundBuffs: {},
     roundSubmissions: {},
     myPlacement: null,
@@ -1898,10 +1966,21 @@ function startNextRound() {
 
   gameState.round += 1;
   gameState.myAnswer = null;
-  gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false };
+  gameState.mulliganUsedThisRound = false;
+  gameState.roundBuffs = {
+    freeze: false,
+    shield: false,
+    fiftyFiftyUsed: false,
+    heartBargain: false,
+    doubleJeopardy: false,
+    juggernaut: false,
+    suddenDeath: false,
+    speedBlitz: false
+  };
   gameState.preRoundBuffs = {};
   gameState.roundSubmissions = {};
   gameState.currentQuestion = pickRandomQuestion();
+  gameState.nextQuestionCategory = gameState.currentQuestion ? gameState.currentQuestion.c : "Trivia";
   gameState.currentPairings = buildPairings(alive);
 
   // Ironclad passive: On every question, 6% chance for a free automatic Aegis Life Shield
@@ -1917,6 +1996,7 @@ function startNextRound() {
     broadcastOnline({
       type: "PRE_ROUND_VS",
       round: gameState.round,
+      category: gameState.nextQuestionCategory,
       players: gameState.players,
       pairings: gameState.currentPairings,
       preRoundBuffs: gameState.preRoundBuffs
@@ -1926,27 +2006,34 @@ function startNextRound() {
   showPreRoundVSScreen();
 }
 
-function formatBuffLabels(buffObj) {
-  if (!buffObj) return [];
+function formatBuffLabels(buffObj, playerObj) {
   const tags = [];
-  if (buffObj.fiftyFiftyUsed) tags.push("✂️ 50/50");
-  if (buffObj.freeze) tags.push("❄️ Cryo +3s");
-  if (buffObj.shield) tags.push(buffObj.ironcladTriggered ? "🛡️ Ironclad Shield" : "🛡️ Life Shield");
-  if (buffObj.heartBargain) tags.push("💝 Heart Bargain");
-  if (buffObj.doubleJeopardy) tags.push("⚡ Double Jeopardy");
-  if (buffObj.juggernaut) tags.push("🦾 Juggernaut (5 ❤️)");
+  if (buffObj) {
+    if (buffObj.suddenDeath) tags.push("⏱️ Sudden Death (10s)");
+    if (buffObj.fiftyFiftyUsed) tags.push("✂️ 50/50");
+    if (buffObj.freeze) tags.push("❄️ Cryo +3s");
+    if (buffObj.shield) tags.push(buffObj.ironcladTriggered ? "🛡️ Ironclad Shield" : "🛡️ Life Shield");
+    if (buffObj.heartBargain) tags.push("💝 Heart Bargain");
+    if (buffObj.doubleJeopardy) tags.push("⚡ Double Jeopardy");
+    if (buffObj.juggernaut) tags.push("🦾 Juggernaut (5 ❤️)");
+  }
+  if ((buffObj && buffObj.speedBlitz) || (playerObj && playerObj.hasSpeedBlitz)) {
+    tags.push("💨 Speed Blitz (-0.5s)");
+  }
   return tags;
 }
 
 function triggerOpponentPowerupNotification(oppName, powerupType) {
   const alertBox = document.getElementById("vsOpponentPowerupAlert");
   const descMap = {
+    suddenDeath: "⏱️ Sudden Death (Both players only get 10.0 seconds to answer!)",
     doubleJeopardy: "⚡ Double Jeopardy (Loser loses 2 ❤️ instead of 1!)",
     heartBargain: "💝 Heart Bargain (Gains +1 ❤️ if they beat you!)",
     freeze: "❄️ Cryo Delay (+3.0s added to your answer time!)",
     shield: "🛡️ Aegis Life Shield (Protected from losing a heart!)",
     ironclad: "🛡️ Ironclad (6% proc triggered a free Aegis Life Shield for this question!)",
     fiftyFifty: "✂️ 50/50 Sabotage (Eliminated 2 wrong choices for themselves!)",
+    speedBlitz: "💨 Speed Blitz (-0.5s subtracted from their answer time all match!)",
     juggernaut: "🦾 Juggernaut (Started the match with 5 ❤️!)"
   };
   const label = descMap[powerupType] || powerupType;
@@ -1975,6 +2062,13 @@ function showPreRoundVSScreen() {
 
   document.getElementById("vsRoundBadge").textContent = `ROUND ${gameState.round} MATCHUP`;
   document.getElementById("vsAliveBadge").textContent = `${alive.length} / 20 Remaining`;
+
+  // Display upcoming question's category
+  const nextCat = (gameState.currentQuestion && gameState.currentQuestion.c)
+    ? gameState.currentQuestion.c
+    : (gameState.nextQuestionCategory || "Trivia");
+  const vsCatEl = document.getElementById("vsNextCategoryText");
+  if (vsCatEl) vsCatEl.textContent = nextCat;
 
   const oppAlertEl = document.getElementById("vsOpponentPowerupAlert");
   oppAlertEl.style.display = "none";
@@ -2008,6 +2102,7 @@ function showPreRoundVSScreen() {
 
   // Populate Left Card
   const leftPassiveEl = document.getElementById("vsLeftPassiveBadge");
+  const leftDiffEl = document.getElementById("vsLeftDiff");
   if (leftPlayer) {
     document.getElementById("vsLeftName").innerHTML = formatPlayerNameHTML(leftPlayer);
     const leftPassivesText = formatPassivesText(leftPlayer.passives);
@@ -2020,14 +2115,31 @@ function showPreRoundVSScreen() {
 
     const skinObj = SKIN_ITEMS.find(s => s.id === leftPlayer.skin) || SKIN_ITEMS[0];
     const leftSkinEl = document.getElementById("vsLeftSkin");
-    leftSkinEl.className = `skin-badge ${skinObj.css}`;
-    leftSkinEl.textContent = leftPlayer.isBot ? leftPlayer.difficulty : skinObj.name;
+    if (leftPlayer.isBot) {
+      if (skinObj.id !== "default") {
+        leftSkinEl.className = `skin-badge ${skinObj.css}`;
+        leftSkinEl.textContent = skinObj.name;
+        leftSkinEl.style.display = "inline-flex";
+        leftDiffEl.textContent = `Bot • ${leftPlayer.difficulty}`;
+        leftDiffEl.style.display = "inline-block";
+      } else {
+        leftSkinEl.style.display = "none";
+        leftDiffEl.textContent = `Bot • ${leftPlayer.difficulty}`;
+        leftDiffEl.style.display = "inline-block";
+      }
+    } else {
+      leftSkinEl.className = `skin-badge ${skinObj.css}`;
+      leftSkinEl.textContent = skinObj.name;
+      leftSkinEl.style.display = "inline-flex";
+      leftDiffEl.style.display = "none";
+    }
     document.getElementById("vsLeftHearts").textContent = renderHearts(leftPlayer.lives, leftPlayer.maxLives || 3);
     document.getElementById("vsLeftLivesText").textContent = `${leftPlayer.lives} ${leftPlayer.lives === 1 ? "Life" : "Lives"} Left`;
   }
 
   // Populate Right Card
   const rightPassiveEl = document.getElementById("vsRightPassiveBadge");
+  const rightSkinEl = document.getElementById("vsRightSkin");
   if (rightPlayer) {
     document.getElementById("vsRightTag").textContent = isSpectating ? "SURVIVOR 2" : "OPPONENT";
     document.getElementById("vsRightName").innerHTML = formatPlayerNameHTML(rightPlayer);
@@ -2039,6 +2151,15 @@ function showPreRoundVSScreen() {
       rightPassiveEl.style.display = "none";
     }
 
+    const oppSkinObj = SKIN_ITEMS.find(s => s.id === rightPlayer.skin) || SKIN_ITEMS[0];
+    if (!rightPlayer.isBot || oppSkinObj.id !== "default") {
+      rightSkinEl.className = `skin-badge ${oppSkinObj.css}`;
+      rightSkinEl.textContent = oppSkinObj.name;
+      rightSkinEl.style.display = "inline-flex";
+    } else {
+      rightSkinEl.style.display = "none";
+    }
+
     document.getElementById("vsRightDiff").textContent = rightPlayer.isBot ? `Bot • ${rightPlayer.difficulty}` : "Human Player";
     document.getElementById("vsRightHearts").textContent = renderHearts(rightPlayer.lives, rightPlayer.maxLives || 3);
     document.getElementById("vsRightLivesText").textContent = `${rightPlayer.lives} ${rightPlayer.lives === 1 ? "Life" : "Lives"} Left`;
@@ -2046,6 +2167,7 @@ function showPreRoundVSScreen() {
     document.getElementById("vsRightTag").textContent = "BYE ROUND";
     document.getElementById("vsRightName").textContent = "No Opponent";
     rightPassiveEl.style.display = "none";
+    rightSkinEl.style.display = "none";
     document.getElementById("vsRightDiff").textContent = "Safe This Round";
     document.getElementById("vsRightHearts").textContent = "🛡️";
     document.getElementById("vsRightLivesText").textContent = "Automatic Pass";
@@ -2060,7 +2182,7 @@ function showPreRoundVSScreen() {
     updateVSPowerupButtonsUI(me, rightPlayer);
   }
 
-  // Notify if facing an Ironclad shield, Juggernaut Round 1 bot, or 3% bot power-up (Double Jeopardy, Heart Bargain, or Aegis Life Shield)
+  // Notify if facing an Ironclad shield, Juggernaut Round 1 bot, or 3% bot power-up (Double Jeopardy, Heart Bargain, Aegis Life Shield, or Sudden Death)
   if (!isSpectating && rightPlayer) {
     if (gameState.preRoundBuffs?.[rightPlayer.id]?.ironcladTriggered) {
       gameState.botPuTimeout = setTimeout(() => {
@@ -2073,7 +2195,7 @@ function showPreRoundVSScreen() {
         }, 700);
       } else if (Math.random() < 0.03) {
         const maxBotLives = rightPlayer.maxLives || 3;
-        const botOptions = ["doubleJeopardy", "shield"];
+        const botOptions = ["doubleJeopardy", "shield", "suddenDeath"];
         if (rightPlayer.lives < maxBotLives) botOptions.push("heartBargain");
         const botPu = botOptions[Math.floor(Math.random() * botOptions.length)];
 
@@ -2123,40 +2245,50 @@ function updateVSPowerupButtonsUI(me, rightPlayer) {
   const isFullLives = me && me.lives >= maxL;
   const isRoundOne = gameState.round === 1;
 
+  document.getElementById("vsInvSuddenDeath").textContent = profile.inventory.suddenDeath || 0;
   document.getElementById("vsInv5050").textContent = profile.inventory.fiftyFifty || 0;
   document.getElementById("vsInvFreeze").textContent = profile.inventory.freeze || 0;
   document.getElementById("vsInvShield").textContent = profile.inventory.shield || 0;
   document.getElementById("vsInvHeartBargain").textContent = profile.inventory.heartBargain || 0;
   document.getElementById("vsInvDoubleJeopardy").textContent = profile.inventory.doubleJeopardy || 0;
+  document.getElementById("vsInvSpeedBlitz").textContent = profile.inventory.speedBlitz || 0;
   document.getElementById("vsInvJuggernaut").textContent = profile.inventory.juggernaut || 0;
 
+  const btnSD = document.getElementById("vsPuSuddenDeathBtn");
   const btn5050 = document.getElementById("vsPu5050Btn");
   const btnFreeze = document.getElementById("vsPuFreezeBtn");
   const btnShield = document.getElementById("vsPuShieldBtn");
   const btnHB = document.getElementById("vsPuHeartBargainBtn");
   const btnDJ = document.getElementById("vsPuDoubleJeopardyBtn");
+  const btnSB = document.getElementById("vsPuSpeedBlitzBtn");
   const btnJug = document.getElementById("vsPuJuggernautBtn");
 
+  btnSD.classList.toggle("armed", !!gameState.roundBuffs.suddenDeath);
   btn5050.classList.toggle("armed", !!gameState.roundBuffs.fiftyFiftyUsed);
   btnFreeze.classList.toggle("armed", !!gameState.roundBuffs.freeze);
   btnShield.classList.toggle("armed", !!gameState.roundBuffs.shield);
   btnHB.classList.toggle("armed", !!gameState.roundBuffs.heartBargain);
   btnDJ.classList.toggle("armed", !!gameState.roundBuffs.doubleJeopardy);
+  btnSB.classList.toggle("armed", !!(gameState.roundBuffs.speedBlitz || (me && me.hasSpeedBlitz)));
   btnJug.classList.toggle("armed", !!gameState.roundBuffs.juggernaut);
 
+  btnSD.disabled = !hasOpp || gameState.roundBuffs.suddenDeath || (profile.inventory.suddenDeath || 0) <= 0;
   btn5050.disabled = !hasOpp || gameState.roundBuffs.fiftyFiftyUsed || (profile.inventory.fiftyFifty || 0) <= 0;
   btnFreeze.disabled = !hasOpp || gameState.roundBuffs.freeze || (profile.inventory.freeze || 0) <= 0;
   btnShield.disabled = !hasOpp || gameState.roundBuffs.shield || (profile.inventory.shield || 0) <= 0;
   btnHB.disabled = !hasOpp || isFullLives || gameState.roundBuffs.heartBargain || (profile.inventory.heartBargain || 0) <= 0;
   btnDJ.disabled = !hasOpp || gameState.roundBuffs.doubleJeopardy || (profile.inventory.doubleJeopardy || 0) <= 0;
 
+  btnSB.style.display = isRoundOne ? "" : "none";
+  btnSB.disabled = !isRoundOne || !!gameState.roundBuffs.speedBlitz || !!(me && me.hasSpeedBlitz) || (profile.inventory.speedBlitz || 0) <= 0;
+
   btnJug.style.display = isRoundOne ? "" : "none";
   btnJug.disabled = !isRoundOne || !!gameState.roundBuffs.juggernaut || (profile.inventory.juggernaut || 0) <= 0;
 
   const summaryEl = document.getElementById("vsActiveBuffSummary");
-  const armed = formatBuffLabels(gameState.roundBuffs);
+  const armed = formatBuffLabels(gameState.roundBuffs, me);
   if (!hasOpp && armed.length === 0) {
-    summaryEl.textContent = isRoundOne ? "Bye Round — Juggernaut available before Q1" : "Bye Round — Duel power-ups paused";
+    summaryEl.textContent = isRoundOne ? "Bye Round — Juggernaut & Speed Blitz available before Q1" : "Bye Round — Duel power-ups paused";
     summaryEl.style.color = "var(--muted)";
   } else if (armed.length > 0) {
     summaryEl.textContent = "Armed: " + armed.join(" • ");
@@ -2175,12 +2307,17 @@ function usePowerup(type) {
   const me = gameState.players.find(p => p.id === myId);
   const rightPlayer = gameState.myOpponentId ? (gameState.players.find(p => p.id === gameState.myOpponentId) || null) : null;
   if (!me || me.lives <= 0) return;
-  if (type !== "juggernaut" && !rightPlayer) return;
+  if (type !== "juggernaut" && type !== "speedBlitz" && !rightPlayer) return;
 
   const maxL = me.maxLives || 3;
   let activated = false;
 
-  if (type === "fiftyFifty" && !gameState.roundBuffs.fiftyFiftyUsed) {
+  if (type === "suddenDeath" && !gameState.roundBuffs.suddenDeath) {
+    profile.inventory.suddenDeath--;
+    gameState.roundBuffs.suddenDeath = true;
+    activated = true;
+    showToast("⏱️ Sudden Death armed! Both players only get 10s!");
+  } else if (type === "fiftyFifty" && !gameState.roundBuffs.fiftyFiftyUsed) {
     profile.inventory.fiftyFifty--;
     gameState.roundBuffs.fiftyFiftyUsed = true;
     activated = true;
@@ -2205,6 +2342,12 @@ function usePowerup(type) {
     gameState.roundBuffs.doubleJeopardy = true;
     activated = true;
     showToast("⚡ Double Jeopardy armed! 2 ❤️ on the line!");
+  } else if (type === "speedBlitz" && gameState.round === 1 && !gameState.roundBuffs.speedBlitz && !me.hasSpeedBlitz) {
+    profile.inventory.speedBlitz--;
+    gameState.roundBuffs.speedBlitz = true;
+    me.hasSpeedBlitz = true;
+    activated = true;
+    showToast("💨 Speed Blitz activated! -0.5s on all your answers this match!");
   } else if (type === "juggernaut" && gameState.round === 1 && !gameState.roundBuffs.juggernaut) {
     profile.inventory.juggernaut--;
     gameState.roundBuffs.juggernaut = true;
@@ -2247,9 +2390,10 @@ function usePowerup(type) {
   }
 }
 
-// ==================== STEP 2 OF ROUND: 20-SECOND QUESTION ARENA ====================
+// ==================== STEP 2 OF ROUND: 20-SECOND (OR 10-SECOND SUDDEN DEATH) QUESTION ARENA ====================
 function setupRoundUI() {
   clearAllTimers();
+  gameState.mulliganUsedThisRound = false;
   const myId = myPeerOrLocalId();
   const me = gameState.players.find(p => p.id === myId);
   const alive = gameState.players.filter(p => p.lives > 0);
@@ -2326,23 +2470,29 @@ function setupRoundUI() {
     optGrid.appendChild(btn);
   });
 
+  const oppBuffObj = rightFighter ? (gameState.preRoundBuffs?.[rightFighter.id] || {}) : {};
+  const isMySuddenDeath = !isSpectating && !!(gameState.roundBuffs.suddenDeath || oppBuffObj.suddenDeath);
+  const duelDuration = isMySuddenDeath ? 10.0 : 20.0;
+
   if (!isSpectating) {
     if (gameState.roundBuffs.fiftyFiftyUsed) {
       const correctIdx = q.a;
       const wrongs = [0, 1, 2, 3].filter(i => i !== correctIdx).sort(() => Math.random() - 0.5);
       wrongs.slice(0, 2).forEach(idx => {
         const el = document.getElementById(`optBtn_${idx}`);
-        if (el) el.classList.add("eliminated-opt");
+        if (el) {
+          el.classList.add("eliminated-opt");
+          el.disabled = true;
+        }
       });
     }
 
-    const myTags = formatBuffLabels(gameState.roundBuffs);
-    const oppBuffObj = rightFighter ? (gameState.preRoundBuffs?.[rightFighter.id] || {}) : {};
-    const oppTags = formatBuffLabels(oppBuffObj);
+    const myTags = formatBuffLabels(gameState.roundBuffs, me);
+    const oppTags = formatBuffLabels(oppBuffObj, rightFighter);
 
     document.getElementById("arenaMyBuffsList").textContent = myTags.length ? myTags.join(", ") : "None";
     document.getElementById("arenaOppBuffsList").textContent = oppTags.length ? oppTags.join(", ") : "None";
-    document.getElementById("activeBuffNotice").textContent = "";
+    document.getElementById("activeBuffNotice").textContent = isMySuddenDeath ? "⏱️ SUDDEN DEATH: 10s CLOCK!" : "";
   }
 
   if (gameState.mode !== "online_client") {
@@ -2352,12 +2502,15 @@ function setupRoundUI() {
     }
   }
 
+  document.getElementById("timerText").textContent = duelDuration.toFixed(1) + "s";
+  document.getElementById("timerBar").style.width = "100%";
+
   gameState.roundStartTime = performance.now();
   gameState.timerInterval = setInterval(() => {
     const elapsed = (performance.now() - gameState.roundStartTime) / 1000;
-    const remaining = Math.max(0, 20.0 - elapsed);
+    const remaining = Math.max(0, duelDuration - elapsed);
     document.getElementById("timerText").textContent = remaining.toFixed(1) + "s";
-    document.getElementById("timerBar").style.width = ((remaining / 20.0) * 100) + "%";
+    document.getElementById("timerBar").style.width = ((remaining / duelDuration) * 100) + "%";
 
     if ((gameState.mode === "single" || gameState.mode === "superhard") && gameState.myAnswer !== null) {
       const oppSub = gameState.myOpponentId ? gameState.roundSubmissions[gameState.myOpponentId] : { timeSec: 0 };
@@ -2369,17 +2522,29 @@ function setupRoundUI() {
     }
 
     if (remaining <= 0) {
-      clearInterval(gameState.timerInterval);
       if (!isSpectating && gameState.myAnswer === null) {
-        gameState.myAnswer = { choice: -1, timeSec: 20.0 };
+        gameState.myAnswer = { choice: -1, timeSec: duelDuration };
+        for (let i = 0; i < 4; i++) {
+          const b = document.getElementById(`optBtn_${i}`);
+          if (b) b.disabled = true;
+        }
         if (gameState.mode === "online_client") {
-          sendToHost({ type: "SUBMIT_ANSWER", playerId: myId, choice: -1, timeSec: 20.0, buffs: gameState.roundBuffs });
+          sendToHost({ type: "SUBMIT_ANSWER", playerId: myId, choice: -1, timeSec: duelDuration, buffs: gameState.roundBuffs });
         } else {
-          gameState.roundSubmissions[myId] = { choice: -1, timeSec: 20.0, buffs: gameState.roundBuffs };
+          gameState.roundSubmissions[myId] = { choice: -1, timeSec: duelDuration, buffs: gameState.roundBuffs };
+          if (gameState.mode === "online_host") {
+            checkAllHumansSubmittedOnline();
+          }
         }
       }
-      if (gameState.mode !== "online_client") {
+      if (gameState.mode === "single" || gameState.mode === "superhard") {
+        clearInterval(gameState.timerInterval);
         resolveRound();
+      } else if (gameState.mode === "online_host" && elapsed >= 20.0) {
+        clearInterval(gameState.timerInterval);
+        resolveRound();
+      } else if (gameState.mode === "online_client") {
+        clearInterval(gameState.timerInterval);
       }
     }
   }, 60);
@@ -2393,26 +2558,61 @@ const LAST_STAND_BOT_ACCURACY = {
   "Hard":           0.90
 };
 
+function isPairingSuddenDeath(playerId) {
+  for (const [idA, idB] of gameState.currentPairings) {
+    if (idA === playerId || idB === playerId) {
+      const bA = gameState.preRoundBuffs?.[idA] || {};
+      const bB = idB ? (gameState.preRoundBuffs?.[idB] || {}) : {};
+      return !!(bA.suddenDeath || bB.suddenDeath);
+    }
+  }
+  return false;
+}
+
 function simulateBotsForRound() {
   const q = gameState.currentQuestion;
   gameState.players.forEach(p => {
     if (!p.isBot || p.lives <= 0) return;
     const spec = p.diffSpec || DIFFICULTIES.find(d => d.key === p.difficulty) || DIFFICULTIES[2];
+    const inSuddenDeath = isPairingSuddenDeath(p.id);
+    const maxClock = inSuddenDeath ? 10.0 : 20.0;
+
     let effectiveAccuracy = spec.accuracy;
     if (hasPassive(p, "lastStand") && p.lives === 1 && LAST_STAND_BOT_ACCURACY[spec.key] !== undefined) {
       effectiveAccuracy = Math.max(effectiveAccuracy, LAST_STAND_BOT_ACCURACY[spec.key]);
     }
-    const isCorrect = Math.random() < effectiveAccuracy;
+
+    let isCorrect = Math.random() < effectiveAccuracy;
     let choice = q.a;
+    let rawTime = spec.minTime + Math.random() * (spec.maxTime - spec.minTime);
+
     if (!isCorrect) {
       const wrongs = [0, 1, 2, 3].filter(i => i !== q.a);
       choice = wrongs[Math.floor(Math.random() * wrongs.length)];
+
+      // Mulligan passive for bots: 20% chance when picking wrong to switch to the correct answer
+      if (hasPassive(p, "mulligan") && Math.random() < 0.20) {
+        choice = q.a;
+        isCorrect = true;
+        rawTime += 0.8 + Math.random() * 1.1;
+      }
     }
-    let rawTime = spec.minTime + Math.random() * (spec.maxTime - spec.minTime);
-    if (hasPassive(p, "buzzerBeater") && isCorrect && rawTime <= 17.0 && Math.random() < 0.25) {
-      rawTime = 17.2 + Math.random() * 2.2; // 17.20s - 19.40s (0.60s - 2.80s remaining)
+
+    if (inSuddenDeath) {
+      rawTime = rawTime * 0.65;
     }
-    const timeSec = Math.round(rawTime * 100) / 100;
+
+    const buzzerThreshold = maxClock - 3.0;
+    if (hasPassive(p, "buzzerBeater") && isCorrect && rawTime <= buzzerThreshold && Math.random() < 0.25) {
+      rawTime = (maxClock - 2.8) + Math.random() * 2.2;
+    }
+
+    let timeSec = Math.round(rawTime * 100) / 100;
+    if (timeSec > maxClock) {
+      choice = -1;
+      timeSec = maxClock;
+    }
+
     const botBuffs = { ...(gameState.preRoundBuffs?.[p.id] || {}) };
     gameState.roundSubmissions[p.id] = { choice, timeSec, buffs: botBuffs };
   });
@@ -2420,16 +2620,38 @@ function simulateBotsForRound() {
 
 function submitPlayerAnswer(choiceIdx) {
   if (gameState.myAnswer !== null) return;
-  const elapsed = Math.min(20.0, Math.round(((performance.now() - gameState.roundStartTime) / 1000) * 100) / 100);
+  const targetBtn = document.getElementById(`optBtn_${choiceIdx}`);
+  if (!targetBtn || targetBtn.disabled) return;
+
+  const myId = myPeerOrLocalId();
+  const me = gameState.players.find(p => p.id === myId);
+  const rightFighter = gameState.myOpponentId ? (gameState.players.find(p => p.id === gameState.myOpponentId) || null) : null;
+  const oppBuffObj = rightFighter ? (gameState.preRoundBuffs?.[rightFighter.id] || {}) : {};
+  const duelDuration = (gameState.roundBuffs.suddenDeath || oppBuffObj.suddenDeath) ? 10.0 : 20.0;
+
+  const elapsed = Math.min(duelDuration, Math.round(((performance.now() - gameState.roundStartTime) / 1000) * 100) / 100);
+  const q = gameState.currentQuestion;
+
+  // Mulligan passive: 30% chance on wrong guess to turn that answer red and allow repicking
+  if (me && hasPassive(me, "mulligan") && !gameState.mulliganUsedThisRound && choiceIdx !== q.a) {
+    gameState.mulliganUsedThisRound = true;
+    if (Math.random() < 0.30) {
+      targetBtn.classList.add("wrong");
+      targetBtn.disabled = true;
+      showToast("🔄 Mulligan triggered! Wrong choice — pick again!");
+      document.getElementById("activeBuffNotice").textContent = "🔄 Mulligan! That option was wrong — pick again!";
+      return;
+    }
+  }
+
   gameState.myAnswer = { choice: choiceIdx, timeSec: elapsed };
 
   for (let i = 0; i < 4; i++) {
     const b = document.getElementById(`optBtn_${i}`);
-    b.disabled = true;
-    if (i === choiceIdx) b.classList.add("selected");
+    if (b) b.disabled = true;
+    if (i === choiceIdx && b) b.classList.add("selected");
   }
 
-  const myId = myPeerOrLocalId();
   if (gameState.mode === "online_client") {
     sendToHost({ type: "SUBMIT_ANSWER", playerId: myId, choice: choiceIdx, timeSec: elapsed, buffs: gameState.roundBuffs });
     document.getElementById("activeBuffNotice").textContent = `Locked in at ${elapsed.toFixed(2)}s! Waiting for round end...`;
@@ -2462,18 +2684,24 @@ function resolveRound() {
     const buffsA = { ...(gameState.preRoundBuffs?.[idA] || {}), ...(subA.buffs || {}) };
     const buffsB = { ...(gameState.preRoundBuffs?.[idB] || {}), ...(subB.buffs || {}) };
 
+    const isSuddenDeathDuel = !!(buffsA.suddenDeath || buffsB.suddenDeath);
+    const duelClock = isSuddenDeathDuel ? 10.0 : 20.0;
+
     const rightA = subA.choice === q.a;
     const rightB = subB.choice === q.a;
 
     if (rightA) pA.correctAnswers = (pA.correctAnswers || 0) + 1;
     if (rightB) pB.correctAnswers = (pB.correctAnswers || 0) + 1;
 
-    const timeA = Math.round((subA.timeSec + (buffsB.freeze ? 3.0 : 0)) * 100) / 100;
-    const timeB = Math.round((subB.timeSec + (buffsA.freeze ? 3.0 : 0)) * 100) / 100;
+    const speedBonusA = (pA.hasSpeedBlitz || buffsA.speedBlitz) ? 0.5 : 0;
+    const speedBonusB = (pB.hasSpeedBlitz || buffsB.speedBlitz) ? 0.5 : 0;
 
-    // Buzzer Beater check: under 3.0s left on the 20s clock (elapsed > 17.0s) and opponent misses
-    const timeLeftA = 20.0 - subA.timeSec;
-    const timeLeftB = 20.0 - subB.timeSec;
+    const timeA = Math.max(0.01, Math.round((subA.timeSec - speedBonusA + (buffsB.freeze ? 3.0 : 0)) * 100) / 100);
+    const timeB = Math.max(0.01, Math.round((subB.timeSec - speedBonusB + (buffsA.freeze ? 3.0 : 0)) * 100) / 100);
+
+    // Buzzer Beater check: under 3.0s left on the clock and opponent misses
+    const timeLeftA = duelClock - subA.timeSec;
+    const timeLeftB = duelClock - subB.timeSec;
     const buzzerA = hasPassive(pA, "buzzerBeater") && rightA && !rightB && timeLeftA < 3.0 && timeLeftA >= 0;
     const buzzerB = hasPassive(pB, "buzzerBeater") && rightB && !rightA && timeLeftB < 3.0 && timeLeftB >= 0;
 
@@ -2763,12 +2991,14 @@ function renderScoreboard(duelLogs) {
     const item = document.createElement("div");
     item.className = `sb-item ${p.id === myId ? "me" : ""} ${p.lives === 0 ? "dead" : ""}`;
     const diffLabel = p.isBot ? `<span class="diff-tag">${p.difficulty}</span>` : `<span class="diff-tag" style="color:var(--accent);">Human</span>`;
+    const botSkinObj = (p.isBot && p.skin && p.skin !== "default") ? SKIN_ITEMS.find(s => s.id === p.skin) : null;
+    const botSkinTag = botSkinObj ? `<span class="skin-badge ${botSkinObj.css}" style="padding:1px 6px; font-size:0.68rem;">${botSkinObj.name}</span>` : "";
     const passiveLabel = formatPassivesText(p.passives);
     const passiveSubHtml = passiveLabel ? `<div class="sb-passive-sub">🔮 ${escapeHtml(passiveLabel)}</div>` : "";
     item.innerHTML = `
       <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
-        <div style="display:flex; align-items:center; gap:5px; min-width:0;">
-          <b style="min-width:0; display:inline-flex; max-width:100%;">${formatPlayerNameHTML(p)}</b> ${diffLabel}
+        <div style="display:flex; align-items:center; gap:5px; min-width:0; flex-wrap:wrap;">
+          <b style="min-width:0; display:inline-flex; max-width:100%;">${formatPlayerNameHTML(p)}</b> ${botSkinTag} ${diffLabel}
         </div>
         ${passiveSubHtml}
       </div>
@@ -3406,6 +3636,9 @@ function handleHostReceive(conn, data) {
       sender.maxLives = 5;
       sender.hasJuggernaut = true;
     }
+    if (sender && data.powerup === "speedBlitz" && gameState.round === 1) {
+      sender.hasSpeedBlitz = true;
+    }
     const senderName = sender ? sender.name : "Opponent";
     if (data.targetId === myPeerOrLocalId()) {
       triggerOpponentPowerupNotification(senderName, data.powerup);
@@ -3459,24 +3692,37 @@ function handleClientReceive(data) {
     gameState.mode = "online_client";
     gameState.superHard = false;
     gameState.round = data.round;
+    gameState.nextQuestionCategory = data.category || "Trivia";
     gameState.players = data.players;
     gameState.currentPairings = data.pairings;
     gameState.myAnswer = null;
-    gameState.roundBuffs = { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false };
+    gameState.mulliganUsedThisRound = false;
+    gameState.roundBuffs = {
+      freeze: false,
+      shield: false,
+      fiftyFiftyUsed: false,
+      heartBargain: false,
+      doubleJeopardy: false,
+      juggernaut: false,
+      suddenDeath: false,
+      speedBlitz: false
+    };
     gameState.preRoundBuffs = data.preRoundBuffs || {};
     showPreRoundVSScreen();
   } else if (data.type === "OPPONENT_USED_POWERUP") {
     if (data.fromId) {
       if (!gameState.preRoundBuffs[data.fromId]) gameState.preRoundBuffs[data.fromId] = {};
       Object.assign(gameState.preRoundBuffs[data.fromId], data.buffs || { [data.powerup]: true });
-      if (data.powerup === "juggernaut") {
-        const senderPlayer = gameState.players.find(p => p.id === data.fromId);
-        if (senderPlayer) {
+      const senderPlayer = gameState.players.find(p => p.id === data.fromId);
+      if (senderPlayer) {
+        if (data.powerup === "juggernaut") {
           senderPlayer.lives = 5;
           senderPlayer.maxLives = 5;
           senderPlayer.hasJuggernaut = true;
           document.getElementById("vsRightHearts").textContent = renderHearts(5, 5);
           document.getElementById("vsRightLivesText").textContent = "5 Lives Left";
+        } else if (data.powerup === "speedBlitz") {
+          senderPlayer.hasSpeedBlitz = true;
         }
       }
     }
@@ -3588,6 +3834,7 @@ function hostStartOnlineMatch() {
     lives: 3,
     maxLives: 3,
     hasJuggernaut: false,
+    hasSpeedBlitz: false,
     passives: Array.isArray(h.passives) ? [...h.passives] : [],
     lastStandStreak: 0,
     bountyElims: 0,
@@ -3609,6 +3856,7 @@ function hostStartOnlineMatch() {
     players: [...humans, ...bots],
     usedQuestionIndices: new Set(),
     currentQuestion: null,
+    nextQuestionCategory: "",
     currentPairings: [],
     myOpponentId: null,
     roundStartTime: 0,
@@ -3616,8 +3864,18 @@ function hostStartOnlineMatch() {
     vsInterval: null,
     sbInterval: null,
     myAnswer: null,
+    mulliganUsedThisRound: false,
     botPuTimeout: null,
-    roundBuffs: { freeze: false, shield: false, fiftyFiftyUsed: false, heartBargain: false, doubleJeopardy: false, juggernaut: false },
+    roundBuffs: {
+      freeze: false,
+      shield: false,
+      fiftyFiftyUsed: false,
+      heartBargain: false,
+      doubleJeopardy: false,
+      juggernaut: false,
+      suddenDeath: false,
+      speedBlitz: false
+    },
     preRoundBuffs: {},
     roundSubmissions: {},
     myPlacement: null,
