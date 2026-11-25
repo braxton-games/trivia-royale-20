@@ -917,7 +917,7 @@
             <li><b>Answer Streaks (🔥):</b> Real players who answer 4+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
             <li><b>Ties &amp; Double Misses:</b> If both answer wrong (or time out), <b>both lose 1 life</b>. If both answer right in the exact same time, <b>neither loses a life</b> (and <b>Lucky Draw</b> grants +1 ❤️!).</li>
             <li><b>XP, Levels &amp; Skin Unlocks:</b> Everyone starts at <b>Level 0 (0 XP)</b>. Earn <b>+1 XP</b> per correct answer plus placement bonuses: <b>Top 10 (+5 XP)</b>, <b>Top 7 (+10 XP)</b>, <b>Top 5 (+20 XP)</b>, <b>Top 3 (+40 XP)</b>, <b>2nd (+60 XP)</b>, <b>1st (+80 XP)</b>, or <b>Undefeated 1st (+150 XP)</b>. Leveling requires <b>250 XP</b> (Lv 0→1), <b>500 XP</b> per level (Lv 1–5), <b>750 XP</b> per level (Lv 5–10), and <b>1,000 XP</b> per level from Lv 10 onward.</li>
-            <li><b>Round 1 Exclusives &amp; Bot Power-Ups:</b> <b>Juggernaut</b> (1,000 🪙, start with 5 ❤️) and <b>Speed Blitz</b> (750 🪙, -0.5s on all answer times for the match) can only be activated on the Round 1 VS screen (5% chance a bot spawns with Juggernaut). Bots also have a 3% chance per duel to activate <i>Double Jeopardy</i>, <i>Heart Bargain</i>, <i>Aegis Life Shield</i>, or <i>Sudden Death</i>.</li>
+            <li><b>Round 1 Exclusives &amp; Bot Power-Ups:</b> <b>Juggernaut</b> (1,000 🪙, start with 5 ❤️) and <b>Speed Blitz</b> (750 🪙, -0.5s on all answer times for the match) can only be activated on the Round 1 VS screen (5% chance a bot spawns with Juggernaut). Bots also have a 4% chance per duel to activate <i>Double Jeopardy</i>, <i>Heart Bargain</i>, <i>Aegis Life Shield</i>, or <i>Sudden Death</i>.</li>
           </ul>
         </div>
       </div>
@@ -2332,7 +2332,7 @@ function showPreRoundVSScreen() {
     updateVSPowerupButtonsUI(me, rightPlayer);
   }
 
-  // Notify if facing an Ironclad shield, Juggernaut Round 1 bot, or 3% bot power-up (Double Jeopardy, Heart Bargain, Aegis Life Shield, or Sudden Death)
+  // Notify if facing an Ironclad shield, Juggernaut Round 1 bot, or 4% bot power-up (Double Jeopardy, Heart Bargain, Aegis Life Shield, or Sudden Death)
   if (!isSpectating && rightPlayer) {
     if (gameState.preRoundBuffs?.[rightPlayer.id]?.ironcladTriggered) {
       gameState.botPuTimeout = setTimeout(() => {
@@ -2343,7 +2343,7 @@ function showPreRoundVSScreen() {
         gameState.botPuTimeout = setTimeout(() => {
           triggerOpponentPowerupNotification(rightPlayer.name, "juggernaut");
         }, 700);
-      } else if (Math.random() < 0.03) {
+      } else if (Math.random() < 0.04) {
         const maxBotLives = rightPlayer.maxLives || 3;
         const botOptions = ["doubleJeopardy", "shield", "suddenDeath"];
         if (rightPlayer.lives < maxBotLives) botOptions.push("heartBargain");
