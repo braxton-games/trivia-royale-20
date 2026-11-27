@@ -3798,6 +3798,10 @@ function joinOnlineRoom() {
   const code = document.getElementById("joinCodeInput").value.trim().toUpperCase();
   if (!code) { showToast("Enter a valid Room Code."); return; }
   cancelQuickMatchSearch();
+  if (peer) {
+    try { peer.destroy(); } catch (e) {}
+    peer = null;
+  }
   onlineRoomCode = code;
   isRoomHost = false;
   isPublicLobby = false;
@@ -3844,11 +3848,28 @@ function joinOnlineRoom() {
 
 function handleHostReceive(conn, data) {
   if (data.type === "JOIN_PUBLIC_HELLO") {
-    if (publicRoomLocked || gameState.mode === "online_host" || clientConns.length >= 19) {
+    if (publicRoomLocked || gameState.mode === "online_host") {
       conn.send({ type: "ROOM_LOCKED" });
       setTimeout(() => { try { conn.close(); } catch (e) {} }, 250);
       return;
     }
+    if (!data.id || (peer && data.id === peer.id)) return;
+
+    const existingIdx = clientConns.findIndex(c => c.id === data.id);
+    if (existingIdx !== -1) {
+      const oldConn = clientConns[existingIdx].conn;
+      clientConns.splice(existingIdx, 1);
+      if (oldConn && oldConn !== conn) {
+        try { oldConn.close(); } catch (e) {}
+      }
+    }
+
+    if (clientConns.length >= 19) {
+      conn.send({ type: "ROOM_LOCKED" });
+      setTimeout(() => { try { conn.close(); } catch (e) {} }, 250);
+      return;
+    }
+
     clientConns.push({
       conn,
       id: data.id,
@@ -3874,7 +3895,20 @@ function handleHostReceive(conn, data) {
       setTimeout(() => hostStartOnlineMatch(), 600);
     }
   } else if (data.type === "JOIN_HELLO") {
-    if (gameState.mode === "online_host" || clientConns.length >= 19) return;
+    if (gameState.mode === "online_host") return;
+    if (!data.id || (peer && data.id === peer.id)) return;
+
+    const existingIdx = clientConns.findIndex(c => c.id === data.id);
+    if (existingIdx !== -1) {
+      const oldConn = clientConns[existingIdx].conn;
+      clientConns.splice(existingIdx, 1);
+      if (oldConn && oldConn !== conn) {
+        try { oldConn.close(); } catch (e) {}
+      }
+    }
+
+    if (clientConns.length >= 19) return;
+
     clientConns.push({
       conn,
       id: data.id,
@@ -4040,6 +4074,7 @@ function sendToHost(payload) {
 }
 
 function getLobbyHumansList() {
+  const seenIds = new Set([peer.id]);
   const list = [{
     id: peer.id,
     name: profile.name || "Host",
@@ -4047,13 +4082,17 @@ function getLobbyHumansList() {
     passives: [...(profile.equippedPassives || [])],
     streak: profile.currentStreak || 0
   }];
-  clientConns.forEach(c => list.push({
-    id: c.id,
-    name: c.name,
-    skin: c.skin,
-    passives: Array.isArray(c.passives) ? c.passives : [],
-    streak: c.streak || 0
-  }));
+  clientConns.forEach(c => {
+    if (!c.id || seenIds.has(c.id)) return;
+    seenIds.add(c.id);
+    list.push({
+      id: c.id,
+      name: c.name,
+      skin: c.skin,
+      passives: Array.isArray(c.passives) ? c.passives : [],
+      streak: c.streak || 0
+    });
+  });
   return list;
 }
 
