@@ -834,11 +834,11 @@
       <!-- PLAY TAB -->
       <div id="playTab" class="home-tab">
         <div class="grid-2">
-          <div class="card highlight">
+         <div class="card highlight">
             <div>
               <h3>🤖 Single Player Royale</h3>
               <p class="sub" style="margin-top:6px;">Battle 19 bots with randomly assigned skills from <b>Very Very Easy</b> to <b>Very Hard</b>.</p>
-              <p style="font-size:0.84rem; color:var(--gold);">Rewards: 1st = 100 🪙 | Top 3 = 50 🪙 | Top 10 = 10 🪙</p>
+              <p style="font-size:0.84rem; color:var(--gold);">Rewards: 1st = 100 🪙 | 2nd–3rd = 50 🪙 | 4th–6th = 25 🪙 | 7th–10th = 10 🪙</p>
             </div>
             <button class="btn" onclick="startSinglePlayer(false)">Play Standard Match</button>
           </div>
@@ -847,7 +847,7 @@
             <div>
               <h3>🛡️ Survival Mode</h3>
               <p class="sub" style="margin-top:6px;">Outlast 19 bots where speed won't cost you a heart—you <b>only lose a ❤️ if you answer wrong or run out of time</b>.</p>
-              <p style="font-size:0.84rem; color:var(--gold);">Rewards: 1st = 100 🪙 | Top 3 = 50 🪙 | Top 10 = 10 🪙 + <b>2 🪙</b> per faster correct answer</p>
+              <p style="font-size:0.84rem; color:var(--gold);">Rewards: 1st = 100 🪙 | 2nd–3rd = 50 🪙 | 4th–6th = 25 🪙 | 7th–10th = 10 🪙 + <b>2 🪙</b> per faster correct answer</p>
             </div>
             <button class="btn survival" onclick="startSurvivalMode()">Play Survival Mode</button>
           </div>
@@ -856,7 +856,7 @@
             <div>
               <h3>🔥 Super Hard Mode</h3>
               <p class="sub" style="margin-top:6px;">All 19 bots are locked to <b>Very Hard</b> difficulty. Lightning speed and near-perfect accuracy.</p>
-              <p style="font-size:0.84rem; color:var(--gold);"><b>2X COINS:</b> 1st = 200 🪙 | Top 3 = 100 🪙 | Top 10 = 20 🪙</p>
+              <p style="font-size:0.84rem; color:var(--gold);"><b>2X COINS:</b> 1st = 200 🪙 | 2nd–3rd = 100 🪙 | 4th–6th = 50 🪙 | 7th–10th = 20 🪙</p>
             </div>
             <button class="btn danger" onclick="startSinglePlayer(true)">Play Super Hard (2x)</button>
           </div>
@@ -3299,8 +3299,10 @@ function concludeMatch() {
   placement = Math.max(1, Math.min(20, placement));
 
   let baseCoins = 0;
+ let baseCoins = 0;
   if (placement === 1) baseCoins = 100;
   else if (placement <= 3) baseCoins = 50;
+  else if (placement <= 6) baseCoins = 25;
   else if (placement <= 10) baseCoins = 10;
 
   const multiplier = gameState.superHard ? 2 : 1;
