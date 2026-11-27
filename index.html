@@ -2214,9 +2214,9 @@ function showPreRoundVSScreen() {
   }
 
   // Display upcoming question's category
-  const nextCat = (gameState.currentQuestion && gameState.currentQuestion.c)
-    ? gameState.currentQuestion.c
-    : (gameState.nextQuestionCategory || "Trivia");
+  const nextCat = gameState.nextQuestionCategory
+    || (gameState.currentQuestion && gameState.currentQuestion.c)
+    || "Trivia";
   const vsCatEl = document.getElementById("vsNextCategoryText");
   if (vsCatEl) vsCatEl.textContent = nextCat;
 
@@ -3935,6 +3935,7 @@ function handleClientReceive(data) {
     gameState.superHard = false;
     gameState.survivalMode = !!data.survivalMode;
     gameState.round = data.round;
+    gameState.currentQuestion = null;
     gameState.nextQuestionCategory = data.category || "Trivia";
     gameState.players = data.players;
     gameState.currentPairings = data.pairings;
