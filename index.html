@@ -2099,7 +2099,11 @@ function buildPairings(alivePlayers) {
 function startNextRound() {
   clearAllTimers();
   const alive = gameState.players.filter(p => p.lives > 0);
-  if (alive.length <= 1) {
+  const aliveHumans = alive.filter(p => !p.isBot);
+  if (alive.length <= 1 || (gameState.mode === "online_host" && gameState.survivalMode && aliveHumans.length === 0)) {
+    if (gameState.mode === "online_host") {
+      broadcastOnline({ type: "MATCH_OVER", players: gameState.players, survivalMode: !!gameState.survivalMode });
+    }
     concludeMatch();
     return;
   }
@@ -3120,13 +3124,19 @@ function renderScoreboard(duelLogs) {
     }
   }
 
+ const aliveHumans = alive.filter(p => !p.isBot);
+  const survivalBotsOnlyEnd = isOnline && gameState.survivalMode && aliveHumans.length === 0;
+
   if (me && me.lives === 0 && gameState.myPlacement !== null) {
     if (!isOnline) {
       nextBtn.disabled = false;
       nextBtn.textContent = "View Final Results ➔";
-    } else if (alive.length <= 1) {
+    } else if (alive.length <= 1 || survivalBotsOnlyEnd) {
       nextBtn.disabled = false;
       nextBtn.textContent = "View Final Results ➔";
+      if (gameState.mode === "online_host") {
+        startOnlineScoreboardAutoAdvance(4);
+      }
     } else if (gameState.mode === "online_host") {
       specBanner.style.display = "flex";
       document.getElementById("sbSpecPlacement").textContent = gameState.myPlacement;
@@ -3253,8 +3263,17 @@ function proceedAfterScoreboard() {
     return;
   }
 
+  if (gameState.mode === "online_client") {
+    const aliveHumans = alive.filter(p => !p.isBot);
+    if (alive.length <= 1 || (gameState.survivalMode && aliveHumans.length === 0)) {
+      concludeMatch();
+    }
+    return;
+  }
+
   if (gameState.mode === "online_host") {
-    if (alive.length <= 1) {
+    const aliveHumans = alive.filter(p => !p.isBot);
+    if (alive.length <= 1 || (gameState.survivalMode && aliveHumans.length === 0)) {
       broadcastOnline({ type: "MATCH_OVER", players: gameState.players, survivalMode: !!gameState.survivalMode });
       concludeMatch();
     } else {
