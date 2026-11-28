@@ -2109,6 +2109,7 @@ function startNextRound() {
   }
 
   gameState.round += 1;
+  gameState.roundResolved = false;
   gameState.myAnswer = null;
   gameState.mulliganUsedThisRound = false;
   gameState.roundBuffs = {
@@ -2682,7 +2683,7 @@ function setupRoundUI() {
       }
     }
 
-    if (remaining <= 0) {
+if (remaining <= 0) {
       if (!isSpectating && gameState.myAnswer === null) {
         gameState.myAnswer = { choice: -1, timeSec: duelDuration };
         for (let i = 0; i < 4; i++) {
@@ -2693,17 +2694,17 @@ function setupRoundUI() {
           sendToHost({ type: "SUBMIT_ANSWER", playerId: myId, choice: -1, timeSec: duelDuration, buffs: gameState.roundBuffs });
         } else {
           gameState.roundSubmissions[myId] = { choice: -1, timeSec: duelDuration, buffs: gameState.roundBuffs };
-          if (gameState.mode === "online_host") {
-            checkAllHumansSubmittedOnline();
-          }
         }
       }
       if (gameState.mode === "single" || gameState.mode === "superhard" || gameState.mode === "survival") {
         clearInterval(gameState.timerInterval);
         resolveRound();
-      } else if (gameState.mode === "online_host" && elapsed >= 20.0) {
-        clearInterval(gameState.timerInterval);
-        resolveRound();
+      } else if (gameState.mode === "online_host") {
+        checkAllHumansSubmittedOnline();
+        if (elapsed >= 20.0 && !gameState.roundResolved) {
+          clearInterval(gameState.timerInterval);
+          resolveRound();
+        }
       } else if (gameState.mode === "online_client") {
         clearInterval(gameState.timerInterval);
       }
@@ -2827,6 +2828,8 @@ function submitPlayerAnswer(choiceIdx) {
 
 // ==================== STEP 3 OF ROUND: RESOLVE & SCOREBOARD ====================
 function resolveRound() {
+  if (gameState.roundResolved) return;
+  gameState.roundResolved = true;
   clearAllTimers();
   const q = gameState.currentQuestion;
   const duelLogs = {};
@@ -3964,15 +3967,20 @@ function handleHostReceive(conn, data) {
 }
 
 function checkAllHumansSubmittedOnline() {
-  if (gameState.mode !== "online_host") return;
+  if (gameState.mode !== "online_host" || gameState.roundResolved) return;
   const aliveHumans = gameState.players.filter(p => !p.isBot && p.lives > 0);
-  const allDone = aliveHumans.every(h => gameState.roundSubmissions[h.id] !== undefined);
+  const elapsed = (performance.now() - gameState.roundStartTime) / 1000;
+  const allDone = aliveHumans.every(h => {
+    const sub = gameState.roundSubmissions[h.id];
+    if (sub === undefined) return false;
+    if (sub.choice === -1 && elapsed < 19.9) return false;
+    return true;
+  });
   if (allDone) {
     clearInterval(gameState.timerInterval);
     resolveRound();
   }
 }
-
 function handleClientReceive(data) {
   if (data.type === "LOBBY_STATE") {
     renderLobbyHumans(data.humans);
