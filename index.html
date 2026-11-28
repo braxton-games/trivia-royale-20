@@ -855,7 +855,7 @@
           <div class="card danger">
             <div>
               <h3>🔥 Super Hard Mode</h3>
-              <p class="sub" style="margin-top:6px;">All 19 bots are locked to <b>Very Hard</b> difficulty. Lightning speed and near-perfect accuracy.</p>
+              <p class="sub" style="margin-top:6px;">All 19 bots are locked to <b>Hard</b> and <b>Very Hard</b> difficulty. Lightning speed and near-perfect accuracy.</p>
               <p style="font-size:0.84rem; color:var(--gold);"><b>2X COINS:</b> 1st = 200 🪙 | 2nd–3rd = 100 🪙 | 4th–6th = 50 🪙 | 7th–10th = 20 🪙</p>
             </div>
             <button class="btn danger" onclick="startSinglePlayer(true)">Play Super Hard (2x)</button>
@@ -1882,7 +1882,7 @@ function generateBots(count, modeType) {
   for (let i = 0; i < count; i++) {
     let diffObj;
     if (modeType === "superhard") {
-      diffObj = DIFFICULTIES[5]; // Very Hard
+      diffObj = Math.random() < 0.5 ? DIFFICULTIES[5] : DIFFICULTIES[4]; // 50% Very Hard, 50% Hard
     } else if (modeType === "online") {
       diffObj = DIFFICULTIES[Math.floor(Math.random() * 5)]; // Never Very Hard
     } else {
