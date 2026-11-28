@@ -1933,10 +1933,10 @@ function generateBots(count, modeType) {
   }
 
   // Independent 7% chance each for a bot to spawn with Ironclad, Buzzer Beater, Last Stand, Lucky Draw, Buffer, Vampire, or Mulligan
-  // plus a 1% independent chance for a bot to spawn with Dual Wielding (2 passives from the pool)
+  // plus a 5% independent chance for a bot to spawn with Dual Wielding (2 passives from the pool)
   const BOT_PASSIVE_POOL = ["ironclad", "buzzerBeater", "lastStand", "luckyDraw", "buffer", "vampire", "mulligan"];
   if (bots.length > 0) {
-    if (Math.random() < 0.91) {
+    if (Math.random() < 0.05) {
       const dwBot = bots[Math.floor(Math.random() * bots.length)];
       const shuffledPool = [...BOT_PASSIVE_POOL].sort(() => Math.random() - 0.5);
       dwBot.passives.push("dualWielding", shuffledPool[0], shuffledPool[1]);
