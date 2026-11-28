@@ -914,7 +914,7 @@
             <li><b>Survival Mode (🛡️):</b> Available in Single Player and Private Online Rooms. Players and bots <b>only lose a heart if they get the question wrong or run out of time</b>—if both answer right, neither loses a life! Plus, answering correctly <b>before your opponent</b> awards <b>+2 🪙</b> per question.</li>
             <li><b>Passive Abilities (🔮):</b> Permanent non-consumable perks bought in the Shop. Equip 1 at a time (or 2 with <b>Dual Wielding</b>). Bots also have a 7% independent chance each to spawn with <i>Ironclad</i>, <i>Buzzer Beater</i>, <i>Last Stand</i>, <i>Lucky Draw</i>, <i>Buffer</i>, <i>Vampire</i>, or <i>Mulligan</i> (max 1 bot per ability).</li>
             <li><b>Bot Prestige Skins:</b> Bots have a chance to spawn wearing random Prestige Skins based on difficulty: <b>Very Hard (10%)</b>, <b>Hard (5%)</b>, and <b>Medium (2%)</b>.</li>
-            <li><b>Answer Streaks (🔥):</b> Real players who answer 4+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
+            <li><b>Answer Streaks (🔥):</b> Real players who answer 3+ questions in a row right and before their opponent earn a flame badge showing their live streak, which carries across games.</li>
             <li><b>Ties &amp; Double Misses:</b> If both answer wrong (or time out), <b>both lose 1 life</b>. If both answer right in the exact same time, <b>neither loses a life</b> (and <b>Lucky Draw</b> grants +1 ❤️!).</li>
             <li><b>XP, Levels &amp; Skin Unlocks:</b> Everyone starts at <b>Level 0 (0 XP)</b>. Earn <b>+1 XP</b> per correct answer plus placement bonuses: <b>Top 10 (+5 XP)</b>, <b>Top 7 (+10 XP)</b>, <b>Top 5 (+20 XP)</b>, <b>Top 3 (+40 XP)</b>, <b>2nd (+60 XP)</b>, <b>1st (+80 XP)</b>, or <b>Undefeated 1st (+150 XP)</b>. Leveling requires <b>250 XP</b> (Lv 0→1), <b>500 XP</b> per level (Lv 1–5), <b>750 XP</b> per level (Lv 5–10), and <b>1,000 XP</b> per level from Lv 10 onward.</li>
             <li><b>Round 1 Exclusives &amp; Bot Power-Ups:</b> <b>Juggernaut</b> (1,000 🪙, start with 5 ❤️) and <b>Speed Blitz</b> (750 🪙, -0.5s on all answer times for the match) can only be activated on the Round 1 VS screen (5% chance a bot spawns with Juggernaut). Bots also have a 4% chance per duel to activate <i>Double Jeopardy</i>, <i>Heart Bargain</i>, <i>Aegis Life Shield</i>, or <i>Sudden Death</i>.</li>
@@ -1492,7 +1492,7 @@ function escapeHtml(str) {
 function formatPlayerNameHTML(player) {
   const safeName = escapeHtml(player?.name || "Player");
   const streak = (!player?.isBot && typeof player?.streak === "number") ? player.streak : 0;
-  if (streak >= 4) {
+  if (streak >= 3) {
     return `<span class="player-name-wrap"><span class="player-name-text">${safeName}</span><span class="streak-flame-badge">🔥 ${streak}</span></span>`;
   }
   return `<span class="player-name-wrap"><span class="player-name-text">${safeName}</span></span>`;
@@ -1562,7 +1562,7 @@ function updateHeaderHUD() {
   const longestEl = document.getElementById("longestStreakMenuDisplay");
   if (longestEl) {
     const best = profile.longestStreak || 0;
-    longestEl.textContent = best >= 4
+    longestEl.textContent = best >= 3
       ? `Longest Answer Streak: 🔥 ${best}`
       : `Longest Answer Streak: ${best}`;
   }
